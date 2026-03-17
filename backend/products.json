@@ -1,0 +1,186 @@
+[
+    {
+        "name": "Classic White Tee",
+        "price": 599,
+        "category": "men",
+        "img": "/public/products/men/men.jpg",
+        "colors": [
+            "white",
+            "grey"
+        ],
+        "sizes": [
+            "S",
+            "M",
+            "L"
+        ],
+        "brand": "ShopVista",
+        "stock": 50
+    },
+    {
+        "name": "Bleasure",
+        "price": 2399,
+        "category": "men",
+        "img": "/public/products/men/bleasure.png",
+        "colors": [
+            "blue"
+        ],
+        "sizes": [
+            "32",
+            "34"
+        ],
+        "brand": "ShopVista",
+        "stock": 30
+    },
+    {
+        "name": "women jeans",
+        "price": 999,
+        "category": "women",
+        "img": "/public/products/women/w-jeans3.jpg",
+        "colors": "blue",
+        "sizes": [
+            "32",
+            "34",
+            "36"
+        ],
+        "brand": "ShopVista",
+        "stock": 20
+    },
+    {
+        "name": "Silk Blouse",
+        "price": 2200,
+        "category": "women",
+        "img": "https://images.pexels.com",
+        "colors": [
+            "white",
+            "black"
+        ],
+        "sizes": [
+            "M",
+            "L"
+        ],
+        "brand": "ShopVista",
+        "stock": 20
+    },
+    {
+        "name": "Leather Handbag",
+        "price": 4500,
+        "category": "bags",
+        "img": "https://images.pexels.com",
+        "colors": [
+            "brown",
+            "black"
+        ],
+        "sizes": [
+            "One Size"
+        ],
+        "brand": "ShopVista",
+        "stock": 10
+    },
+    {
+        "name": "Canvas Backpack",
+        "price": 1500,
+        "category": "bags",
+        "img": "https://images.pexels.com",
+        "colors": [
+            "grey",
+            "blue"
+        ],
+        "sizes": [
+            "One Size"
+        ],
+        "brand": "ShopVista",
+        "stock": 25
+    },
+    {
+        "name": "Running Sneakers",
+        "price": 3200,
+        "category": "shoes",
+        "img": "https://images.pexels.com",
+        "colors": [
+            "black",
+            "white",
+            "red"
+        ],
+        "sizes": [
+            "8",
+            "9",
+            "10"
+        ],
+        "brand": "ShopVista",
+        "stock": 40
+    },
+    {
+        "name": "Formal Loafers",
+        "price": 2800,
+        "category": "shoes",
+        "img": "https://images.pexels.com",
+        "colors": [
+            "brown",
+            "black"
+        ],
+        "sizes": [
+            "9",
+            "10"
+        ],
+        "brand": "ShopVista",
+        "stock": 12
+    },
+    {
+        "name": "Aviator Sunglasses",
+        "price": 999,
+        "category": "accessories",
+        "img": "https://images.pexels.com",
+        "colors": [
+            "black",
+            "yellow"
+        ],
+        "sizes": [
+            "One Size"
+        ],
+        "brand": "ShopVista",
+        "stock": 100
+    },
+    {
+        "name": "Leather Wallet",
+        "price": 750,
+        "category": "accessories",
+        "img": "https://images.pexels.com",
+        "colors": [
+            "brown",
+            "black"
+        ],
+        "sizes": [
+            "One Size"
+        ],
+        "brand": "ShopVista",
+        "stock": 60
+    },
+    {
+        "name": "Organic Coffee Beans",
+        "price": 450,
+        "category": "grocceroies",
+        "img": "https://images.pexels.com",
+        "colors": [
+            "brown"
+        ],
+        "sizes": [
+            "500g"
+        ],
+        "brand": "ShopVista",
+        "stock": 80
+    },
+    {
+        "name": "Premium Basmati Rice",
+        "price": 850,
+        "category": "grocceroies",
+        "img": "https://images.pexels.com",
+        "colors": [
+            "white"
+        ],
+        "sizes": [
+            "5kg"
+        ],
+        "brand": "ShopVista",
+        "stock": 45
+    }
+]

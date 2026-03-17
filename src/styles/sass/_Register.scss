@@ -1,0 +1,14 @@
+@use "Login" as *; // This imports all the layout and button styles
+
+.register-bg {
+    // A different high-quality image for registration
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+        url('https://images.unsplash.com') !important;
+}
+
+// Add any register-specific tweaks here
+.login-content {
+    h1 {
+        color: #c5a059; // Using the ShopVista Gold for the Register heading
+    }
+}
