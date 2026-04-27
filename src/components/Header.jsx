@@ -147,7 +147,9 @@ const Header = ({ cartCount = 0 }) => {
                             <div className="col-lg-6 col-md-6 col-12 text-end">
                                 <div className="header__top__right">
                                     <div className="header__top__links">
-                                        <Link to="/login">Sign in</Link>
+                                        {!localStorage.getItem("token") && (
+                                            <Link to="/login">Sign in</Link>
+                                        )}
                                         <Link to="/faq">FAQs</Link>
                                         <div
                                             className="canvas__open d-lg-none"
