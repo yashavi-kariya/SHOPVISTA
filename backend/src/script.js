@@ -71,8 +71,7 @@ app.post("/api/upload", (req, res, next) => {
             return res.status(400).json({ message: err.message });
         }
         if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-        const url = `http://localhost:3001/uploads/products/${req.file.filename}`;
-        res.json({ url });
+        const url = `${process.env.BASE_URL}/uploads/products/${req.file.filename}`; res.json({ url });
     });
 });
 

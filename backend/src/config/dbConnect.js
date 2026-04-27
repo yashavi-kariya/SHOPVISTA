@@ -4,6 +4,7 @@ const dbconnect = async () => {
     try {
         // Change MONGO_URL to MONGO_URI to match your Render dashboard
         await mongoose.connect(process.env.MONGO_URI);
+
         console.log("MongoDB Connected Successfully");
     } catch (error) {
         console.log("DB Connection Error:", error.message);
