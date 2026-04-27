@@ -68,8 +68,6 @@ const Header = ({ cartCount = 0 }) => {
                     background: #e53935;
                 }
             `}</style>
-
-            {/* ===== MOBILE OVERLAY ===== */}
             <div
                 className={`offcanvas-menu-overlay ${menuOpen ? "active" : ""}`}
                 onClick={() => setMenuOpen(false)}
@@ -141,7 +139,7 @@ const Header = ({ cartCount = 0 }) => {
                         <div className="row align-items-center">
                             <div className="col-lg-6 col-md-6 col-12">
                                 <div className="header__top__left">
-                                    <p>Free shipping, 30-day return or refund guarantee.</p>
+                                    <p>Free shipping,30-day return or refund guarantee.</p>
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-12 text-end">

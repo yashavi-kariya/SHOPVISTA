@@ -8,7 +8,7 @@ const statusColors = {
     processing: { bg: "#fef3c7", text: "#92400e" },
     shipped: { bg: "#dbeafe", text: "#1e40af" },
     cancelled: { bg: "#fee2e2", text: "#991b1b" },
-    pending: { bg: "#ede9fe", text: "#5b21b6" },
+    pending: { bg: "#ede9fe", text: "#ac93d5" },
 };
 
 const statusIcons = {
@@ -38,7 +38,7 @@ const Dashboard = () => {
             .then((res) => {
                 const userData = res.data;
                 setUser(userData);
-                // ✅ Admin → redirect immediately
+
                 if (userData.role === "admin") { navigate("/admin-dashboard"); return; }
                 return api.get("/api/orders", { headers });
             })
