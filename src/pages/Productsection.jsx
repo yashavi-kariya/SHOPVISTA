@@ -34,8 +34,8 @@ const Product = () => {
         const fetchProducts = async () => {
             setLoading(true);
             try {
-                // Hits your updated backend route: http://localhost:3001/api/products?filter=...
-                const res = await api.get(`http://localhost:3001/api/products?filter=${activeFilter}`);
+                // Hits your updated backend route: /api/products?filter=...
+                const res = await api.get(`/api/products?filter=${activeFilter}`);
                 setProducts(res.data); // Res.data is now the array from backend
             } catch (error) {
                 console.error("Error fetching products:", error);
@@ -56,7 +56,7 @@ const Product = () => {
         if (path.startsWith("http")) return path;
 
         // If relative path
-        return `http://localhost:3001${path}`;
+        return `${import.meta.env.VITE_API_URL || ''}${path}`;
     };
 
     return (

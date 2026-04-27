@@ -17,7 +17,7 @@ const Register = () => {
         setLoading(true);
         try {
             const res = await api.post(
-                "http://localhost:3001/api/auth/register",
+                "/api/auth/register",
                 { name, email, password }  // 👈 role removed
             );
             alert(res.data.message);

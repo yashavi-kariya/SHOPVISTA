@@ -45,7 +45,7 @@ const ImageUploader = ({ images, setImages, uploadEndpoint, token, maxImages = 6
         const formData = new FormData();
         formData.append("image", file);
         try {
-            const res = await fetch(uploadEndpoint || "http://localhost:3001/api/upload", {
+            const res = await fetch(uploadEndpoint || "/api/upload", {
                 method: "POST",
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
                 body: formData,

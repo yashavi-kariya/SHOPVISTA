@@ -15,7 +15,7 @@
 //     useEffect(() => {
 //         const fetchProducts = async () => {
 //             try {
-//                 const res = await api.get("http://localhost:3001/api/products");
+//                 const res = await api.get("/api/products");
 
 //                 // filter by category
 //                 const filtered = res.data.filter(

@@ -222,7 +222,7 @@ const ProductDetails = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const res = await api.get(`http://localhost:3001/api/products/${id}`);
+                const res = await api.get(`/api/products/${id}`);
                 const data = res.data.product || res.data;
                 setProduct(data);
                 setSelectedColor(data.colors?.[0] || data.variants?.[0]?.attributes?.color || "");

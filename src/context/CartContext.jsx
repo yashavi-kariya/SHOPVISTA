@@ -6,7 +6,7 @@
 // export const CartProvider = ({ children }) => {
 //     const [cartItems, setCartItems] = useState([]);
 
-//     const API_BASE = "http://localhost:3001/api/cart";
+//     const API_BASE = "/api/cart";
 
 //     const getAuthConfig = () => {
 //         const token = localStorage.getItem("token");
@@ -148,7 +148,7 @@ export const CartProvider = ({ children }) => {
     const [cartItems, setCartItems] = useState([]);
 
     // DELETE whatever is there and type this exactly:
-    const API_BASE = "http://localhost:3001/api/cart";
+    const API_BASE = "/api/cart";
     const getAuthConfig = () => {
         const token = localStorage.getItem("token");
         if (!token) return null;

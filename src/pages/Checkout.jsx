@@ -18,7 +18,7 @@ const Checkout = () => {
         const token = localStorage.getItem("token");
         if (!token) { navigate("/login"); return; }
         if (id) {
-            api.get(`http://localhost:3001/api/products/${id}`)
+            api.get(`/api/products/${id}`)
                 .then(res => setProduct(res.data))
                 .catch(err => console.error("Product fetch error:", err));
         }
@@ -65,7 +65,7 @@ const Checkout = () => {
                 coupon: coupon || null,
                 discount: buyNowItem || (id && product) ? 0 : discount || 0,
             };
-            await api.post("http://localhost:3001/api/orders", orderData, config);
+            await api.post("/api/orders", orderData, config);
             if (!buyNowItem && !id) clearCart();
             localStorage.removeItem("discount");
             localStorage.removeItem("coupon");
@@ -445,7 +445,7 @@ export default Checkout;
 //     useEffect(() => {
 //         if (id) {
 //             api
-//                 .get(`http://localhost:3001/api/products/${id}`)
+//                 .get(`/api/products/${id}`)
 //                 .then((res) => setProduct(res.data))
 //                 .catch((err) => console.error("Product fetch error:", err));
 //         }
@@ -499,7 +499,7 @@ export default Checkout;
 //                 coupon: coupon || null,
 //                 discount: buyNowItem || (id && product) ? 0 : discount || 0, // ✅ no discount for buyNow/single product
 //             };
-//             await api.post("http://localhost:3001/api/orders", orderData, config);
+//             await api.post("/api/orders", orderData, config);
 //             alert("Order placed successfully!");
 //             if (!buyNowItem && !id) clearCart();
 //             localStorage.removeItem("discount");

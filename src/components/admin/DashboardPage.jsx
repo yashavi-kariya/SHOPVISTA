@@ -17,7 +17,7 @@ const DashboardPage = ({ toggleSidebar, sidebarOpen }) => {
                 const token = localStorage.getItem("token");
 
                 const res = await api.get(
-                    "http://localhost:3001/api/admin/dashboard",
+                    "/api/admin/dashboard",
                     {
                         headers: {
                             Authorization: `Bearer ${token}`

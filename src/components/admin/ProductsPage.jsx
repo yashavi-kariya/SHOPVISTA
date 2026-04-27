@@ -55,10 +55,10 @@ const ProductsPage = ({ products, fetchProducts, token, toggleSidebar, sidebarOp
 
         try {
             if (editId) {
-                await api.put(`http://localhost:3001/api/products/${editId}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+                await api.put(`/api/products/${editId}`, payload, { headers: { Authorization: `Bearer ${token}` } });
                 alert("Product updated!");
             } else {
-                await api.post("http://localhost:3001/api/products", payload, { headers: { Authorization: `Bearer ${token}` } });
+                await api.post("/api/products", payload, { headers: { Authorization: `Bearer ${token}` } });
                 alert("Product added!");
             }
             fetchProducts();
@@ -96,7 +96,7 @@ const ProductsPage = ({ products, fetchProducts, token, toggleSidebar, sidebarOp
     const handleCancel = () => { setForm(emptyForm); setEditId(null); setShowForm(false); };
     const deleteProduct = async (id) => {
         if (!window.confirm("Are you sure?")) return;
-        await api.delete(`http://localhost:3001/api/products/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+        await api.delete(`/api/products/${id}`, { headers: { Authorization: `Bearer ${token}` } });
         fetchProducts();
     };
 

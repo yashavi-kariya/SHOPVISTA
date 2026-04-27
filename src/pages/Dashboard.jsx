@@ -34,13 +34,13 @@ const Dashboard = () => {
 
         const headers = { Authorization: `Bearer ${token}` };
 
-        api.get("http://localhost:3001/api/users/profile", { headers })
+        api.get("/api/users/profile", { headers })
             .then((res) => {
                 const userData = res.data;
                 setUser(userData);
                 // ✅ Admin → redirect immediately
                 if (userData.role === "admin") { navigate("/admin-dashboard"); return; }
-                return api.get("http://localhost:3001/api/orders", { headers });
+                return api.get("/api/orders", { headers });
             })
             .then((res) => { if (res) setOrders(res.data); })
             .catch(() => setError("Something went wrong. Please try again."))
@@ -272,12 +272,12 @@ export default Dashboard;
 //         }
 //         const headers = { Authorization: `Bearer ${token}` };
 //         // GET ORDERS
-//         api.get("http://localhost:3001/api/orders", { headers })
+//         api.get("/api/orders", { headers })
 //             .then(res => setOrders(res.data))
 //             .catch(() => setError("Failed to load orders."));
 
 //         // GET USER PROFILE
-//         api.get("http://localhost:3001/api/users/profile", { headers })
+//         api.get("/api/users/profile", { headers })
 //             .then(res => setUser(res.data))
 //             .catch(() => setError("Failed to load profile."));
 
@@ -367,7 +367,7 @@ export default Dashboard;
 //         }
 
 //         // GET ORDERS
-//         api.get("http://localhost:3001/api/orders", {
+//         api.get("/api/orders", {
 //             headers: {
 //                 Authorization: `Bearer ${token}`
 //             }
@@ -376,7 +376,7 @@ export default Dashboard;
 //             .catch(err => console.log(err));
 
 //         // GET USER PROFILE
-//         api.get("http://localhost:3001/api/users/profile", {
+//         api.get("/api/users/profile", {
 //             headers: {
 //                 Authorization: `Bearer ${token}`
 //             }

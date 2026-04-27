@@ -15,7 +15,7 @@ const OrdersPage = ({ token, toggleSidebar, sidebarOpen }) => {
         const fetchOrders = async () => {
 
             try {
-                const res = await api.get("http://localhost:3001/api/orders", {
+                const res = await api.get("/api/orders", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setOrders(res.data);
@@ -30,7 +30,7 @@ const OrdersPage = ({ token, toggleSidebar, sidebarOpen }) => {
     const updateStatus = async (orderId, newStatus) => {
         try {
             await api.put(
-                `http://localhost:3001/api/orders/${orderId}/status`,  // ← verify this matches your backend route
+                `/api/orders/${orderId}/status`,  // ← verify this matches your backend route
                 { status: newStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

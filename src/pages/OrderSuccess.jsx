@@ -39,7 +39,7 @@ const Orders = () => {
     const fetchOrders = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await api.get("http://localhost:3001/api/orders/my", {
+            const res = await api.get("/api/orders/my", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setOrders(res.data || []);
@@ -56,7 +56,7 @@ const Orders = () => {
         try {
             const token = localStorage.getItem("token");
             await api.put(
-                `http://localhost:3001/api/orders/${orderId}/cancel`,
+                `/api/orders/${orderId}/cancel`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );

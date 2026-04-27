@@ -15,7 +15,7 @@ const BlogPage = ({ token, toggleSidebar, sidebarOpen }) => {
 
     const fetchBlogs = async () => {
         try {
-            const res = await api.get("http://localhost:3001/api/blogs");
+            const res = await api.get("/api/blogs");
             setBlogs(res.data);
         } catch (err) {
             console.error("Blogs fetch error:", err);
@@ -49,11 +49,11 @@ const BlogPage = ({ token, toggleSidebar, sidebarOpen }) => {
         }
         try {
             if (editId) {
-                await api.put(`http://localhost:3001/api/blogs/${editId}`, form, {
+                await api.put(`/api/blogs/${editId}`, form, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             } else {
-                await api.post("http://localhost:3001/api/blogs", form, {
+                await api.post("/api/blogs", form, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             }
@@ -67,7 +67,7 @@ const BlogPage = ({ token, toggleSidebar, sidebarOpen }) => {
     const handleDelete = async (id) => {
         if (!window.confirm("Delete this blog?")) return;
         try {
-            await api.delete(`http://localhost:3001/api/blogs/${id}`, {
+            await api.delete(`/api/blogs/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setBlogs(prev => prev.filter(b => b._id !== id));

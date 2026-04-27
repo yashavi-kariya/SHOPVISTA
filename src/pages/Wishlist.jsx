@@ -27,7 +27,7 @@ const resolveImage = (img) => {
     if (!img) return "/no-image.png";
     if (img.startsWith("http://") || img.startsWith("https://")) return img;
     const clean = img.startsWith("/") ? img : `/${img}`;
-    return `http://localhost:3001${clean}`;
+    return `${import.meta.env.VITE_API_URL || ''}${clean}`;
 };
 
 const Wishlist = () => {

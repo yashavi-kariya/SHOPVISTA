@@ -12,7 +12,7 @@ const CollectionProducts = () => {
         const fetchProducts = async () => {
             try {
                 const res = await api.get(
-                    `http://localhost:3001/api/products?collection=${type}`
+                    `/api/products?collection=${type}`
                 );
                 setProducts(res.data);
             } catch (err) {

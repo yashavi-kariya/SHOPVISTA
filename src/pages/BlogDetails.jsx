@@ -11,7 +11,7 @@ const BlogDetail = () => {
     const [blog, setBlog] = useState(null);
 
     useEffect(() => {
-        api.get(`http://localhost:3001/api/blogs/${id}`)
+        api.get(`/api/blogs/${id}`)
             .then(res => setBlog(res.data))
             .catch(() => navigate("/blog"));
     }, [id]);

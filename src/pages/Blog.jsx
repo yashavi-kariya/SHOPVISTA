@@ -9,7 +9,7 @@ const Blog = () => {
     const [blogs, setBlogs] = useState([]);
 
     useEffect(() => {
-        api.get("http://localhost:3001/api/blogs")
+        api.get("/api/blogs")
             .then(res => setBlogs(res.data))
             .catch(err => console.error(err));
     }, []);

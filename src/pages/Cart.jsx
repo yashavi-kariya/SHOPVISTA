@@ -29,7 +29,7 @@ const Cart = () => {
                 const userId = localStorage.getItem("userId"); // ✅ must be saved at login
 
                 const res = await api.get(
-                    `http://localhost:3001/api/coupons/best?subtotal=${subtotal}&userId=${userId}` // ✅
+                    `/api/coupons/best?subtotal=${subtotal}&userId=${userId}` // ✅
                 );
 
                 if (res.data?.coupon?.code) {

@@ -12,7 +12,7 @@
 //         e.preventDefault();
 //         try {
 
-//             const res = await api.post("http://localhost:3001/api/users/login", {
+//             const res = await api.post("/api/users/login", {
 //                 email,
 //                 password
 //             });
@@ -105,7 +105,7 @@ const Login = () => {
         e.preventDefault();
         try {
 
-            const res = await api.post("http://localhost:3001/api/users/login", {
+            const res = await api.post("/api/users/login", {
                 email,
                 password
             });

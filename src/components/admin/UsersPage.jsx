@@ -13,7 +13,7 @@ const UsersPage = ({ token, toggleSidebar, sidebarOpen }) => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const res = await api.get("http://localhost:3001/api/admin/users", {
+                const res = await api.get("/api/admin/users", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setUsers(res.data);
