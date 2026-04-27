@@ -52,7 +52,10 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // ── Middleware ──────────────────────────────────────────────────
-app.use(cors());
+app.use(cors({
+    origin: "https://shopvista-zreu.vercel.app",
+    credentials: true
+}));
 app.use(express.json());
 
 //  This is fine as-is
