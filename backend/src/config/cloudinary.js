@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -9,10 +9,13 @@ cloudinary.config({
 });
 
 const storage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-        folder: "shopvista/products",
-        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+        return {
+            folder: "shopvista/products",
+            allowed_formats: ["jpg", "jpeg", "png", "webp", "avif"],
+            resource_type: "image",
+        };
     },
 });
 
