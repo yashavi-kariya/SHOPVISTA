@@ -7,7 +7,6 @@ import insta3 from "../assets/img/instagram/instagram-3.jpg";
 import insta4 from "../assets/img/instagram/instagram-4.jpg";
 import insta5 from "../assets/img/instagram/instagram-5.jpg";
 import insta6 from "../assets/img/instagram/instagram-6.jpg";
-
 import blog1 from "../assets/img/blog/blog-1.jpg";
 import blog2 from "../assets/img/blog/blog-2.jpg";
 import blog3 from "../assets/img/blog/blog-3.jpg";
@@ -66,11 +65,11 @@ const Category = () => {
                         {/* Left Content */}
                         <div className="col-lg-3">
                             <div className="categories__text">
-                                <ul className="filter__controls">
+                                {/* <ul className="filter__controls">
                                     <li className="active" data-filter="*">Best Sellers</li>
                                     <li className="active" data-filter="*">New Arrivals</li>
                                     <li className="active" data-filter="*">Hot Sales</li>
-                                </ul>
+                                </ul> */}
                             </div>
                         </div>
 
@@ -110,14 +109,13 @@ const Category = () => {
                                     </div>
                                 </div>
 
-                                <a href="#" className="primary-btn">Shop now</a>
+                                <a href="/shop" className="primary-btn">Shop now</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* ================== INSTAGRAM SECTION ================== */}
             {/* ================== INSTAGRAM SECTION ================== */}
             <section className="instagram spad">
                 <div className="container">
@@ -134,11 +132,6 @@ const Category = () => {
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        {/* Overlay effect often used in templates */}
-                                        {/* <div className="instagram__pic__item__hover">
-                                            <i className="fa fa-instagram"></i>
-
-                                        </div> */}
                                     </div>
                                 ))}
                             </div>
@@ -219,3 +212,4 @@ const Category = () => {
 };
 
 export default Category;
+

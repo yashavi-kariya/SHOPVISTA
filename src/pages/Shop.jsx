@@ -1,154 +1,180 @@
 import React, { useState, useContext, useMemo, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-// import { allProducts } from "../data/categoryData";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
-import { getProducts } from "../services/productService";
-import heartIcon from "../assets/img/icon/heart.png";
-import compareIcon from "../assets/img/icon/compare.png";
-import axios from "axios";
 import { WishlistContext } from "../context/WishlistContext";
+import { getProducts } from "../services/productService";
 
 const Shop = () => {
     const navigate = useNavigate();
-    const { addToCart } = useContext(CartContext);
-
-    // STATE
-    const { wishlist, toggleWishlist, isInWishlist } = useContext(WishlistContext);
+    const { toggleWishlist, isInWishlist } = useContext(WishlistContext);
+    const { addToCart, cartItems } = useContext(CartContext);
+    const [addedProducts, setAddedProducts] = useState({});
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+    const location = useLocation();
     const [products, setProducts] = useState([]);
     const [search, setSearch] = useState("");
     const [selectedCategories, setSelectedCategories] = useState([]);
-    const [selectedColors, setSelectedColors] = useState([]);
-    const [selectedSizes, setSelectedSizes] = useState([]);
+    const [selectedSubCategories, setSelectedSubCategories] = useState([]);
+    const [expandedCategory, setExpandedCategory] = useState(null);
     const [priceRange, setPriceRange] = useState([500, 10000]);
     const [sortOrder, setSortOrder] = useState("");
     const [visibleCount, setVisibleCount] = useState(6);
-    // const [wishlist, setWishlist] = useState([]);
-    const [compare, setCompare] = useState([]);
+    const [loading, setLoading] = useState(true);
 
+    const categories = {
+        men: ["Top Wear", "Bottom Wear", "Casual Wear", "Formal Wear"],
+        women: ["Top Wear", "Bottom Wear", "Ethnic Wear", "Western Wear"],
+        kids: ["Top Wear", "Bottom Wear", "School Wear"],
+        bags: [],
+        Footware: [],
+        accessories: [],
+        Electronics: []
+    };
+    console.log("TOKEN:", localStorage.getItem("token"));
+    console.log("isLoggedIn:", isLoggedIn);
+    const requireLogin = () => {
+        if (!isLoggedIn) {
+            alert("You are not logged in!");
+            navigate("/login");
+            return false;
+        }
+        return true;
+    };
+
+
+    //  Listen for login/logout changes
+    useEffect(() => {
+        const checkLogin = () => {
+            setIsLoggedIn(!!localStorage.getItem("token"));
+        };
+        window.addEventListener("storage", checkLogin);
+        checkLogin();
+        return () => window.removeEventListener("storage", checkLogin);
+    }, [location]);
 
     useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const data = await getProducts();
+                setProducts(data);
+            } catch (error) {
+                console.error("Failed to fetch products:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchProducts();
+
+        const handleFocus = () => fetchProducts();
+
+        //  NEW: listen for admin updates
+        const handleStorage = (event) => {
+            if (event.key === "productUpdated") {
+                fetchProducts();
+            }
+        };
+
+        window.addEventListener("focus", handleFocus);
+        window.addEventListener("storage", handleStorage);
+
+        return () => {
+            window.removeEventListener("focus", handleFocus);
+            window.removeEventListener("storage", handleStorage);
+        };
     }, []);
 
-    const fetchProducts = async () => {
-        const data = await getProducts();
-        setProducts(data);
-    };
+    // const handleAddToCart = async (product) => {
+    //     if (!requireLogin()) return;
+
+    //     try {
+    //         const alreadyInCart = cartItems?.some(
+    //             (item) => item.product?._id === product._id
+    //         );
+
+    //         await addToCart(product);
+
+    //         if (alreadyInCart) {
+    //             alert("✅ Quantity updated in cart!");
+    //         } else {
+    //             alert("🛒 Product added to cart!");
+    //         }
+    //     } catch (error) {
+    //         console.error("Cart error:", error);
+    //         alert("Failed to add product to cart");
+    //     }
+    // };
     const handleAddToCart = async (product) => {
-
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("Please login first");
-            navigate("/login");
-            return;
-        }
+        if (!requireLogin()) return;
 
         try {
-
             await addToCart(product);
-            alert("Product added to cart");
-
-            addToCart({
-                product: product,
-                quantity: 1
-            });// update UI
-            alert("Product added to cart");
-
+            setAddedProducts(prev => ({ ...prev, [product._id]: true }));
         } catch (error) {
             console.error("Cart error:", error);
+            alert("Failed to add product to cart");
         }
     };
-    // Sidebar static categories
-    const categories = ["men", "women", "bags", "Footware", "accessories", "Electronics"];
+    useEffect(() => {
+        if (cartItems?.length) {
+            const map = {};
+            cartItems.forEach(item => {
+                if (item.product?._id) map[item.product._id] = true;
+            });
+            setAddedProducts(map);
+        }
+    }, [cartItems]);
 
-    // ===========================
-    // TOGGLE FUNCTIONS
-    // ===========================
+    const handleBuyNow = (productId) => {
+        if (!requireLogin()) return;
+        navigate(`/checkout/${productId}`);
+    };
+
     const toggleCategory = (cat) => {
         setSelectedCategories((prev) =>
-            prev.includes(cat)
-                ? prev.filter((c) => c !== cat)
-                : [...prev, cat]
+            prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+        );
+        // 👇 Auto expand when checked, collapse when unchecked
+        setExpandedCategory((prev) => {
+            if (prev === cat) return null;
+            return cat;
+        });
+    };
+
+    const toggleSubCategory = (sub) => {
+        setSelectedSubCategories((prev) =>
+            prev.includes(sub) ? prev.filter((s) => s !== sub) : [...prev, sub]
         );
     };
 
-    const toggleColor = (color) => {
-        setSelectedColors((prev) =>
-            prev.includes(color)
-                ? prev.filter((c) => c !== color)
-                : [...prev, color]
-        );
+    const handlePriceChange = (e) => {
+        setPriceRange([500, Number(e.target.value)]);
     };
 
-    const toggleSize = (size) => {
-        setSelectedSizes((prev) =>
-            prev.includes(size)
-                ? prev.filter((s) => s !== size)
-                : [...prev, size]
-        );
-    };
-
-    // const toggleWishlist = (id) => {
-    //     setWishlist((prev) =>
-    //         prev.includes(id)
-    //             ? prev.filter((item) => item !== id)
-    //             : [...prev, id]
-    //     );
-    // };
-
-    const toggleCompare = (id) => {
-        setCompare((prev) =>
-            prev.includes(id)
-                ? prev.filter((item) => item !== id)
-                : [...prev, id]
-        );
-    };
-
-    // ===========================
-    // FILTER LOGIC
-    // ===========================
     const filteredProducts = useMemo(() => {
         return products
-            .filter((p) =>
-                p.name.toLowerCase().includes(search.toLowerCase())
-            )
+            .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
             .filter((p) =>
                 selectedCategories.length === 0
                     ? true
                     : selectedCategories.includes(p.category)
             )
             .filter((p) =>
-                (p.price >= priceRange[0] && p.price <= priceRange[1])
-            )
-            .filter((p) =>
-                selectedColors.length === 0
+                selectedSubCategories.length === 0
                     ? true
-                    : p.colors?.some((c) => selectedColors.includes(c))
+                    : selectedSubCategories.includes(p.subCategory)
             )
-            .filter((p) =>
-                selectedSizes.length === 0
-                    ? true
-                    : p.sizes?.some((s) => selectedSizes.includes(s))
-            )
+            .filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1])
             .sort((a, b) => {
                 if (sortOrder === "low") return a.price - b.price;
                 if (sortOrder === "high") return b.price - a.price;
                 return 0;
             });
-    }, [products, search, selectedCategories, selectedColors, selectedSizes, priceRange, sortOrder]);
+    }, [products, search, selectedCategories, selectedSubCategories, priceRange, sortOrder]);
 
-    // Change 'products' to 'filteredProducts' so your filters actually work
     const visibleProducts = filteredProducts.slice(0, visibleCount);
-
-    // ===========================
-    // TEMPLATE UI
-    // ===========================
     return (
         <>
-
-
-            {/* Breadcrumb */}
             <section className="breadcrumb-option">
                 <div className="container">
                     <h4>Shop</h4>
@@ -159,189 +185,226 @@ const Shop = () => {
                 </div>
             </section>
 
-            {/* Shop Section */}
             <section className="shop spad">
                 <div className="container">
-                    <div className="row">
+                    <div className="shop__container">
 
-                        {/* ====================== SIDEBAR ====================== */}
-                        <div className="col-lg-3">
-                            <div className="shop__sidebar">
-
-                                {/* Search */}
-                                <div className="shop__sidebar__search mb-4">
-                                    <input
-                                        type="text"
-                                        placeholder="Search..."
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                    />
-                                </div>
-
-                                {/* Categories */}
-                                <h4>Categories</h4>
-                                <ul>
-                                    {categories.map((cat) => (
-                                        <li key={cat}>
-                                            <label>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedCategories.includes(cat)}
-                                                    onChange={() => toggleCategory(cat)}
-                                                />
-                                                {" "}{cat.toUpperCase()}
-                                            </label>
-                                        </li>
-                                    ))}
-                                </ul>
-
-                                {/* Price */}
-                                <h4 className="mt-4">Price Range</h4>
+                        {/* SIDEBAR */}
+                        <aside className="shop__sidebar">
+                            <div className="shop__sidebar__search">
                                 <input
-                                    type="range"
-                                    min="50"
-                                    max="10000000"
-                                    value={priceRange[1]}
-                                    onChange={(e) => setPriceRange([0, Number(e.target.value)])}
+                                    type="text"
+                                    placeholder="Search products..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
                                 />
-                                <p>Rs.{priceRange[0]} - Rs.{priceRange[1]}</p>
-
-                                {/* Colors */}
-                                <h4 className="mt-4">Colors</h4>
-                                <div className="shop__sidebar__color">
-                                    {["red", "blue", "black", "white", "yellow", "grey"].map((c) => (
-                                        <label
-                                            key={c}
-                                            onClick={() => toggleColor(c)}
-                                            style={{
-                                                background: c,
-                                                width: 25,
-                                                height: 25,
-                                                display: "inline-block",
-                                                marginRight: 10,
-                                                cursor: "pointer",
-                                                border: selectedColors.includes(c)
-                                                    ? "2px solid #111"
-                                                    : "1px solid #ccc",
-                                            }}
-                                        ></label>
-                                    ))}
-                                </div>
-
-                                {/* Sizes */}
-                                <h4 className="mt-4">Sizes</h4>
-                                <div>
-                                    {["S", "M", "L", "XL", "2XL"].map((s) => (
-                                        <label key={s} style={{ marginRight: 15 }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedSizes.includes(s)}
-                                                onChange={() => toggleSize(s)}
-                                            />{" "}
-                                            {s}
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ====================== PRODUCT GRID ====================== */}
-                        <div className="col-lg-9">
-
-                            {/* Sort */}
-                            <div className="d-flex justify-content-end mb-3">
-                                <select
-                                    value={sortOrder}
-                                    onChange={(e) => setSortOrder(e.target.value)}
-                                    className="form-select w-auto"
-                                >
-                                    <option value="">Sort by</option>
-                                    <option value="low">Price: Low to High</option>
-                                    <option value="high">Price: High to Low</option>
-                                </select>
                             </div>
 
-                            <div className="row">
-                                {visibleProducts.map((item) => (
-                                    <div className="col-lg-4 col-md-6 col-sm-6" key={item._id}>
-                                        <div className="product__item">
+                            <div className="shop__sidebar__accordion">
+                                <div className="card">
+                                    <h4>Categories</h4>
+                                    <ul>
+                                        {Object.keys(categories).map((cat) => (
+                                            <li key={cat}>
+                                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 
-                                            {/* Product image */}
+                                                    {/* Checkbox + label */}
+                                                    <label style={{ display: "flex", alignItems: "center" }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            style={{ marginRight: "10px" }}
+                                                            checked={selectedCategories.includes(cat)}
+                                                            onChange={() => toggleCategory(cat)}
+                                                        />
+                                                        {cat.toUpperCase()}
+                                                    </label>
+
+                                                    {/* Arrow — OUTSIDE label so it doesn't trigger checkbox */}
+                                                    {Object.values(categories)[Object.keys(categories).indexOf(cat)].length > 0 && (
+                                                        <span
+                                                            style={{ cursor: "pointer", fontSize: "12px", padding: "0 8px" }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setExpandedCategory((prev) => (prev === cat ? null : cat));
+                                                            }}
+                                                        >
+                                                            {expandedCategory === cat ? "▲" : "▼"}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Subcategories */}
+                                                {categories[cat].length > 0 && expandedCategory === cat && (
+                                                    <ul style={{ paddingLeft: "20px", marginTop: "6px" }}>
+                                                        {categories[cat].map((sub) => (
+                                                            <li key={sub}>
+                                                                <label>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        style={{ marginRight: "8px" }}
+                                                                        checked={selectedSubCategories.includes(sub)}
+                                                                        onChange={() => toggleSubCategory(sub)}
+                                                                    />
+                                                                    {sub}
+                                                                </label>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <div className="card">
+                                    <h4>Price Range</h4>
+                                    <input
+                                        type="range"
+                                        min="500"
+                                        max="10000"
+                                        step="100"
+                                        value={priceRange[1]}
+                                        onChange={handlePriceChange}
+                                        style={{ width: "100%" }}
+                                    />
+                                    <p>Rs.{priceRange[0]} - Rs.{priceRange[1]}</p>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* PRODUCT SECTION */}
+                        <div className="shop__products__wrapper">
+                            <div className="shop__product__option">
+                                <div className="row mb-4">
+                                    <div className="col-lg-6 col-md-6">
+                                        <p>
+                                            Showing {visibleProducts.length} of {filteredProducts.length} products
+                                        </p>
+                                    </div>
+                                    <div className="col-lg-6 col-md-6 text-right">
+                                        <span>Sort by: </span>
+                                        <select
+                                            value={sortOrder}
+                                            onChange={(e) => setSortOrder(e.target.value)}
+                                        >
+                                            <option value="">Default</option>
+                                            <option value="low">Price: Low to High</option>
+                                            <option value="high">Price: High to Low</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {loading ? (
+                                <p style={{ textAlign: "center", padding: "2rem" }}>Loading products...</p>
+                            ) : filteredProducts.length === 0 ? (
+                                <p style={{ textAlign: "center", padding: "2rem" }}>No products found.</p>
+                            ) : (
+                                <div className="shop__product__grid">
+                                    {visibleProducts.map((product) => (
+                                        <div className="product__item" key={product._id}>
                                             <div
                                                 className="product__item__pic"
-                                                style={{
-                                                    backgroundImage: `url(${item.img.replace("/public", "")})`
-                                                }}
-                                                onClick={() => navigate(`/product/${item._id}`)}
+                                                style={{ cursor: "pointer" }}
+                                                onClick={() => navigate(`/product/${product._id}`)}
                                             >
+                                                <img
+                                                    src={
+                                                        product.img && product.img.trim() !== ""
+                                                            ? product.img.replace("/public", "")
+                                                            : "/placeholder.png"
+                                                    }
+                                                    alt={product.name}
+                                                />
+
                                                 <ul className="product__hover">
-                                                    {/* Wishlist */}
-                                                    {/* <li onClick={(e) => { e.stopPropagation(); toggleWishlist(item._id); }}>
-                                                        <img src={heartIcon} alt="" />
-                                                    </li> */}
                                                     <li
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            toggleWishlist(item); // pass full product or item
+                                                            toggleWishlist(product);
                                                         }}
-                                                        style={{ cursor: "pointer" }} // just pointer cursor
+                                                        style={{ cursor: "pointer" }}
                                                     >
-                                                        <img
-                                                            src={heartIcon}
-                                                            alt="wishlist"
-                                                            width="20"
+                                                        <span
                                                             style={{
-                                                                filter: isInWishlist(item.id)
-                                                                    ? "invert(36%) sepia(89%) saturate(6799%) hue-rotate(336deg) brightness(100%) contrast(101%)"
-                                                                    : "none",
+                                                                fontSize: "18px",
+                                                                color: isInWishlist(product._id) ? "red" : "inherit",
                                                             }}
-                                                        />
-                                                    </li>
-                                                    {/* Compare */}
-                                                    <li onClick={(e) => { e.stopPropagation(); toggleCompare(item._id); }}>
-                                                        <img src={compareIcon} alt="" />
+                                                        >
+                                                            ♥
+                                                        </span>
                                                     </li>
                                                 </ul>
                                             </div>
 
-                                            {/* Product text */}
                                             <div className="product__item__text">
-                                                <h6
+                                                <h6>{product.category}</h6>
+                                                <h5
                                                     style={{ cursor: "pointer" }}
-                                                    onClick={() => navigate(`/product/${item._id}`)}
+                                                    onClick={() => {
+                                                        if (!isLoggedIn) {
+                                                            alert("Please login to view product details");
+                                                            navigate("/login");
+                                                            return;
+                                                        }
+                                                        navigate(`/product/${product._id}`);
+                                                    }}
                                                 >
-                                                    {item.name}
-                                                </h6>
+                                                    {product.name}
+                                                </h5>
 
-                                                {/* Add to cart */}
-                                                <button
-                                                    className="add-cart"
-                                                    onClick={() => handleAddToCart(item)}
+                                                {/*  Price hidden if not logged in */}
+                                                <span
+                                                    className="price"
+                                                    style={{ cursor: !isLoggedIn ? "pointer" : "default", color: !isLoggedIn ? "red" : "" }}
+                                                    onClick={() => {
+                                                        if (!isLoggedIn) navigate("/login");
+                                                    }}
                                                 >
-                                                    + Add To Cart
-                                                </button>
+                                                    {isLoggedIn ? `Rs.${product.price}` : "Login to see price"}
+                                                </span>
 
-                                                <h5>Rs.{item.price}</h5>
-
-                                                {/* Buy Now */}
-                                                <button
-                                                    className="primary-btn mt-2"
-                                                    onClick={() => navigate(`/checkout/${item._id}`)}
-                                                >
-                                                    Buy Now
-                                                </button>
+                                                <div className="product__item__btns">
+                                                    {/*  Add to Cart — alerts if not logged in */}
+                                                    <button
+                                                        className={`add-cart ${addedProducts[product._id] ? "in-cart" : ""}`}
+                                                        onClick={() => {
+                                                            if (addedProducts[product._id]) {
+                                                                navigate("/cart");
+                                                            } else {
+                                                                handleAddToCart(product);
+                                                            }
+                                                        }}
+                                                        style={{
+                                                            opacity: !isLoggedIn ? 0.6 : 1,
+                                                            cursor: "pointer"
+                                                        }}
+                                                    >
+                                                        {addedProducts[product._id] ? "Go to Cart →" : "+ Add To Cart"}
+                                                    </button>
+                                                    {/* Buy Now — alerts if not logged in */}
+                                                    <button
+                                                        className="primary-btn"
+                                                        onClick={() => handleBuyNow(product._id)}
+                                                        style={{
+                                                            opacity: !isLoggedIn ? 0.6 : 1,
+                                                            cursor: "pointer"
+                                                        }}
+                                                    >
+                                                        Buy Now
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Load More */}
+                                    ))}
+                                </div>
+                            )}
                             {visibleCount < filteredProducts.length && (
-                                <div className="text-center mt-4">
+                                <div className="product__pagination">
                                     <button
                                         className="primary-btn"
-                                        onClick={() => setVisibleCount(visibleCount + 6)}
+                                        style={{ width: "auto", padding: "12px 30px" }}
+                                        onClick={() => setVisibleCount((prev) => prev + 3)}
                                     >
                                         Load More
                                     </button>
@@ -354,5 +417,4 @@ const Shop = () => {
         </>
     );
 };
-
 export default Shop;

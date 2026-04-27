@@ -1,207 +1,71 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+// import api from "api";
+import api from "../api";
+import breadcrumbBg from "../assets/img/breadcrumb-bg.jpg";
+import calendarIcon from "../assets/img/icon/calendar.png";
 
+const BlogDetail = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [blog, setBlog] = useState(null);
 
-import blogDetailsImg from "../assets/img/blog/details/blog-details.jpg";
-import blogAuthorImg from "../assets/img/blog/details/blog-author.jpg";
-
-const BlogDetails = () => {
+    useEffect(() => {
+        api.get(`http://localhost:3001/api/blogs/${id}`)
+            .then(res => setBlog(res.data))
+            .catch(() => navigate("/blog"));
+    }, [id]);
+    if (!blog) return <div style={{ textAlign: "center", padding: "60px", color: "#aaa" }}>Loading...</div>;
     return (
         <>
-            {/* Blog Details Hero */}
-            <section className="blog-hero spad">
+            <section className="breadcrumb-blog set-bg"
+                style={{ backgroundImage: `url(${breadcrumbBg})` }}>
                 <div className="container">
-                    <div className="row d-flex justify-content-center">
-                        <div className="col-lg-9 text-center">
-                            <div className="blog__hero__text">
-                                <h2>
-                                    Are you one of the thousands of Iphone owners who has no idea
-                                </h2>
-                                <ul>
-                                    <li>By Deercreative</li>
-                                    <li>February 21, 2019</li>
-                                    <li>8 Comments</li>
-                                </ul>
-                            </div>
-                        </div>
+                    <div className="row">
+                        <div className="col-lg-12"><h2>{blog.title}</h2></div>
                     </div>
                 </div>
             </section>
 
-            {/* Blog Details Section */}
-            <section className="blog-details spad">
+            <section className="blog spad">
                 <div className="container">
-                    <div className="row d-flex justify-content-center">
-
-                        {/* Blog Image */}
-                        <div className="col-lg-12">
-                            <div className="blog__details__pic">
-                                <img src={blogDetailsImg} alt="Blog" />
-                            </div>
-                        </div>
-
-                        {/* Blog Content */}
+                    <div className="row justify-content-center">
                         <div className="col-lg-8">
-                            <div className="blog__details__content">
 
-                                {/* Share Section */}
-                                <div className="blog__details__share">
-                                    <span>share</span>
-                                    <ul>
-                                        <li>
-                                            <a href="#">
-                                                <i className="fa fa-facebook"></i>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="#" className="twitter">
-                                                <i className="fa fa-twitter"></i>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="#" className="youtube">
-                                                <i className="fa fa-youtube-play"></i>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="#" className="linkedin">
-                                                <i className="fa fa-linkedin"></i>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
+                            {/* Back button */}
+                            <button onClick={() => navigate("/blog")}
+                                style={{ marginBottom: "24px", background: "none", border: "1px solid #ddd", borderRadius: "8px", padding: "8px 18px", cursor: "pointer", fontSize: "13px" }}>
+                                ← Back to Blogs
+                            </button>
 
-                                {/* Paragraphs */}
-                                <div className="blog__details__text">
-                                    <p>
-                                        Hydroderm is the highly desired anti-aging cream on the
-                                        block. This serum restricts the occurrence of early aging
-                                        sings on the skin and keeps the skin younger, tighter and
-                                        healthier. It reduces the wrinkles and loosening of skin.
-                                        This cream nourishes the skin and brings back the glow that
-                                        had lost in the run of hectic years.
-                                    </p>
-                                    <p>
-                                        The most essential ingredient that makes hydroderm so
-                                        effective is Vyo-Serum, which is a product of natural
-                                        selected proteins. This concentrate works actively in
-                                        bringing about the natural youthful glow of the skin. It
-                                        tightens the skin along with its moisturizing effect on the
-                                        skin. The other important ingredient, making hydroderm so
-                                        effective is “marine collagen” which along with Vyo-Serum
-                                        helps revitalize the skin.
-                                    </p>
-                                </div>
+                            {/* Hero Image */}
+                            <img src={blog.img} alt={blog.title}
+                                style={{ width: "100%", borderRadius: "12px", objectFit: "cover", maxHeight: "420px", marginBottom: "24px" }}
+                                onError={e => e.target.src = "/placeholder.png"} />
 
-                                {/* Quote */}
-                                <div className="blog__details__quote">
-                                    <i className="fa fa-quote-left"></i>
-                                    <p>
-                                        “When designing an advertisement for a particular product
-                                        many things should be researched like where it should be
-                                        displayed.”
-                                    </p>
-                                    <h6>_ John Smith _</h6>
-                                </div>
+                            {/* Date */}
+                            <p style={{ color: "#888", fontSize: "13px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+                                <img src={calendarIcon} alt="" style={{ width: "14px" }} /> {blog.date}
+                            </p>
 
-                                {/* More Paragraphs */}
-                                <div className="blog__details__text">
-                                    <p>
-                                        Vyo-Serum along with tightening the skin also reduces the
-                                        fine lines indicating aging of skin. Problems like dark
-                                        circles, puffiness, and crow’s feet can be control from the
-                                        strong effects of this serum.
-                                    </p>
-                                    <p>
-                                        Hydroderm is a multi-functional product that helps in
-                                        reducing the cellulite and giving the body a toned shape,
-                                        also helps in cleansing the skin from the root and not
-                                        letting the pores clog, nevertheless also let’s sweeps out
-                                        the wrinkles and all signs of aging from the sensitive near
-                                        the eyes.
-                                    </p>
-                                </div>
+                            {/* Title */}
+                            <h2 style={{ fontSize: "26px", fontWeight: 700, marginBottom: "16px", color: "#111" }}>
+                                {blog.title}
+                            </h2>
 
-                                {/* Author + Tags */}
-                                <div className="blog__details__option">
-                                    <div className="row">
-                                        <div className="col-lg-6 col-md-6 col-sm-6">
-                                            <div className="blog__details__author">
-                                                <div className="blog__details__author__pic">
-                                                    <img src={blogAuthorImg} alt="Author" />
-                                                </div>
-                                                <div className="blog__details__author__text">
-                                                    <h5>Aiden Blair</h5>
-                                                </div>
-                                            </div>
-                                        </div>
+                            {/* Excerpt */}
+                            {blog.excerpt && (
+                                <p style={{ fontSize: "16px", color: "#555", fontStyle: "italic", borderLeft: "3px solid #6b2737", paddingLeft: "14px", marginBottom: "20px" }}>
+                                    {blog.excerpt}
+                                </p>
+                            )}
 
-                                        <div className="col-lg-6 col-md-6 col-sm-6">
-                                            <div className="blog__details__tags">
-                                                <a href="#">#Fashion</a>
-                                                <a href="#">#Trending</a>
-                                                <a href="#">#2020</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Previous / Next Buttons */}
-                                <div className="blog__details__btns">
-                                    <div className="row">
-                                        <div className="col-lg-6 col-md-6 col-sm-6">
-                                            <a href="#" className="blog__details__btns__item">
-                                                <p>
-                                                    <span className="arrow_left"></span> Previous Post
-                                                </p>
-                                                <h5>
-                                                    It’s Classified How To Utilize Free Classified Ad Sites
-                                                </h5>
-                                            </a>
-                                        </div>
-
-                                        <div className="col-lg-6 col-md-6 col-sm-6">
-                                            <a
-                                                href="#"
-                                                className="blog__details__btns__item blog__details__btns__item--next"
-                                            >
-                                                <p>
-                                                    Next Post <span className="arrow_right"></span>
-                                                </p>
-                                                <h5>
-                                                    Tips For Choosing The Perfect Gloss For Your Lips
-                                                </h5>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Comment Form */}
-                                <div className="blog__details__comment">
-                                    <h4>Leave A Comment</h4>
-                                    <form action="#">
-                                        <div className="row">
-                                            <div className="col-lg-4 col-md-4">
-                                                <input type="text" placeholder="Name" />
-                                            </div>
-                                            <div className="col-lg-4 col-md-4">
-                                                <input type="text" placeholder="Email" />
-                                            </div>
-                                            <div className="col-lg-4 col-md-4">
-                                                <input type="text" placeholder="Phone" />
-                                            </div>
-                                            <div className="col-lg-12 text-center">
-                                                <textarea placeholder="Comment"></textarea>
-                                                <button type="submit" className="site-btn">
-                                                    Post Comment
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-
+                            {/* Full Content */}
+                            <div style={{ fontSize: "15px", color: "#444", lineHeight: "1.9", whiteSpace: "pre-line" }}>
+                                {blog.content || "No content available."}
                             </div>
-                        </div>
 
+                        </div>
                     </div>
                 </div>
             </section>
@@ -209,4 +73,4 @@ const BlogDetails = () => {
     );
 };
 
-export default BlogDetails;
+export default BlogDetail;

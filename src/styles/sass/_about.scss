@@ -11,7 +11,9 @@
     margin-bottom: 35px;
 
     img {
-        min-width: 100%;
+        width: 100%;
+        height: auto;
+        display: block;
     }
 }
 
@@ -178,4 +180,145 @@
     display: block;
     margin-bottom: 75px;
     text-align: center;
+}
+
+/*---------------------
+  Responsive About
+-----------------------*/
+@media (max-width: 991px) {
+    .about {
+        padding-bottom: 50px;
+    }
+
+    .testimonial__text {
+        padding: 90px 40px 110px;
+    }
+
+    .testimonial__text p {
+        font-size: 18px;
+        line-height: 28px;
+    }
+
+    .testimonial__pic {
+        height: 480px;
+    }
+
+    .counter .container {
+        padding-bottom: 50px;
+    }
+
+    .counter__item {
+        margin-bottom: 24px;
+    }
+
+    .counter__item__number {
+        float: none;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    .counter__item__number h2,
+    .counter__item__number strong {
+        font-size: 48px;
+        line-height: 44px;
+    }
+
+    .team__item {
+        margin-bottom: 24px;
+    }
+
+    .client__item {
+        margin-bottom: 50px;
+    }
+}
+
+@media (max-width: 767px) {
+    .testimonial__text {
+        padding: 60px 20px 80px;
+    }
+
+    .testimonial__text span {
+        font-size: 48px;
+    }
+
+    .testimonial__pic {
+        height: 320px;
+    }
+
+    .testimonial__author {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .testimonial__author__pic {
+        float: none;
+        margin: 0 0 15px;
+    }
+
+    .testimonial__author__text {
+        padding-top: 0;
+    }
+
+    .counter__item__number h2,
+    .counter__item__number strong {
+        font-size: 40px;
+        line-height: 40px;
+    }
+
+    .counter__item span {
+        font-size: 16px;
+        line-height: 24px;
+    }
+
+    .about__item h4 {
+        font-size: 20px;
+    }
+
+    .about__item p {
+        font-size: 15px;
+    }
+
+    .team__item h4 {
+        font-size: 18px;
+    }
+
+    .team__item span {
+        font-size: 14px;
+    }
+
+    .client__item {
+        margin-bottom: 40px;
+    }
+}
+
+@media (max-width: 575px) {
+    .testimonial__text {
+        padding: 45px 15px 60px;
+    }
+
+    .testimonial__text span {
+        font-size: 42px;
+    }
+
+    .testimonial__author__pic img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .counter__item__number h2,
+    .counter__item__number strong {
+        font-size: 36px;
+        line-height: 36px;
+    }
+
+    .about__item {
+        margin-bottom: 20px;
+    }
+
+    .client__item {
+        margin-bottom: 30px;
+    }
 }

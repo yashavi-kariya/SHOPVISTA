@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
-
+import { Routes, Route, useLocation } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 // Components
 import Preloader from "./components/Preloader";
 import OffcanvasMenu from "./components/OffcanvasMenu";
@@ -9,7 +9,7 @@ import Hero from "./components/Hero";
 import Banner from "./components/Banner";
 import Categories from "./components/Category";
 import Footer from "./components/Footer";
-
+import AdminRoute from "./components/AdminRoute";
 // Pages
 import About from "./pages/About";
 import Home from "./pages/Home";
@@ -22,20 +22,21 @@ import Checkout from "./pages/Checkout";
 import Shop from "./pages/Shop";
 import Login from "./pages/Login";
 import Register from './pages/Register';
-import CategoryPage from "./pages/CategoryPage";
+import Collection from "./pages/Collection";
+import CollectionProducts from "./pages/CollectionProducts";
+// import CategoryPage from "./pages/CategoryPage";
 import OrderSuccess from "./pages/OrderSuccess";
 import Wishlist from "./pages/Wishlist";
-
-// Case sensitive!
+import AdminDashboard from "./pages/AdminDashboard";
 import Dashboard from "./pages/Dashboard";
-// NEW: Product Details Page
-// import ShopDetails from "./pages/shopDetails";
 import ProductDetails from "./pages/ProductDetails";
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(timer);
@@ -43,14 +44,20 @@ function App() {
 
   return (
     <>
+
+      <ScrollToTop />
       {loading && <Preloader />}
 
-      <OffcanvasMenu
-        isOpen={isMenuOpen}
-        closeMenu={() => setIsMenuOpen(false)}
-      />
+      {!isAdminRoute && (
+        <OffcanvasMenu
+          isOpen={isMenuOpen}
+          closeMenu={() => setIsMenuOpen(false)}
+        />
+      )}
 
-      <Header openMenu={() => setIsMenuOpen(true)} />
+      {!isAdminRoute && (
+        <Header openMenu={() => setIsMenuOpen(true)} />
+      )}
 
       <Routes>
         {/* HOME PAGE */}
@@ -76,13 +83,21 @@ function App() {
 
         {/* BLOG */}
         <Route path="/blog" element={<Blog />} />
-        <Route path="/blog-details" element={<BlogDetails />} />
+        <Route path="/blog/:id" element={<BlogDetails />} />
 
         {/* SHOP */}
         <Route path="/shop" element={<Shop />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        {/* CATEGORY PAGE */}
-        <Route path="/category/:name" element={<CategoryPage />} />
+        <Route
+          path="/admin-dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+        <Route path="/collection" element={<Collection />} />
+        <Route path="/collection/:type" element={<CollectionProducts />} />
 
         {/* PRODUCT DETAILS PAGE (NEW) */}
         <Route path="/product/:id" element={<ProductDetails />} />
@@ -95,7 +110,7 @@ function App() {
         <Route path="/order-success" element={<OrderSuccess />} />
       </Routes>
 
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </>
   );
 }

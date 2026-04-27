@@ -96,9 +96,9 @@ const About = () => {
                             <div className="testimonial__text">
                                 <span className="icon_quotations"></span>
                                 <p>
-                                    “Going out after work? Take your butane curling iron with you
+                                    Going out after work? Take your butane curling iron with you
                                     to the office, style your hair before leaving and skip going
-                                    home.”
+                                    home.
                                 </p>
 
                                 <div className="testimonial__author">

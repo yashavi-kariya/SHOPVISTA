@@ -1,0 +1,143 @@
+@use "variable" as *;
+@use "mixins" as *;
+
+/* ================= CATEGORY ================= */
+
+.categories__deal__countdown {
+    text-align: left;
+}
+
+.categories__deal__countdown__timer {
+    display: flex;
+    gap: 20px;
+}
+
+/* Mobile Fix */
+@media (max-width: 576px) {
+
+    .categories__deal__countdown {
+        text-align: left;
+        width: 100%;
+        padding: 0;
+    }
+
+    .categories__deal__countdown__timer {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: flex-start;
+        /* ✅ left aligned */
+        align-items: flex-start;
+        gap: 0 !important;
+        width: 100%;
+        margin: 0;
+        padding-left: 30px;
+    }
+
+    /* ✅ Kill ::after only */
+    .cd-item::after,
+    .cd-item span::after,
+    .cd-item span::before {
+        display: none !important;
+        content: "" !important;
+    }
+
+    /* ✅ First item — simple flex column, tight */
+    .cd-item:first-child {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        padding: 0 4px 0 0;
+        /* ✅ tight right padding only */
+        position: static !important;
+    }
+
+    /* ✅ Items 2,3,4 — grid layout */
+    .cd-item:not(:first-child) {
+        display: grid !important;
+        grid-template-columns: auto auto;
+        grid-template-rows: auto auto;
+        align-items: start;
+        padding: 0 4px 0 0;
+        /* ✅ tight */
+        position: static !important;
+        float: none !important;
+    }
+
+    /* ✅ Colon — tight spacing */
+    .cd-item:not(:first-child)::before {
+        content: ":" !important;
+        display: block !important;
+        font-size: 24px !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+        color: #111111 !important;
+        grid-column: 1;
+        grid-row: 1;
+        align-self: start;
+        padding-right: 4px;
+        /* ✅ tiny gap between colon and number */
+        position: static !important;
+    }
+
+    /* ✅ Number */
+    .cd-item span {
+        font-size: 24px !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+        color: #111111 !important;
+        display: block !important;
+        text-align: center;
+        position: static !important;
+        white-space: nowrap;
+    }
+
+    .cd-item:not(:first-child) span {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    /* ✅ Label */
+    .cd-item p {
+        font-size: 9px !important;
+        text-transform: uppercase;
+        color: #b7b7b7 !important;
+        margin: 3px 0 0 0 !important;
+        letter-spacing: 0.5px;
+        text-align: center;
+        white-space: nowrap;
+        display: block !important;
+    }
+
+    .cd-item:not(:first-child) p {
+        grid-column: 2;
+        grid-row: 2;
+        text-align: center;
+    }
+
+    .filter__controls {
+        display: block !important;
+        text-align: center !important;
+        padding-top: 0 !important;
+        /* ✅ Removes top padding */
+        margin-top: 0 !important;
+        /* ✅ Removes top margin */
+        margin-bottom: 0 !important;
+        width: 100%;
+    }
+
+    .filter__controls li {
+        display: block !important;
+        float: none !important;
+        margin-right: 0 !important;
+        margin-top: 0 !important;
+        /* ✅ Removes space between items */
+        margin-bottom: 8px !important;
+        width: 100%;
+    }
+
+    section.product,
+    .spad {
+        padding-top: 0 !important;
+
+    }
+}

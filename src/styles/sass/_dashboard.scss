@@ -1,0 +1,831 @@
+/*=============================================
+  DASHBOARD  —  Light theme, top-nav layout
+  BEM prefix: .db-*
+==============================================*/
+
+/* ── Tokens ── */
+$white: #f7f1f1;
+$bg: #dbd7d8; //#d1caca// soft off-white page background
+$surface: #e3cfca; // #bab1b1
+$border: #e5e7eb;
+$accent: #000000; // indigo
+$accent2: #e0a2a2; // pink
+$text: #111827;
+$muted: #000000;
+$radius: 12px;
+$nav-h: 64px;
+
+/* ── Keyframes ── */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes statPop {
+    0% {
+        opacity: 0;
+        transform: scale(0.88);
+    }
+
+    60% {
+        transform: scale(1.03);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Loader ── */
+.db-loader {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: $bg;
+    color: $muted;
+    gap: 14px;
+    font-size: 14px;
+
+    &__ring {
+        width: 40px;
+        height: 40px;
+        border: 3px solid $border;
+        border-top-color: $accent;
+        border-radius: 50%;
+        animation: spin 0.75s linear infinite;
+    }
+}
+
+/* ── Root ── */
+.db {
+    min-height: 100vh;
+    background: $bg;
+    font-family: "DM Sans", "Segoe UI", sans-serif;
+    color: $text;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ── Orb animations ── */
+.db::before,
+.db::after,
+.db-orb {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.45;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.db::before {
+    width: 420px;
+    height: 420px;
+    // background: #ffffff;
+    top: -120px;
+    left: -80px;
+    animation: dbFloat1 10s ease-in-out infinite;
+}
+
+.db::after {
+    width: 360px;
+    height: 360px;
+    background: #e0cad6;
+    top: 60px;
+    right: -60px;
+    animation: dbFloat2 13s ease-in-out infinite;
+}
+
+.db-orb {
+    width: 300px;
+    height: 300px;
+    background: #95b1d3;
+    bottom: 80px;
+    left: 38%;
+    animation: dbFloat3 9s ease-in-out infinite;
+}
+
+@keyframes dbFloat1 {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(40px, -60px);
+    }
+}
+
+@keyframes dbFloat2 {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(-50px, 35px);
+    }
+}
+
+@keyframes dbFloat3 {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(25px, 45px);
+    }
+}
+
+/* ═══════════════════════════
+   TOP NAV
+═══════════════════════════ */
+.db-nav {
+    background: $white;
+    border-bottom: 1px solid $border;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: $nav-h;
+
+    &__inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        height: 100%;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    /* Avatar + name */
+    &__user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-right: auto;
+    }
+
+    &__avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, $accent, $accent2);
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    &__name {
+        font-size: 14px;
+        font-weight: 600;
+        color: $text;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    &__email {
+        font-size: 11px;
+        color: $muted;
+        margin: 2px 0 0;
+    }
+
+    /* Tabs */
+    &__tabs {
+        display: flex;
+        gap: 4px;
+        background: $bg;
+        padding: 4px;
+        border-radius: 8px;
+    }
+
+    &__tab {
+        padding: 7px 18px;
+        border-radius: 6px;
+        border: none;
+        background: transparent;
+        color: $muted;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            color: $text;
+        }
+
+        &.active {
+            background: $white;
+            color: $text;
+            font-weight: 600;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+    }
+
+    /* Logout */
+    &__logout {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1px solid $border;
+        background: transparent;
+        color: $muted;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+
+        &:hover {
+            border-color: #fca5a5;
+            color: #dc2626;
+            background: #fef2f2;
+        }
+    }
+}
+
+/* ═══════════════════════════
+   PAGE BODY
+═══════════════════════════ */
+.db-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+    animation: fadeUp 0.4s ease both;
+    position: relative;
+    z-index: 1;
+}
+
+/* Error */
+.db-error {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+
+/* Greeting */
+.db-greeting {
+    margin-bottom: 28px;
+
+    &__title {
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0 0 6px;
+        letter-spacing: -0.03em;
+        color: $text;
+
+        span {
+            background: linear-gradient(135deg, $accent, $accent2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    }
+
+    &__sub {
+        font-size: 14px;
+        color: $muted;
+        margin: 0;
+    }
+}
+
+/* Stats */
+.db-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 36px;
+}
+
+.db-stat {
+    background: $white;
+    border: 1px solid $border;
+    border-radius: $radius;
+    padding: 20px 22px;
+    animation: statPop 0.5s ease both;
+
+    &__label {
+        font-size: 11px;
+        font-weight: 600;
+        color: $muted;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        margin: 0 0 8px;
+    }
+
+    &__value {
+        font-size: 28px;
+        font-weight: 700;
+        color: $text;
+        margin: 0;
+        letter-spacing: -0.03em;
+    }
+}
+
+/* Section */
+.db-section {
+    animation: fadeUp 0.4s ease both;
+
+    &__title {
+        font-size: 15px;
+        font-weight: 700;
+        color: $text;
+        margin: 0 0 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+}
+
+/* Empty */
+.db-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: $muted;
+
+    span {
+        font-size: 40px;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    p {
+        font-size: 15px;
+        margin: 0;
+    }
+}
+
+/* ═══════════════════════════
+   ORDER CARDS
+═══════════════════════════ */
+.db-order {
+    background: $white;
+    border: 1px solid $border;
+    border-radius: $radius;
+    margin-bottom: 10px;
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+    transition: box-shadow 0.2s, border-color 0.2s;
+
+    &:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        border-color: #d1d5db;
+    }
+
+    /* Summary row */
+    &__row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__badge {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 11px;
+        border-radius: 20px;
+        text-transform: capitalize;
+        letter-spacing: 0.02em;
+    }
+
+    &__id {
+        font-size: 13px;
+        color: $muted;
+        font-family: "JetBrains Mono", "Courier New", monospace;
+    }
+
+    &__right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    &__amount {
+        font-size: 15px;
+        font-weight: 700;
+        color: $text;
+    }
+
+    &__arrow {
+        font-size: 22px;
+        color: $muted;
+        display: inline-block;
+        transition: transform 0.3s ease;
+        line-height: 1;
+
+        &.open {
+            transform: rotate(90deg);
+        }
+    }
+
+    /* Accordion */
+    &__body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-top: 0 solid $border;
+
+        &--open {
+            max-height: 700px;
+            border-top: 1px solid $border;
+        }
+    }
+
+    /* Footer inside accordion */
+    &__footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 12px 20px;
+        border-top: 1px solid $border;
+        font-size: 12px;
+        color: $muted;
+        background: $bg;
+    }
+}
+
+/* Items inside accordion */
+.db-items {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.db-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    background: $bg;
+    border-radius: 10px;
+
+    &__img {
+        width: 52px;
+        height: 52px;
+        object-fit: cover;
+        border-radius: 8px;
+        flex-shrink: 0;
+        background: $border;
+    }
+
+    &__info {
+        flex: 1;
+    }
+
+    &__name {
+        font-size: 14px;
+        font-weight: 600;
+        color: $text;
+        margin: 0 0 4px;
+    }
+
+    &__meta {
+        font-size: 12px;
+        color: $muted;
+        margin: 0;
+    }
+
+    &__total {
+        font-size: 14px;
+        font-weight: 700;
+        color: $text;
+        margin: 0;
+        white-space: nowrap;
+    }
+}
+
+.db-no-items {
+    padding: 16px 20px;
+    color: $muted;
+    font-size: 13px;
+}
+
+/* ═══════════════════════════
+   PROFILE
+═══════════════════════════ */
+.db-profile {
+    background: $white;
+    border: 1px solid $border;
+    border-radius: $radius;
+    padding: 28px;
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    animation: fadeUp 0.4s ease both;
+
+    &__avatar {
+        width: 68px;
+        height: 68px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, $accent, $accent2);
+        color: #bcafaf;
+        font-size: 26px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    &__grid {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    &__field {
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: $muted;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 5px;
+        }
+
+        p {
+            font-size: 15px;
+            font-weight: 500;
+            color: $text;
+            margin: 0;
+        }
+    }
+}
+
+/* ═══════════════════════════
+   RESPONSIVE
+═══════════════════════════ */
+
+/* Tablet */
+@media (max-width: 768px) {
+    .db-nav {
+        height: auto;
+
+        &__inner {
+            flex-wrap: wrap;
+            padding: 12px 16px;
+            gap: 12px;
+        }
+
+        &__user {
+            order: 1;
+        }
+
+        &__logout {
+            order: 2;
+        }
+
+        &__tabs {
+            order: 3;
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    .db-body {
+        padding: 24px 16px 48px;
+    }
+
+    .db-greeting__title {
+        font-size: 22px;
+    }
+
+    .db-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .db-stat:last-child {
+        grid-column: span 2;
+    }
+
+    .db-profile {
+        flex-direction: column;
+
+        &__grid {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .db-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .db-stat:last-child {
+        grid-column: span 1;
+    }
+
+    .db-stat__value {
+        font-size: 24px;
+    }
+
+    .db-order__row {
+        padding: 14px 14px;
+    }
+
+    .db-item {
+        flex-wrap: wrap;
+
+        &__img {
+            width: 44px;
+            height: 44px;
+        }
+    }
+
+    .db-nav__user-text {
+        display: none;
+    }
+
+    // hide email on very small screens
+}
+
+// @use "mixins";
+// @use "variable";
+
+// /*---------------------
+//   Dashboard
+// -----------------------*/
+
+// .dashboard {
+//     padding: 40px 0;
+
+//     &__title {
+//         margin-bottom: 30px;
+//         font-size: 24px;
+//         font-weight: 600;
+//     }
+
+//     &__wrapper {
+//         display: flex;
+//         gap: 20px;
+//     }
+
+//     /* SIDEBAR */
+//     &__sidebar {
+//         .list-group {
+//             border-radius: 10px;
+//             overflow: hidden;
+
+//             .list-group-item {
+//                 cursor: pointer;
+//                 padding: 12px 15px;
+//                 border: none;
+//                 border-bottom: 1px solid #eee;
+
+//                 &.active {
+//                     background: #111;
+//                     color: #fff;
+//                 }
+
+//                 &:hover {
+//                     background: #f5f5f5;
+//                 }
+//             }
+//         }
+//     }
+
+//     /* CONTENT */
+//     &__content {
+//         width: 100%;
+//     }
+
+//     /* CARD */
+//     &__card {
+//         background: #fff;
+//         padding: 20px;
+//         margin-bottom: 20px;
+//         border-radius: 12px;
+//         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+
+//         &__header {
+//             display: flex;
+//             justify-content: space-between;
+//             flex-wrap: wrap;
+//             margin-bottom: 10px;
+//         }
+//     }
+
+//     /* ORDER ITEMS */
+//     &__items {
+//         margin-top: 10px;
+//     }
+
+//     &__item {
+//         display: flex;
+//         align-items: center;
+//         gap: 15px;
+//         margin-bottom: 10px;
+
+//         img {
+//             width: 60px;
+//             height: 60px;
+//             object-fit: cover;
+//             border-radius: 8px;
+//         }
+//     }
+// }
+
+// /*=====================
+//   TABLET
+// ======================*/
+// @media (max-width: 991px) {
+//     .dashboard {
+//         &__wrapper {
+//             flex-direction: column;
+//         }
+
+//         &__sidebar {
+//             width: 100%;
+//         }
+//     }
+// }
+
+// /*=====================
+//   MOBILE
+// ======================*/
+// @media (max-width: 767px) {
+//     .dashboard {
+//         padding: 20px 10px;
+
+//         &__title {
+//             font-size: 20px;
+//         }
+
+//         &__card {
+//             padding: 15px;
+//         }
+
+//         &__card__header {
+//             flex-direction: column;
+//             gap: 5px;
+//         }
+
+//         &__item {
+//             img {
+//                 width: 50px;
+//                 height: 50px;
+//             }
+//         }
+//     }
+// }
+
+// /*=====================
+//   SMALL MOBILE
+// ======================*/
+// @media (max-width: 480px) {
+//     .dashboard {
+//         &__title {
+//             font-size: 18px;
+//         }
+
+//         &__item {
+//             flex-direction: column;
+//             align-items: flex-start;
+
+//             img {
+//                 width: 100%;
+//                 height: auto;
+//             }
+//         }
+//     }
+// }

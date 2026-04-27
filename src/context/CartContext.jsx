@@ -1,5 +1,5 @@
 // import { createContext, useContext, useState, useMemo, useEffect, useCallback } from "react";
-// import axios from "axios";
+// import api from "api";
 
 // export const CartContext = createContext();
 
@@ -25,7 +25,7 @@
 //         if (!config) return;
 
 //         try {
-//             const res = await axios.get(API_BASE, config);
+//             const res = await api.get(API_BASE, config);
 
 //             const items = res.data?.items || [];
 //             setCartItems(items);
@@ -49,7 +49,7 @@
 //         }
 
 //         try {
-//             await axios.post(
+//             await api.post(
 //                 `${API_BASE}/add`,
 //                 { productId: product._id, quantity: 1 },
 //                 config
@@ -70,7 +70,7 @@
 //         const validatedQty = Math.max(1, parseInt(newQty) || 1);
 
 //         try {
-//             await axios.put(
+//             await api.put(
 //                 `${API_BASE}/update`,
 //                 { productId, quantity: validatedQty },
 //                 config
@@ -95,7 +95,7 @@
 //         if (!config) return;
 
 //         try {
-//             await axios.delete(`${API_BASE}/remove/${productId}`, config);
+//             await api.delete(`${API_BASE}/remove/${productId}`, config);
 
 //             setCartItems(prev =>
 //                 prev.filter(item => item.product?._id !== productId)
@@ -139,15 +139,16 @@
 // export const useCart = () => useContext(CartContext);
 
 import { createContext, useContext, useState, useMemo, useEffect, useCallback } from "react";
-import axios from "axios";
+// import api from "api";
+import api from "../api";
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
     const [cartItems, setCartItems] = useState([]);
 
+    // DELETE whatever is there and type this exactly:
     const API_BASE = "http://localhost:3001/api/cart";
-
     const getAuthConfig = () => {
         const token = localStorage.getItem("token");
         if (!token) return null;
@@ -168,7 +169,7 @@ export const CartProvider = ({ children }) => {
         if (config) {
             // Logged-in user → fetch from backend
             try {
-                const res = await axios.get(API_BASE, config);
+                const res = await api.get(API_BASE, config);
                 const items = res.data?.items || [];
                 setCartItems(items);
             } catch (err) {
@@ -190,11 +191,13 @@ export const CartProvider = ({ children }) => {
     // -----------------------------
     const addToCart = async (product) => {
         const config = getAuthConfig();
+        console.log("token:", localStorage.getItem("token")); // ← add this
+        console.log("product._id being sent:", product._id);
 
         if (config) {
             // Logged-in → backend
             try {
-                await axios.post(`${API_BASE}/add`, { productId: product._id, quantity: 1 }, config);
+                await api.post(`${API_BASE}/add`, { productId: product._id, quantity: product.quantity || 1 }, config);
                 fetchCart();
             } catch (err) {
                 console.error("Add to cart failed:", err);
@@ -215,19 +218,18 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    // -----------------------------
-    // UPDATE QUANTITY
-    // -----------------------------
-    const updateQty = async (productId, newQty) => {
+    // Change signature:
+    const updateQty = async (productId, newQty, variantId = null) => {
         const config = getAuthConfig();
         const validatedQty = Math.max(1, parseInt(newQty) || 1);
 
         if (config) {
             try {
-                await axios.put(`${API_BASE}/update`, { productId, quantity: validatedQty }, config);
+                await api.put(`${API_BASE}/update`, { productId, quantity: validatedQty, variantId }, config);
                 setCartItems(prev =>
                     prev.map(item =>
-                        item.product?._id === productId
+                        item.product?._id === productId &&
+                            (!variantId || item.variantId === variantId)
                             ? { ...item, quantity: validatedQty }
                             : item
                     )
@@ -252,7 +254,7 @@ export const CartProvider = ({ children }) => {
 
         if (config) {
             try {
-                await axios.delete(`${API_BASE}/remove/${productId}`, config);
+                await api.delete(`${API_BASE}/remove/${productId}`, config);
                 setCartItems(prev =>
                     prev.filter(item => item.product?._id !== productId)
                 );
@@ -280,7 +282,7 @@ export const CartProvider = ({ children }) => {
         if (!config || guestCart.length === 0) return;
 
         try {
-            await axios.post(`${API_BASE}/merge`, { items: guestCart }, config);
+            await api.post(`${API_BASE}/merge`, { items: guestCart }, config);
             localStorage.removeItem("cart");
             fetchCart();
         } catch (err) {

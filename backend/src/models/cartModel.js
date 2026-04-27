@@ -1,35 +1,42 @@
 import mongoose from "mongoose";
 
 const cartItemSchema = new mongoose.Schema({
-
     product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
         required: true
     },
-
+    variantId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false,
+        default: null
+    },
     name: {
         type: String,
         required: true
     },
-
     price: {
         type: Number,
         required: true
     },
-
     img: {
         type: String,
         default: ""
     },
-
+    color: {
+        type: String,
+        default: ""
+    },
+    size: {
+        type: String,
+        default: ""
+    },
     quantity: {
         type: Number,
         required: true,
         min: 1,
         default: 1
     }
-
 });
 
 const cartSchema = new mongoose.Schema(
@@ -40,13 +47,9 @@ const cartSchema = new mongoose.Schema(
             required: true,
             unique: true
         },
-
         items: [cartItemSchema]
-
     },
     { timestamps: true }
 );
-
 const Cart = mongoose.model("Cart", cartSchema);
-
 export default Cart;

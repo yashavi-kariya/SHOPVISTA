@@ -1,6 +1,9 @@
 @use "variable" as *;
 @use "mixins" as *;
 @use "base" as *;
+@use "category" as *;
+@use "dashboard" as *;
+@use"admin-dashboard" as *;
 @use "header" as *;
 @use "hero" as *;
 @use "home-page" as *;
@@ -18,4 +21,5 @@
 @use "blog-sidebar" as *;
 @use "blog-details" as *;
 @use "contact" as *;
+@use "wishlist" as*;
 @use "responsive" as *;

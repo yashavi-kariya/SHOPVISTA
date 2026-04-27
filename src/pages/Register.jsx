@@ -1,32 +1,31 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import axios from "axios";
-
+// import api from "api";
+import api from "../api";
+import { useNavigate } from "react-router-dom";
 const Register = () => {
-
+    const navigate = useNavigate();
     const [showPass, setShowPass] = useState(false);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        setLoading(true);
         try {
-
-            const res = await axios.post(
+            const res = await api.post(
                 "http://localhost:3001/api/auth/register",
-                { name, email, password }
+                { name, email, password }  // 👈 role removed
             );
-
             alert(res.data.message);
-
-            localStorage.setItem("token", res.data.token);
-
+            navigate("/login");
         } catch (error) {
-
             alert(error.response?.data?.message || "Registration failed");
-
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -39,15 +38,11 @@ const Register = () => {
                     <p>Create an account to unlock personalized recommendations, track your orders, and enjoy faster checkout.</p>
                 </div>
             </div>
-
             <div className="login-form-side">
                 <div className="login-content">
-
                     <h1>Create Account</h1>
                     <p className="subtext">Fill in your details to get started.</p>
-
                     <form onSubmit={handleSubmit}>
-
                         <div className="input-group">
                             <label>Full Name</label>
                             <div className="input-box">
@@ -61,7 +56,6 @@ const Register = () => {
                                 />
                             </div>
                         </div>
-
                         <div className="input-group">
                             <label>Email Address</label>
                             <div className="input-box">
@@ -75,7 +69,6 @@ const Register = () => {
                                 />
                             </div>
                         </div>
-
                         <div className="input-group">
                             <label>Password</label>
                             <div className="input-box">
@@ -92,17 +85,13 @@ const Register = () => {
                                 </span>
                             </div>
                         </div>
-
-                        <button type="submit" className="login-btn">
-                            Create Account <ArrowRight size={18} style={{ marginLeft: '10px' }} />
+                        <button type="submit" className="login-btn" disabled={loading}>
+                            {loading ? "Creating..." : "Create Account"}
                         </button>
-
                     </form>
-
                 </div>
             </div>
         </div>
     );
 };
-
 export default Register;

@@ -20,7 +20,8 @@ const protect = async (req, res, next) => {
         req.user = {
             id: user._id,
             name: user.name || "User",
-            email: user.email || ""
+            email: user.email || "",
+            role: user.role
         };
 
         next();
@@ -30,4 +31,20 @@ const protect = async (req, res, next) => {
     }
 };
 
-export default protect;
+// const adminOnly = (req, res, next) => {
+//     if (req.user && req.user.role === "admin") {
+//         next();
+//     } else {
+//         return res.status(403).json({
+//             message: "Admin access only"
+//         });
+//     }
+// };
+const adminOnly = (req, res, next) => {
+    if (req.user.role !== "admin") {
+        return res.status(403).json({ message: "Access denied" });
+    }
+    next();
+};
+
+export { protect, adminOnly };
