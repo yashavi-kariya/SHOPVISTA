@@ -1,6 +1,5 @@
 import { useState } from "react";
-
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import api from "../api";
 
 const Spinner = () => (
     <span style={{
@@ -29,17 +28,12 @@ export default function ContactPage() {
         boxSizing: "border-box", fontFamily: "inherit",
     });
 
-    // hits your POST /api/ai/customer-suggest
+    // ✅ CHANGE 1: was fetch(), now uses api axios instance
     const handleAISuggest = async () => {
         if (!topic.trim()) return;
         setAiLoading(true);
         try {
-            const res = await fetch(`${API}/ai/customer-suggest`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ topic }),
-            });
-            const data = await res.json();
+            const { data } = await api.post("/api/ai/customer-suggest", { topic });
             if (data.suggestion) setSuggestions([data.suggestion, ...suggestions.slice(0, 1)]);
         } catch {
             setError("AI unavailable — write your message manually.");
@@ -47,7 +41,7 @@ export default function ContactPage() {
         setAiLoading(false);
     };
 
-    // hits your POST /api/messages
+    // ✅ CHANGE 2: was fetch(), now uses api axios instance
     const handleSend = async () => {
         setError("");
         if (!form.name || !form.email || !form.message) {
@@ -56,16 +50,11 @@ export default function ContactPage() {
         }
         setSendLoading(true);
         try {
-            const res = await fetch(`${API}/messages`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to send");
+            const { data } = await api.post("/api/messages", form);
+            if (!data.success) throw new Error(data.error || "Failed to send");
             setSent(true);
         } catch (e) {
-            setError(e.message || "Something went wrong. Please try again.");
+            setError(e.response?.data?.error || e.message || "Something went wrong. Please try again.");
         }
         setSendLoading(false);
     };
@@ -106,9 +95,9 @@ export default function ContactPage() {
     return (
         <div style={{ maxWidth: 520, margin: "2.5rem auto", padding: "0 16px" }}>
             <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      `}</style>
+                @keyframes spin { to { transform: rotate(360deg); } }
+                @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+            `}</style>
 
             <div style={{ animation: "fadeUp .35s ease" }}>
                 {/* Header */}
@@ -129,7 +118,6 @@ export default function ContactPage() {
                     border: "0.5px solid var(--color-border-tertiary)",
                     borderRadius: 12, padding: "1.5rem"
                 }}>
-
                     {/* Name + Email */}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
                         {[
