@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 // import api from "api";
 import api from "../api";
@@ -12,6 +10,7 @@ import UsersPage from "../components/admin/UsersPage";
 import CollectionsPage from "../components/admin/CollectionsPage"
 import OrdersPage from "../components/admin/OrdersPage";
 import BlogPage from "../components/admin/BlogPage";
+import AdminMessages from "../components/admin/AdminMessages";
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -19,7 +18,12 @@ const AdminDashboard = () => {
     const [products, setProducts] = useState([]);
     const [activeTab, setActiveTab] = useState("dashboard");
     const [sidebarOpen, setSidebarOpen] = useState(false);
-
+    const [unreadCount, setUnreadCount] = useState(0);
+    useEffect(() => {
+        api.get("/api/messages")
+            .then(res => setUnreadCount(res.data.filter(m => m.status === "unread").length))
+            .catch(() => { });
+    }, []);
     const token = localStorage.getItem("token");
 
     const toggleSidebar = () => {
@@ -58,6 +62,7 @@ const AdminDashboard = () => {
             case "orders": return <OrdersPage token={token} {...sharedProps} />
             case "users": return <UsersPage token={token} {...sharedProps} />
             case "blogs": return <BlogPage token={token} {...sharedProps} />
+            case "messages": return <AdminMessages token={token} {...sharedProps} />;
             default: return <DashboardPage {...sharedProps} />;
         }
     };
@@ -77,6 +82,7 @@ const AdminDashboard = () => {
                 sidebarOpen={sidebarOpen}
                 setSidebarOpen={setSidebarOpen}
                 handleLogout={handleLogout}
+                unreadCount={unreadCount}
             />
 
             <div className="admin__content">{renderPage()}</div>

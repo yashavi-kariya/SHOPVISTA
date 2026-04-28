@@ -14,8 +14,10 @@ import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-import couponRoutes from "./models/couponRoutes.js";
+import couponRoutes from "./routes/couponRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 
 const app = express();
 dbconnect();
@@ -48,7 +50,8 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/blogs", blogRoutes);
-
+app.use("/api/messages", messageRoutes);
+app.use("/api/ai", aiRoutes);
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, "0.0.0.0", () => {
