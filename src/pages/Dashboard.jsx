@@ -99,6 +99,7 @@ const Dashboard = () => {
                 const userData = res.data;
                 setUser(userData);
                 if (userData.role === "admin") { navigate("/admin-dashboard"); return; }
+                fetchMessages(userData.email);
                 return api.get("/api/orders", { headers });
             })
             .then((res) => { if (res) setOrders(res.data); })
@@ -111,17 +112,18 @@ const Dashboard = () => {
         navigate("/login");
     };
 
-    const fetchMessages = async () => {
-        if (!user.email) return;
+    const fetchMessages = async (emailOverride) => {
+        const email = emailOverride || user.email;
+        if (!email) return;
         setMessagesLoading(true);
         try {
             const token = localStorage.getItem("token");
-            const { data } = await api.get(`/api/messages/my?email=${user.email}`, {
+            const { data } = await api.get(`/api/messages/my?email=${email}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMessages(data);
-        } catch {
-
+        } catch (e) {
+            console.error("Messages fetch error:", e.response?.status, e.response?.data);
         }
         setMessagesLoading(false);
     };
