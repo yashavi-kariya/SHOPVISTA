@@ -27,8 +27,10 @@ const __dirname = path.dirname(__filename);
 
 // ── Middleware ──────────────────────────────────────────────────
 app.use(cors({
-    origin: "https://shopvista-zreu.vercel.app",
-    credentials: true
+    origin: ["https://shopvista-zreu.vercel.app", "http://localhost:5173"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express.json());
 

@@ -3,9 +3,9 @@ import { sendMessage, getMessages, markAsRead, replyToMessage } from "../control
 
 const router = express.Router();
 
-router.post("/", sendMessage);      // user submits contact form
-router.get("/", getMessages);      // admin fetches all messages
-router.patch("/:id/read", markAsRead);       // admin opens message
-router.patch("/:id/reply", replyToMessage);  // admin sends reply
+router.post("/", sendMessage);
+router.get("/", getMessages);
+router.patch("/:id/read", markAsRead);
+router.patch("/:id/reply", replyToMessage);
 
 export default router;
