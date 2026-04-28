@@ -1,3 +1,4 @@
+console.log("API KEY loaded:", !!process.env.ANTHROPIC_API_KEY);
 export async function getAISuggestion(prompt, systemPrompt) {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -16,6 +17,7 @@ export async function getAISuggestion(prompt, systemPrompt) {
 
     if (!response.ok) {
         const err = await response.json();
+        console.error("Anthropic API error:", JSON.stringify(err)); // ← add this
         throw new Error(err.error?.message || `API error ${response.status}`);
     }
 
