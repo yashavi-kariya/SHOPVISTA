@@ -49,3 +49,15 @@ export const replyToMessage = async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 };
+
+export const getMyMessages = async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email) return res.status(400).json({ error: "Email required" });
+        const messages = await Message.find({ email: email.toLowerCase() })
+            .sort({ createdAt: -1 });
+        res.json(messages);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
