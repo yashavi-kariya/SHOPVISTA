@@ -1,26 +1,26 @@
 console.log("API KEY loaded:", !!process.env.ANTHROPIC_API_KEY);
 export async function getAISuggestion(prompt, systemPrompt) {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "x-api-key": process.env.ANTHROPIC_API_KEY,
-            "anthropic-version": "2023-06-01",
+            "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
         },
         body: JSON.stringify({
-            model: "claude-sonnet-4-5",
+            model: "llama-3.1-8b-instant", // free model
             max_tokens: 300,
-            system: systemPrompt,
-            messages: [{ role: "user", content: prompt }],
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: prompt }
+            ],
         }),
     });
 
     if (!response.ok) {
         const err = await response.json();
-        console.error("Anthropic API error:", JSON.stringify(err)); // ← add this
         throw new Error(err.error?.message || `API error ${response.status}`);
     }
 
     const data = await response.json();
-    return data.content?.[0]?.text || "";
+    return data.choices?.[0]?.message?.content || "";
 }
