@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../api";
 
 const Spinner = () => (
@@ -18,6 +18,20 @@ export default function ContactPage() {
     const [sent, setSent] = useState(false);
     const [error, setError] = useState("");
     const [focused, setFocused] = useState("");
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        api.get("/api/users/profile", { headers: { Authorization: `Bearer ${token}` } })
+            .then(res => {
+                setForm(p => ({
+                    ...p,
+                    name: res.data.name || "",
+                    email: res.data.email || ""
+                }));
+            })
+            .catch(() => { });
+    }, []);
 
     const fieldStyle = (name) => ({
         width: "100%", padding: "10px 12px", borderRadius: 8,
