@@ -114,6 +114,7 @@ const Dashboard = () => {
 
     const fetchMessages = async (emailOverride) => {
         const email = emailOverride || user.email;
+        console.log("fetchMessages called with email:", email); // ← add
         if (!email) return;
         setMessagesLoading(true);
         try {
@@ -121,9 +122,10 @@ const Dashboard = () => {
             const { data } = await api.get(`/api/messages/my?email=${email}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            console.log("messages received:", data); // ← add
             setMessages(data);
         } catch (e) {
-            console.error("Messages fetch error:", e.response?.status, e.response?.data);
+            console.error("Messages error:", e.response?.status, e.response?.data); // ← add
         }
         setMessagesLoading(false);
     };
