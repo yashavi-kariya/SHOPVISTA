@@ -86,6 +86,8 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [expandedOrder, setExpandedOrder] = useState(null);
     const [activeTab, setActiveTab] = useState("orders");
+    const [messages, setMessages] = useState([]);
+    const [messagesLoading, setMessagesLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -107,6 +109,21 @@ const Dashboard = () => {
     const logout = () => {
         localStorage.removeItem("token");
         navigate("/login");
+    };
+
+    const fetchMessages = async () => {
+        if (!user.email) return;
+        setMessagesLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            const { data } = await api.get(`/api/messages/my?email=${user.email}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setMessages(data);
+        } catch {
+
+        }
+        setMessagesLoading(false);
     };
 
     const totalSpent = orders.reduce((s, o) => s + (o.totalAmount || 0), 0);
@@ -139,6 +156,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Stats */}
+                    {/* Stats */}
                     <div className="db2-stats">
                         {[
                             { label: "Total Orders", value: orders.length },
@@ -154,6 +172,42 @@ const Dashboard = () => {
 
                     {/* Tabs */}
                     <div className="db2-tabs">
+                        {[
+                            { id: "orders", label: "My Orders" },
+                            { id: "messages", label: "Messages" },
+                            { id: "profile", label: "Profile" },
+                        ].map((t) => (
+                            <button
+                                key={t.id}
+                                className={`db2-tab ${activeTab === t.id ? "active" : ""}`}
+                                onClick={() => {
+                                    setActiveTab(t.id);
+                                    if (t.id === "messages") fetchMessages();
+                                }}
+                            >
+                                {t.label}
+                            </button>
+                        ))}
+                        <button className="db2-tab" style={{ marginLeft: "auto", color: "#e53935" }} onClick={logout}>
+                            Logout
+                        </button>
+                    </div>
+
+                    {/* <div className="db2-stats">
+                        {[
+                            { label: "Total Orders", value: orders.length },
+                            { label: "Delivered", value: deliveredCount },
+                            { label: "Total Spent", value: `₹${totalSpent.toLocaleString("en-IN")}`, red: true },
+                        ].map((s, i) => (
+                            <div key={s.label} className="db2-stat" style={{ animationDelay: `${i * 80}ms` }}>
+                                <p className="db2-stat__label">{s.label}</p>
+                                <p className={`db2-stat__val${s.red ? " red" : ""}`}>{s.value}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Tabs */}
+                    {/* <div className="db2-tabs">
                         {[{ id: "orders", label: "My Orders" }, { id: "profile", label: "Profile" }].map((t) => (
                             <button key={t.id} className={`db2-tab ${activeTab === t.id ? "active" : ""}`} onClick={() => setActiveTab(t.id)}>
                                 {t.label}
@@ -162,7 +216,7 @@ const Dashboard = () => {
                         <button className="db2-tab" style={{ marginLeft: "auto", color: "#e53935" }} onClick={logout}>
                             Logout
                         </button>
-                    </div>
+                    </div> */}
 
                     {/* Orders Tab */}
                     {activeTab === "orders" && (
@@ -246,6 +300,64 @@ const Dashboard = () => {
                                     ))}
                                 </div>
                             </div>
+                        </section>
+                    )}
+                    {activeTab === "messages" && (
+                        <section>
+                            <p className="db2-section-title">My Messages</p>
+                            {messagesLoading ? (
+                                <div className="db2-loader">
+                                    <div className="db2-loader__ring" />
+                                </div>
+                            ) : messages.length === 0 ? (
+                                <div className="db2-empty">
+                                    <div style={{ fontSize: 36 }}>💬</div>
+                                    <p>No messages sent yet.</p>
+                                </div>
+                            ) : (
+                                messages.map((msg, i) => (
+                                    <div key={msg._id} className="db2-order" style={{ animationDelay: `${i * 60}ms`, marginBottom: 12 }}>
+                                        {/* Message header */}
+                                        <div style={{ padding: "13px 16px", borderBottom: "0.5px solid #f0f0f0" }}>
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                                                <span style={{
+                                                    fontSize: 11, fontWeight: 600, padding: "3px 9px",
+                                                    borderRadius: 20,
+                                                    background: msg.status === "replied" ? "#d1fae5" : msg.status === "read" ? "#dbeafe" : "#fef3c7",
+                                                    color: msg.status === "replied" ? "#065f46" : msg.status === "read" ? "#1e40af" : "#92400e"
+                                                }}>
+                                                    {msg.status === "replied" ? "✓ Replied" : msg.status === "read" ? "👁 Read" : "● Unread"}
+                                                </span>
+                                                <span style={{ fontSize: 11, color: "#aaa" }}>
+                                                    {new Date(msg.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                                                </span>
+                                            </div>
+                                            {/* Your message */}
+                                            <p style={{ fontSize: 13, color: "#444", margin: 0, lineHeight: 1.6 }}>
+                                                <span style={{ fontWeight: 600, color: "#111" }}>You: </span>{msg.message}
+                                            </p>
+                                        </div>
+
+                                        {/* Admin reply */}
+                                        {msg.adminReply ? (
+                                            <div style={{ padding: "12px 16px", background: "#f0f7ff" }}>
+                                                <p style={{ fontSize: 11, fontWeight: 600, color: "#185FA5", marginBottom: 5 }}>
+                                                    💬 Admin Reply
+                                                </p>
+                                                <p style={{ fontSize: 13, color: "#333", margin: 0, lineHeight: 1.6 }}>
+                                                    {msg.adminReply}
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div style={{ padding: "10px 16px", background: "#fafafa" }}>
+                                                <p style={{ fontSize: 12, color: "#bbb", margin: 0, fontStyle: "italic" }}>
+                                                    Awaiting reply from support…
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            )}
                         </section>
                     )}
 
