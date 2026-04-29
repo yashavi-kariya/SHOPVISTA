@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-// Images 
+import api from "../api";
+import { Link } from "react-router-dom";
 import saleImg from "../assets/img/shop-details/thumb-1.png";
 import insta1 from "../assets/img/instagram/instagram-1.jpg";
 import insta2 from "../assets/img/instagram/instagram-2.jpg";
