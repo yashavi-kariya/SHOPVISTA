@@ -109,195 +109,168 @@ import banner2 from "../assets/img/banner/banner-2.jpg";
 import banner3 from "../assets/img/banner/banner-3.jpg";
 
 const bannerData = [
-    { id: 1, img: banner1, label: "New Arrivals", title: "Clothing Collections 2026", link: "/shop", cardClass: "banner__card--main" },
-    { id: 2, img: banner2, label: "Essentials", title: "Accessories", link: "/shop", cardClass: "banner__card--top" },
-    { id: 3, img: banner3, label: "Season Drop", title: "Shoes Spring 2026", link: "/shop", cardClass: "banner__card--bottom" },
+    { id: 1, img: banner1, num: "01", tag: "New Arrivals · 2026", title: "Clothing Collections", link: "/shop" },
+    { id: 2, img: banner2, num: "02", tag: "Essentials · 2026", title: "Accessories", link: "/shop" },
+    { id: 3, img: banner3, num: "03", tag: "Season Drop · 2026", title: "Shoes Spring", link: "/shop" },
 ];
 
 const Banner = () => (
     <>
         <style>{`
-            @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 
             .banner-section {
-                padding: 48px 24px;
-                background: #f8f6f2;
+                padding: 40px 20px;
+                background: #0d0d0d;
                 font-family: 'DM Sans', sans-serif;
             }
 
             .banner-grid {
                 display: grid;
-                grid-template-columns: 1fr 1fr;
-                grid-template-rows: 260px;
-                gap: 16px;
-                max-width: 1200px;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 3px;
+                max-width: 1100px;
                 margin: 0 auto;
             }
 
-            .banner__card {
+            .banner-col {
                 position: relative;
                 overflow: hidden;
-                border-radius: 4px;
+                height: 540px;
                 cursor: pointer;
-                background: #e8e4de;
+                background: #1a1a1a;
+                animation: colFadeIn 0.6s ease both;
             }
 
-            .banner__card img {
+            .banner-col:nth-child(1) { animation-delay: 0s; }
+            .banner-col:nth-child(2) { animation-delay: 0.12s; }
+            .banner-col:nth-child(3) { animation-delay: 0.24s; }
+
+            @keyframes colFadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+
+            .banner-col img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
                 display: block;
-                transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                filter: brightness(0.7);
+                transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                            filter 0.5s ease;
             }
 
-            .banner__card:hover img {
-                transform: scale(1.06);
+            .banner-col:hover img {
+                transform: scale(1.08);
+                filter: brightness(0.45);
             }
 
-            .banner__card--main {
-                grid-column: 1 / 2;
-                grid-row: 1 / 3;
-                min-height: 520px;
-            }
-
-            .banner__card--top {
-                grid-column: 2 / 3;
-                grid-row: 1 / 2;
-                min-height: 250px;
-            }
-
-            .banner__card--bottom {
-                grid-column: 2 / 3;
-                grid-row: 2 / 3;
-                min-height: 250px;
-            }
-
-            .banner__overlay {
+            .banner-col__num {
                 position: absolute;
-                inset: 0;
-                background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 55%);
-                transition: opacity 0.4s ease;
+                top: 20px;
+                left: 20px;
+                font-family: 'Bebas Neue', sans-serif;
+                font-size: 72px;
+                color: rgba(255,255,255,0.08);
+                line-height: 1;
+                transition: opacity 0.4s;
+                pointer-events: none;
             }
 
-            .banner__card:hover .banner__overlay {
-                opacity: 0.85;
+            .banner-col:hover .banner-col__num {
+                opacity: 0;
             }
 
-            .banner__text {
+            .banner-col__bar {
                 position: absolute;
                 bottom: 0;
                 left: 0;
                 right: 0;
-                padding: 28px 24px;
+                padding: 28px 24px 32px;
+                background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+            }
+
+            .banner-col__tag {
+                font-size: 9px;
+                letter-spacing: 4px;
+                text-transform: uppercase;
+                color: rgba(255,255,255,0.5);
+                margin-bottom: 10px;
+                font-weight: 500;
+            }
+
+            .banner-col__title {
+                font-family: 'Bebas Neue', sans-serif;
+                font-size: 38px;
                 color: #fff;
-                transform: translateY(6px);
-                transition: transform 0.4s ease;
+                line-height: 0.95;
+                margin-bottom: 18px;
+                letter-spacing: 1px;
+                transition: letter-spacing 0.4s ease;
             }
 
-            .banner__card:hover .banner__text {
-                transform: translateY(0);
+            .banner-col:hover .banner-col__title {
+                letter-spacing: 2px;
             }
 
-            .banner__label {
+            .banner-col__link {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
                 font-size: 10px;
                 letter-spacing: 3px;
                 text-transform: uppercase;
-                opacity: 0.75;
-                margin-bottom: 8px;
-                font-weight: 500;
-            }
-
-            .banner__title {
-                font-family: 'Playfair Display', serif;
-                font-size: 22px;
-                font-weight: 600;
-                line-height: 1.2;
-                margin-bottom: 14px;
-                color: #fff;
-            }
-
-            .banner__card--top .banner__title,
-            .banner__card--bottom .banner__title {
-                font-size: 18px;
-            }
-
-            .banner__link {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                font-size: 11px;
-                letter-spacing: 2.5px;
-                text-transform: uppercase;
-                font-weight: 500;
                 color: #fff;
                 text-decoration: none;
-                border-bottom: 1px solid rgba(255,255,255,0.5);
-                padding-bottom: 2px;
-                transition: border-color 0.3s, gap 0.3s;
+                font-weight: 500;
+                opacity: 0;
+                transform: translateY(8px);
+                transition: opacity 0.4s 0.1s ease, transform 0.4s 0.1s ease;
             }
 
-            .banner__link:hover {
-                border-color: #fff;
-                gap: 12px;
+            .banner-col:hover .banner-col__link {
+                opacity: 1;
+                transform: translateY(0);
             }
 
-            .banner__link-arrow {
+            .banner-col__link-line {
+                width: 28px;
+                height: 1px;
+                background: #fff;
                 display: inline-block;
-                transition: transform 0.3s;
+                transition: width 0.3s ease;
             }
 
-            .banner__card:hover .banner__link-arrow {
-                transform: translateX(4px);
-            }
-
-            /* Entrance animations */
-            .banner__card {
-                animation: bannerFadeUp 0.7s ease both;
-            }
-            .banner__card--main   { animation-delay: 0s; }
-            .banner__card--top    { animation-delay: 0.15s; }
-            .banner__card--bottom { animation-delay: 0.30s; }
-
-            @keyframes bannerFadeUp {
-                from { opacity: 0; transform: translateY(24px); }
-                to   { opacity: 1; transform: translateY(0); }
+            .banner-col:hover .banner-col__link-line {
+                width: 40px;
             }
 
             /* Responsive */
-            @media (max-width: 768px) {
-                .banner__card--main {
-                    min-height: 380px;
-                }
-                .banner__title { font-size: 20px; }
+            @media (max-width: 900px) and (min-width: 641px) {
+                .banner-col { height: 400px; }
+                .banner-col__title { font-size: 30px; }
             }
 
-            @media (max-width: 576px) {
-                .banner-grid {
-                    grid-template-columns: 1fr;
-                    grid-template-rows: auto;
-                }
-                .banner__card--main,
-                .banner__card--top,
-                .banner__card--bottom {
-                    grid-column: 1;
-                    grid-row: auto;
-                    min-height: 240px;
-                }
-                .banner__card--main { min-height: 320px; }
+            @media (max-width: 640px) {
+                .banner-grid { grid-template-columns: 1fr; }
+                .banner-col { height: 320px; }
+                .banner-col__title { font-size: 48px; }
             }
         `}</style>
 
         <section className="banner-section">
             <div className="banner-grid">
                 {bannerData.map((item) => (
-                    <div className={`banner__card ${item.cardClass}`} key={item.id}>
+                    <div className="banner-col" key={item.id}>
                         <img src={item.img} alt={item.title} />
-                        <div className="banner__overlay" />
-                        <div className="banner__text">
-                            <p className="banner__label">{item.label}</p>
-                            <h2 className="banner__title">{item.title}</h2>
-                            <Link to={item.link} className="banner__link">
-                                Shop now <span className="banner__link-arrow">→</span>
+                        <div className="banner-col__num">{item.num}</div>
+                        <div className="banner-col__bar">
+                            <p className="banner-col__tag">{item.tag}</p>
+                            <h2 className="banner-col__title">{item.title}</h2>
+                            <Link to={item.link} className="banner-col__link">
+                                <span className="banner-col__link-line" />
+                                Shop now
                             </Link>
                         </div>
                     </div>
