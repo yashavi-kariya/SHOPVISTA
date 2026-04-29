@@ -528,8 +528,7 @@ const Category = () => {
 
                     <div className={`deal-text-side ${dealVisible ? "visible" : ""}`}>
                         <p className="deal-eyebrow">Deal Of The Week</p>
-                        <h2 className="deal-title">Multi-pocket<br />Chest Bag Black</h2>
-
+                        <h2 className="deal-title">Beige Oversized<br />Crew Sweatshirt</h2>
                         <div className="countdown">
                             <CountUnit num={timeLeft.days} label="Days" />
                             <span className="cd-sep">:</span>
