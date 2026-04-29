@@ -26,8 +26,9 @@ const Product = () => {
             return;
         }
         addToCart(product);
-        alert(`${product.name} added to cart!`);
     };
+    const { cartItems } = useCart();
+    const isInCart = (id) => cartItems?.some(item => item._id === id || item.id === id);
 
     const handleWishlist = (e, product) => {
         e.preventDefault();
@@ -88,9 +89,11 @@ const Product = () => {
                 }
 
                 /* Make sure hover area has dark bg so icons are always visible by default */
-                .product__hover li a {
+               .product__hover li a {
                     background: rgba(255,255,255,0.92);
                     border-radius: 50%;
+                    width: 40px;
+                    height: 40px;        /* ← add fixed size so the circle is visible */
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -267,18 +270,19 @@ const Product = () => {
                                                 <h6>{product.name}</h6>
                                                 <button
                                                     className="add-cart"
-                                                    onClick={() => handleAddToCart(product)}
+                                                    onClick={() => isInCart(product._id) ? navigate("/cart") : handleAddToCart(product)}
                                                     style={{
                                                         opacity: !isLoggedIn ? 0.6 : 1,
                                                         cursor: "pointer",
                                                         color: "#fff",
-                                                        backgroundColor: "#7e8286",
+                                                        backgroundColor: isInCart(product._id) ? "#27ae60" : "#7e8286",
                                                         border: "none",
                                                         padding: "5px 10px",
                                                         borderRadius: "4px",
+                                                        transition: "background-color 0.3s",
                                                     }}
                                                 >
-                                                    + Add To Cart
+                                                    {isInCart(product._id) ? "→ Go to Cart" : "+ Add To Cart"}
                                                 </button>
                                                 <h5>Rs. {product.price}</h5>
                                                 <div className="product__color__select">
