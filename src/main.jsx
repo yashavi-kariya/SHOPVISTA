@@ -22,17 +22,20 @@ import './styles/sass/style.scss';
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { CompareProvider } from "./context/CompareContext";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <CartProvider>
         <WishlistProvider>
-          <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
-            <App />
-          </GoogleOAuthProvider>
+          <CompareProvider>
+            <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+              <App />
+            </GoogleOAuthProvider>
+          </CompareProvider>
         </WishlistProvider>
       </CartProvider>
     </BrowserRouter>
-  </React.StrictMode>,
+  </React.StrictMode>
 )
