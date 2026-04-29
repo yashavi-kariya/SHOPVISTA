@@ -46,24 +46,6 @@ const Category = () => {
 
         return () => clearInterval(timer);
     }, [targetDate]);
-    // const blogs = [
-    //     {
-    //         img: blog1,
-    //         date: "16 February 2026",
-    //         title: "What Curling Irons Are The Best Ones",
-    //     },
-    //     {
-    //         img: blog2,
-    //         date: "21 February 2026",
-    //         title: "Eternity Bands Do Last Forever",
-    //     },
-    //     {
-    //         img: blog3,
-    //         date: "28 February 2026",
-    //         title: "The Health Benefits Of Sunglasses",
-    //     },
-    // ];
-
     return (
         <>
             {/* ================== CATEGORIES SECTION ================== */}
@@ -173,7 +155,7 @@ const Category = () => {
             </section>
 
 
-            {/* ================== LATEST BLOG SECTION ================== */}
+
             {/* ================== LATEST BLOG SECTION ================== */}
             <section className="latest spad">
                 <div className="container">

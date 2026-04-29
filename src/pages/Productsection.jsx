@@ -69,10 +69,33 @@ const Product = () => {
     return (
         <>
             <style>{`
-                .product__hover li a.wishlisted { background: #e74c3c !important; }
-                .product__hover li a.wishlisted img { filter: brightness(0) invert(1); }
-                .product__hover li a.compared { background: #27ae60 !important; }
-                .product__hover li a.compared img { filter: brightness(0) invert(1); }
+              /* Wishlist active — red background + white icon */
+               .product__hover li a.wishlisted {
+                    background: #e74c3c !important;
+                    border-color: #e74c3c !important;
+                }
+                .product__hover li a.wishlisted img {
+                    filter: brightness(0) invert(1) !important;
+                }
+
+                /* Compare active — green background + white icon */
+                .product__hover li a.compared {
+                    background: #27ae60 !important;
+                    border-color: #27ae60 !important;
+                }
+                .product__hover li a.compared img {
+                    filter: brightness(0) invert(1) !important;
+                }
+
+                /* Make sure hover area has dark bg so icons are always visible by default */
+                .product__hover li a {
+                    background: rgba(255,255,255,0.92);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: background 0.2s, border-color 0.2s;
+                }
                 .compare-bar {
                     position: fixed;
                     bottom: 0; left: 0; right: 0;
