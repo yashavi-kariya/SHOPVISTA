@@ -216,7 +216,7 @@ const Banner = () => (
                 font-size: 10px;
                 letter-spacing: 3px;
                 text-transform: uppercase;
-                color: #fff;
+                color: #797575;
                 text-decoration: none;
                 font-weight: 500;
                 opacity: 0;
@@ -230,7 +230,7 @@ const Banner = () => (
             .banner-col__link-line {
                 width: 28px;
                 height: 1px;
-                background: #fff;
+                background: #817d7d;
                 display: inline-block;
                 transition: width 0.3s ease;
             }
