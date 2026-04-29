@@ -128,7 +128,7 @@ const Banner = () => (
             .banner-grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                grid-template-rows: auto auto;
+                grid-template-rows: 260px;
                 gap: 16px;
                 max-width: 1200px;
                 margin: 0 auto;
