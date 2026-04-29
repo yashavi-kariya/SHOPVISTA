@@ -86,11 +86,12 @@ const Category = () => {
                     display: flex;
                     align-items: center;
                     gap: 60px;
+                    justify-content: center
                 }
 
                 /* Image side */
                 .deal-img-side {
-                    flex: 0 0 auto;
+                    flex: 0 0 320px;
                     width: 320px;
                     position: relative;
                     opacity: 0;
@@ -138,6 +139,7 @@ const Category = () => {
                 .deal-text-side {
                     flex: 1;
                     opacity: 0;
+                    max-width: 500px;
                     transform: translateX(40px);
                     transition: opacity 0.8s 0.15s ease, transform 0.8s 0.15s ease;
                 }
@@ -230,9 +232,9 @@ const Category = () => {
                 }
                 .insta-container {
                     width: 100%;
-                    max-width: 1280px;
-                    margin: 0 auto;
-                    padding: 0 40px;
+                    // max-width: 1280px;
+                    // margin: 0 auto;
+                    padding: 0 24px;
                     box-sizing: border-box;
                     display: flex;
                     align-items: center;
