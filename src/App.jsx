@@ -24,6 +24,7 @@ import Login from "./pages/Login";
 import Register from './pages/Register';
 import Collection from "./pages/Collection";
 import CollectionProducts from "./pages/CollectionProducts";
+import Compare from "./pages/Compare";
 // import CategoryPage from "./pages/CategoryPage";
 import OrderSuccess from "./pages/OrderSuccess";
 import Wishlist from "./pages/Wishlist";
@@ -103,6 +104,7 @@ function App() {
         <Route path="/product/:id" element={<ProductDetails />} />
         {/* <Route path="/shop-details" element={<ShopDetails />} /> */}
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/compare" element={<Compare />} />
         {/* CART & CHECKOUT */}
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
