@@ -25,9 +25,9 @@ export const CompareProvider = ({ children }) => {
     };
 
     const isInCompare = (id) => compare.some((p) => p.id === id);
-
+    const clearCompare = () => setCompare([]);
     return (
-        <CompareContext.Provider value={{ compare, toggleCompare, isInCompare }}>
+        <CompareContext.Provider value={{ compare, toggleCompare, isInCompare, clearCompare }}>
             {children}
         </CompareContext.Provider>
     );
