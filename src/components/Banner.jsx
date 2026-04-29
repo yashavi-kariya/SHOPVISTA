@@ -18,22 +18,72 @@ const Banner = () => (
             .bn-wrap {
                 width: 100%;
                 background: #ffffff;
-                padding: 0;
+                padding: 40px 20px 48px;
                 box-sizing: border-box;
             }
 
+            /* ── Section heading ── */
+            .bn-header {
+                display: flex;
+                align-items: flex-end;
+                justify-content: space-between;
+                margin-bottom: 24px;
+            }
+
+            .bn-header__eyebrow {
+                font-family: 'DM Sans', sans-serif;
+                font-size: 10px;
+                letter-spacing: 4px;
+                text-transform: uppercase;
+                color: #aaa;
+                font-weight: 500;
+                margin: 0 0 6px 0;
+            }
+
+            .bn-header__title {
+                font-family: 'Bebas Neue', sans-serif;
+                font-size: clamp(36px, 5vw, 56px);
+                color: #111;
+                line-height: 1;
+                letter-spacing: 1px;
+                margin: 0;
+            }
+
+            .bn-header__link {
+                font-family: 'DM Sans', sans-serif;
+                font-size: 11px;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+                color: #555;
+                text-decoration: none;
+                font-weight: 500;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding-bottom: 4px;
+                border-bottom: 1px solid #ccc;
+                transition: color 0.3s, border-color 0.3s;
+            }
+
+            .bn-header__link:hover {
+                color: #111;
+                border-color: #111;
+            }
+
+            /* ── Grid ── */
             .bn-grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
                 gap: 4px;
             }
 
+            /* ── Card ── */
             .bn-card {
                 position: relative;
                 overflow: hidden;
                 cursor: pointer;
                 background: #f5f0eb;
-                aspect-ratio: 3 / 4;
+                aspect-ratio: 4 / 4.5;
                 border-radius: 6px;
                 animation: cardIn 0.7s ease both;
             }
@@ -52,12 +102,12 @@ const Banner = () => (
                 position: absolute;
                 inset: 0;
                 z-index: 1;
-                background: linear-gradient(to bottom, transparent 40%, rgba(20, 18, 15, 0.72) 100%);
+                background: linear-gradient(to bottom, transparent 35%, rgba(15, 13, 10, 0.75) 100%);
                 transition: opacity 0.5s ease;
             }
 
             .bn-card:hover::before {
-                opacity: 0.92;
+                opacity: 0.95;
             }
 
             .bn-card img {
@@ -72,7 +122,7 @@ const Banner = () => (
             }
 
             .bn-card:hover img {
-                transform: scale(1.1);
+                transform: scale(1.08);
             }
 
             .bn-num {
@@ -81,7 +131,7 @@ const Banner = () => (
                 right: 16px;
                 z-index: 2;
                 font-family: 'Bebas Neue', sans-serif;
-                font-size: 56px;
+                font-size: 52px;
                 line-height: 1;
                 color: rgba(255, 255, 255, 0.12);
                 pointer-events: none;
@@ -99,27 +149,27 @@ const Banner = () => (
                 left: 0;
                 right: 0;
                 z-index: 2;
-                padding: 22px 20px 26px;
+                padding: 20px 18px 24px;
             }
 
             .bn-tag {
                 display: block;
                 font-family: 'DM Sans', sans-serif;
-                font-size: 8px;
-                letter-spacing: 3.5px;
+                font-size: 10px;
+                letter-spacing: 3px;
                 text-transform: uppercase;
-                color: rgba(255, 255, 255, 0.5);
+                color: rgba(255, 255, 255, 0.55);
                 margin-bottom: 8px;
                 font-weight: 500;
             }
 
             .bn-title {
                 font-family: 'Bebas Neue', sans-serif;
-                font-size: clamp(28px, 3.5vw, 42px);
+                font-size: clamp(30px, 3.2vw, 40px);
                 color: #fff;
                 line-height: 0.95;
                 letter-spacing: 1px;
-                margin: 0 0 16px 0;
+                margin: 0 0 14px 0;
                 transition: letter-spacing 0.4s ease;
             }
 
@@ -132,10 +182,10 @@ const Banner = () => (
                 align-items: center;
                 gap: 10px;
                 font-family: 'DM Sans', sans-serif;
-                font-size: 9px;
+                font-size: 10px;
                 letter-spacing: 3px;
                 text-transform: uppercase;
-                color: rgba(255, 255, 255, 0.75);
+                color: rgba(255, 255, 255, 0.8);
                 text-decoration: none;
                 font-weight: 500;
                 opacity: 0;
@@ -160,26 +210,35 @@ const Banner = () => (
                 width: 36px;
             }
 
-            /* Responsive */
+            /* ── Responsive ── */
             @media (max-width: 900px) and (min-width: 601px) {
-                .bn-title { font-size: 28px; }
+                .bn-card { aspect-ratio: 3 / 3.8; }
+                .bn-title { font-size: 26px; }
             }
 
             @media (max-width: 600px) {
-                .bn-grid {
-                    grid-template-columns: 1fr;
-                    gap: 6px;
-                }
-                .bn-card {
-                    aspect-ratio: 4 / 3;
-                }
-                .bn-title {
-                    font-size: 44px;
-                }
+                .bn-wrap { padding: 24px 14px 36px; }
+                .bn-grid { grid-template-columns: 1fr; gap: 6px; }
+                .bn-card { aspect-ratio: 16 / 10; }
+                .bn-title { font-size: 40px; }
+                .bn-header { flex-direction: column; align-items: flex-start; gap: 12px; }
             }
         `}</style>
 
         <section className="bn-wrap">
+
+            {/* Section heading */}
+            <div className="bn-header">
+                <div>
+                    <p className="bn-header__eyebrow">Curated for you</p>
+                    <h2 className="bn-header__title">Shop by Category</h2>
+                </div>
+                <Link to="/shop" className="bn-header__link">
+                    View all collections →
+                </Link>
+            </div>
+
+            {/* Cards */}
             <div className="bn-grid">
                 {bannerData.map((item) => (
                     <div className="bn-card" key={item.id}>
@@ -203,6 +262,7 @@ const Banner = () => (
                     </div>
                 ))}
             </div>
+
         </section>
     </>
 );
