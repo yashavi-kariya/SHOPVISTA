@@ -188,7 +188,7 @@ const Banner = () => (
                 left: 0;
                 right: 0;
                 padding: 28px 24px 32px;
-                background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+                background: linear-gradient(to top, rgba(250, 250, 250, 0.85) 0%, transparent 100%);
             }
 
             .banner-col__tag {
