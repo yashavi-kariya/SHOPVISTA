@@ -11,8 +11,7 @@ import insta6 from "../assets/img/instagram/instagram-6.jpg";
 
 const instaPics = [insta1, insta2, insta3, insta4, insta5, insta6];
 
-/* ── tiny hook: fires callback once when element enters viewport ── */
-function useInView(threshold = 0.15) {
+function useInView(threshold = 0.1) {
     const ref = useRef(null);
     const [visible, setVisible] = useState(false);
     useEffect(() => {
@@ -32,7 +31,6 @@ const Category = () => {
     const targetDate = new Date("2026-12-31T23:59:59").getTime();
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const [blogs, setBlogs] = useState([]);
-
     const [dealRef, dealVisible] = useInView();
     const [instaRef, instaVisible] = useInView();
 
@@ -62,53 +60,60 @@ const Category = () => {
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 
-                /* ═══════════════════════════════════════
+                /* ── Reset any theme spad overrides ── */
+                .deal-section,
+                .insta-section,
+                .blog-section {
+                    box-sizing: border-box;
+                }
+
+                /* ════════════════════════════════
                    DEAL OF THE WEEK
-                ═══════════════════════════════════════ */
+                ════════════════════════════════ */
                 .deal-section {
                     background: #f7f4f0;
-                    padding: 72px 0 64px;
+                    padding: 60px 0;
                     overflow: hidden;
-                }
-
-                .deal-inner {
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    padding: 0 24px;
-                    display: grid;
-                    grid-template-columns: 1fr 420px 1fr;
-                    align-items: center;
-                    gap: 40px;
-                }
-
-                /* ── image column ── */
-                .deal-img-wrap {
-                    position: relative;
-                    display: flex;
-                    justify-content: center;
-                }
-
-                .deal-img-wrap img {
                     width: 100%;
-                    max-width: 340px;
-                    height: auto;
-                    object-fit: cover;
-                    border-radius: 4px;
+                }
+
+                .deal-container {
+                    width: 100%;
+                    max-width: 1280px;
+                    margin: 0 auto;
+                    padding: 0 40px;
+                    box-sizing: border-box;
+                    display: flex;
+                    align-items: center;
+                    gap: 60px;
+                }
+
+                /* Image side */
+                .deal-img-side {
+                    flex: 0 0 auto;
+                    width: 320px;
+                    position: relative;
                     opacity: 0;
-                    transform: translateY(40px);
+                    transform: translateX(-40px);
                     transition: opacity 0.8s ease, transform 0.8s ease;
                 }
-                .deal-img-wrap.visible img {
+                .deal-img-side.visible {
                     opacity: 1;
-                    transform: translateY(0);
+                    transform: translateX(0);
                 }
-
+                .deal-img-side img {
+                    width: 100%;
+                    height: 420px;
+                    object-fit: cover;
+                    border-radius: 6px;
+                    display: block;
+                }
                 .deal-sticker {
                     position: absolute;
-                    top: 18px;
-                    right: 10px;
-                    width: 88px;
-                    height: 88px;
+                    top: 16px;
+                    right: -16px;
+                    width: 90px;
+                    height: 90px;
                     background: #111;
                     border-radius: 50%;
                     display: flex;
@@ -118,27 +123,28 @@ const Category = () => {
                     color: #fff;
                     text-align: center;
                     opacity: 0;
-                    transform: scale(0.5) rotate(-20deg);
-                    transition: opacity 0.6s 0.4s ease, transform 0.6s 0.4s cubic-bezier(0.34,1.56,0.64,1);
+                    transform: scale(0.4) rotate(-20deg);
+                    transition: opacity 0.5s 0.5s ease, transform 0.5s 0.5s cubic-bezier(0.34,1.56,0.64,1);
+                    z-index: 2;
                 }
-                .deal-img-wrap.visible .deal-sticker {
+                .deal-img-side.visible .deal-sticker {
                     opacity: 1;
                     transform: scale(1) rotate(0deg);
                 }
-                .deal-sticker span { font-size: 10px; letter-spacing: 1px; opacity: 0.7; }
-                .deal-sticker h5   { font-family: 'Bebas Neue', sans-serif; font-size: 20px; margin: 2px 0 0; line-height: 1; }
+                .deal-sticker span { font-size: 9px; letter-spacing: 1px; opacity: 0.65; line-height: 1.4; }
+                .deal-sticker strong { font-family: 'Bebas Neue', sans-serif; font-size: 18px; line-height: 1; display: block; }
 
-                /* ── text column ── */
-                .deal-text {
+                /* Text side */
+                .deal-text-side {
+                    flex: 1;
                     opacity: 0;
-                    transform: translateX(32px);
-                    transition: opacity 0.8s 0.2s ease, transform 0.8s 0.2s ease;
+                    transform: translateX(40px);
+                    transition: opacity 0.8s 0.15s ease, transform 0.8s 0.15s ease;
                 }
-                .deal-text.visible {
+                .deal-text-side.visible {
                     opacity: 1;
                     transform: translateX(0);
                 }
-
                 .deal-eyebrow {
                     font-family: 'DM Sans', sans-serif;
                     font-size: 10px;
@@ -146,61 +152,55 @@ const Category = () => {
                     text-transform: uppercase;
                     color: #c0392b;
                     font-weight: 600;
-                    margin: 0 0 12px;
+                    margin: 0 0 14px;
                 }
-
                 .deal-title {
                     font-family: 'Bebas Neue', sans-serif;
-                    font-size: clamp(36px, 4.5vw, 56px);
+                    font-size: clamp(40px, 5vw, 64px);
                     color: #111;
-                    line-height: 1.0;
+                    line-height: 1;
                     letter-spacing: 1px;
-                    margin: 0 0 28px;
+                    margin: 0 0 32px;
                 }
-
-                /* ── countdown ── */
                 .countdown {
                     display: flex;
-                    gap: 0;
-                    margin-bottom: 36px;
                     align-items: flex-start;
+                    gap: 0;
+                    margin-bottom: 40px;
                 }
-
                 .cd-unit {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    min-width: 64px;
+                    min-width: 72px;
                 }
-
                 .cd-num {
                     font-family: 'Bebas Neue', sans-serif;
-                    font-size: clamp(40px, 5vw, 60px);
+                    font-size: clamp(44px, 5.5vw, 64px);
                     line-height: 1;
                     color: #111;
                     letter-spacing: -1px;
-                    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+                    transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+                    display: block;
                 }
-                .cd-num.tick { transform: scale(1.15); }
-
+                .cd-num.tick { transform: scale(1.18); }
                 .cd-label {
                     font-family: 'DM Sans', sans-serif;
                     font-size: 9px;
                     letter-spacing: 2px;
                     text-transform: uppercase;
-                    color: #aaa;
-                    margin-top: 4px;
+                    color: #bbb;
+                    margin-top: 6px;
                 }
-
                 .cd-sep {
                     font-family: 'Bebas Neue', sans-serif;
-                    font-size: clamp(36px, 4vw, 52px);
-                    color: #ccc;
+                    font-size: clamp(40px, 5vw, 58px);
+                    color: #ddd;
                     line-height: 1;
-                    padding: 0 4px;
-                    margin-top: 2px;
+                    padding: 0 2px;
+                    margin-top: 0;
+                    align-self: flex-start;
                 }
-
                 .deal-btn {
                     display: inline-block;
                     font-family: 'DM Sans', sans-serif;
@@ -210,33 +210,38 @@ const Category = () => {
                     font-weight: 600;
                     color: #fff;
                     background: #111;
-                    padding: 14px 36px;
+                    padding: 16px 40px;
                     text-decoration: none;
                     border-radius: 2px;
                     transition: background 0.3s, transform 0.2s;
+                    border: none;
+                    cursor: pointer;
                 }
                 .deal-btn:hover { background: #333; transform: translateY(-2px); color: #fff; }
 
-                /* ═══════════════════════════════════════
-                   INSTAGRAM SECTION
-                ═══════════════════════════════════════ */
+                /* ════════════════════════════════
+                   INSTAGRAM
+                ════════════════════════════════ */
                 .insta-section {
                     background: #fff;
-                    padding: 72px 0 64px;
+                    padding: 60px 0;
                     overflow: hidden;
+                    width: 100%;
                 }
-
-                .insta-inner {
-                    max-width: 1200px;
+                .insta-container {
+                    width: 100%;
+                    max-width: 1280px;
                     margin: 0 auto;
-                    padding: 0 24px;
-                    display: grid;
-                    grid-template-columns: 1fr 320px;
-                    gap: 56px;
+                    padding: 0 40px;
+                    box-sizing: border-box;
+                    display: flex;
                     align-items: center;
+                    gap: 56px;
                 }
-
-                /* ── grid ── */
+                .insta-grid-wrap {
+                    flex: 1;
+                    min-width: 0;
+                }
                 .insta-grid {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
@@ -245,20 +250,15 @@ const Category = () => {
                     border-radius: 8px;
                     overflow: hidden;
                 }
-
                 .insta-tile {
                     position: relative;
                     overflow: hidden;
                     cursor: pointer;
                     opacity: 0;
-                    transform: scale(0.92);
-                    transition: opacity 0.55s ease, transform 0.55s ease;
+                    transform: scale(0.9);
+                    transition: opacity 0.5s ease, transform 0.5s ease;
                 }
-                .insta-tile.visible {
-                    opacity: 1;
-                    transform: scale(1);
-                }
-
+                .insta-tile.visible { opacity: 1; transform: scale(1); }
                 .insta-tile img {
                     width: 100%;
                     height: 100%;
@@ -267,64 +267,51 @@ const Category = () => {
                     transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
                 }
                 .insta-tile:hover img { transform: scale(1.1); }
-
-                .insta-tile__overlay {
+                .insta-overlay {
                     position: absolute;
                     inset: 0;
-                    background: rgba(0,0,0,0.38);
+                    background: rgba(0,0,0,0.36);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     opacity: 0;
-                    transition: opacity 0.35s;
+                    transition: opacity 0.3s;
                 }
-                .insta-tile:hover .insta-tile__overlay { opacity: 1; }
-
-                .insta-tile__icon {
-                    width: 32px;
-                    height: 32px;
-                    fill: none;
-                    stroke: #fff;
-                    stroke-width: 1.5;
+                .insta-tile:hover .insta-overlay { opacity: 1; }
+                .insta-overlay svg {
+                    width: 28px; height: 28px;
+                    fill: none; stroke: #fff; stroke-width: 1.5;
                 }
-
-                /* ── text ── */
-                .insta-text {
+                .insta-text-wrap {
+                    flex: 0 0 300px;
                     opacity: 0;
-                    transform: translateX(28px);
-                    transition: opacity 0.8s 0.3s ease, transform 0.8s 0.3s ease;
+                    transform: translateX(30px);
+                    transition: opacity 0.8s 0.25s ease, transform 0.8s 0.25s ease;
                 }
-                .insta-text.visible {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-
+                .insta-text-wrap.visible { opacity: 1; transform: translateX(0); }
                 .insta-hashtag {
                     font-family: 'Bebas Neue', sans-serif;
-                    font-size: clamp(32px, 4vw, 48px);
+                    font-size: clamp(30px, 3.5vw, 46px);
                     color: #111;
                     letter-spacing: 1px;
                     line-height: 1;
-                    margin: 0 0 18px;
+                    margin: 0 0 16px;
                 }
-
                 .insta-desc {
                     font-family: 'DM Sans', sans-serif;
                     font-size: 14px;
                     line-height: 1.75;
                     color: #666;
-                    margin: 0 0 28px;
+                    margin: 0 0 20px;
                 }
-
                 .insta-handle {
                     font-family: 'DM Sans', sans-serif;
                     font-size: 20px;
                     font-weight: 500;
                     color: #a75f32;
-                    margin: 0 0 32px;
                     display: block;
+                    margin-bottom: 28px;
                 }
-
                 .insta-btn {
                     display: inline-flex;
                     align-items: center;
@@ -336,38 +323,30 @@ const Category = () => {
                     font-weight: 600;
                     color: #fff;
                     background: #111;
-                    padding: 14px 28px;
+                    padding: 14px 24px;
                     text-decoration: none;
                     border-radius: 2px;
                     transition: background 0.3s, transform 0.2s;
                 }
                 .insta-btn:hover { background: #333; transform: translateY(-2px); color: #fff; }
+                .insta-btn svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 1.5; }
 
-                .insta-btn svg {
-                    width: 16px;
-                    height: 16px;
-                    fill: none;
-                    stroke: #fff;
-                    stroke-width: 1.5;
-                }
-
-                /* ═══════════════════════════════════════
-                   BLOG SECTION (unchanged but responsive)
-                ═══════════════════════════════════════ */
+                /* ════════════════════════════════
+                   BLOG
+                ════════════════════════════════ */
                 .blog-section {
                     background: #f7f4f0;
-                    padding: 72px 0 80px;
+                    padding: 60px 0 72px;
+                    width: 100%;
                 }
-
-                .blog-inner {
-                    max-width: 1200px;
+                .blog-container {
+                    width: 100%;
+                    max-width: 1280px;
                     margin: 0 auto;
-                    padding: 0 24px;
+                    padding: 0 40px;
+                    box-sizing: border-box;
                 }
-
-                .section-head {
-                    margin-bottom: 40px;
-                }
+                .section-head { margin-bottom: 36px; }
                 .section-head span {
                     font-family: 'DM Sans', sans-serif;
                     font-size: 10px;
@@ -379,18 +358,16 @@ const Category = () => {
                 }
                 .section-head h2 {
                     font-family: 'Bebas Neue', sans-serif;
-                    font-size: clamp(32px, 4vw, 48px);
+                    font-size: clamp(30px, 4vw, 46px);
                     color: #111;
                     margin: 0;
                     letter-spacing: 1px;
                 }
-
                 .blog-grid {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
                     gap: 24px;
                 }
-
                 .blog-card {
                     background: #fff;
                     border-radius: 10px;
@@ -398,151 +375,153 @@ const Category = () => {
                     box-shadow: 0 2px 16px rgba(0,0,0,0.06);
                     transition: transform 0.3s ease, box-shadow 0.3s ease;
                 }
-                .blog-card:hover {
-                    transform: translateY(-6px);
-                    box-shadow: 0 10px 32px rgba(0,0,0,0.12);
-                }
-
+                .blog-card:hover { transform: translateY(-6px); box-shadow: 0 10px 32px rgba(0,0,0,0.12); }
                 .blog-card__pic {
-                    width: 100%;
-                    height: 210px;
-                    object-fit: cover;
-                    display: block;
+                    width: 100%; height: 210px;
+                    object-fit: cover; display: block;
                     transition: transform 0.5s ease;
                 }
                 .blog-card:hover .blog-card__pic { transform: scale(1.04); }
-
                 .blog-card__body { padding: 20px 22px 24px; }
                 .blog-card__date {
-                    display: flex;
-                    align-items: center;
-                    gap: 5px;
-                    font-size: 12px;
-                    color: #999;
-                    margin-bottom: 10px;
+                    display: flex; align-items: center; gap: 5px;
+                    font-size: 12px; color: #999; margin-bottom: 10px;
                 }
                 .blog-card__title {
-                    font-size: 16px;
-                    font-weight: 600;
-                    color: #1a1a1a;
-                    line-height: 1.45;
-                    margin: 0 0 14px;
+                    font-size: 16px; font-weight: 600; color: #1a1a1a;
+                    line-height: 1.45; margin: 0 0 14px;
                     display: -webkit-box;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
+                    -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
                 }
                 .blog-card__link {
-                    font-size: 11px;
-                    letter-spacing: 2px;
-                    text-transform: uppercase;
-                    font-weight: 600;
-                    color: #6b2737;
-                    text-decoration: none;
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 6px;
-                    border-bottom: 1px solid transparent;
-                    padding-bottom: 2px;
+                    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+                    font-weight: 600; color: #6b2737; text-decoration: none;
+                    display: inline-flex; align-items: center; gap: 6px;
+                    border-bottom: 1px solid transparent; padding-bottom: 2px;
                     transition: gap 0.3s, border-color 0.3s;
                 }
                 .blog-card__link:hover { border-color: #6b2737; gap: 10px; }
-
                 .blog-cta-wrap { text-align: center; margin-top: 40px; }
 
-                /* Skeleton */
+                /* Skeletons */
                 .skeleton-pic { height: 210px; background: #ececec; animation: shimmer 1.4s infinite; }
                 .skeleton-line { height: 13px; background: #ececec; border-radius: 4px; margin-bottom: 8px; animation: shimmer 1.4s infinite; }
                 .skeleton-line--short { width: 40%; }
                 .skeleton-line--medium { width: 65%; }
                 .skeleton-line--xs { width: 28%; height: 11px; }
+                @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-                @keyframes shimmer {
-                    0%,100% { opacity: 1; } 50% { opacity: 0.4; }
-                }
-
-                /* ═══════════════════════════════════════
+                /* ════════════════════════════════
                    RESPONSIVE
-                ═══════════════════════════════════════ */
+                ════════════════════════════════ */
 
-                /* Tablet landscape 900–1100 */
+                /* 1100px */
                 @media (max-width: 1100px) {
-                    .deal-inner { grid-template-columns: 1fr 360px 1fr; gap: 28px; }
-                    .insta-inner { grid-template-columns: 1fr 280px; gap: 36px; }
-                    .insta-grid  { grid-template-rows: repeat(2, 170px); }
+                    .deal-container,
+                    .insta-container,
+                    .blog-container { padding: 0 28px; }
+                    .deal-img-side { width: 280px; }
+                    .deal-img-side img { height: 360px; }
+                    .insta-text-wrap { flex: 0 0 260px; }
+                    .insta-grid { grid-template-rows: repeat(2, 175px); }
                 }
 
-                /* Tablet portrait 640–900 */
+                /* 900px — tablet */
                 @media (max-width: 900px) {
-                    .deal-inner {
-                        grid-template-columns: 1fr;
-                        grid-template-areas:
-                            "img"
-                            "text";
-                        max-width: 520px;
+                    .deal-container {
+                        flex-direction: column;
+                        align-items: flex-start;
                         gap: 32px;
+                        padding: 0 24px;
                     }
-                    .deal-img-wrap { grid-area: img; }
-                    .deal-text     { grid-area: text; }
-
-                    .insta-inner {
-                        grid-template-columns: 1fr;
-                        gap: 36px;
+                    .deal-img-side {
+                        width: 100%;
+                        max-width: 400px;
+                        align-self: center;
+                        transform: translateY(40px) !important;
                     }
-                    .insta-grid { grid-template-rows: repeat(2, 160px); }
+                    .deal-img-side.visible { transform: translateY(0) !important; }
+                    .deal-img-side img { height: 320px; }
+                    .deal-sticker { right: 0; }
+                    .deal-text-side {
+                        width: 100%;
+                        transform: translateX(0) !important;
+                        opacity: 0;
+                        transition: opacity 0.8s 0.15s ease;
+                    }
+                    .deal-text-side.visible { opacity: 1; }
 
+                    .insta-container {
+                        flex-direction: column;
+                        gap: 32px;
+                        padding: 0 24px;
+                    }
+                    .insta-grid-wrap { width: 100%; }
+                    .insta-grid { grid-template-rows: repeat(2, 170px); }
+                    .insta-text-wrap {
+                        flex: none;
+                        width: 100%;
+                        transform: translateX(0) !important;
+                        opacity: 0;
+                        transition: opacity 0.8s 0.25s ease;
+                    }
+                    .insta-text-wrap.visible { opacity: 1; }
+
+                    .blog-container { padding: 0 24px; }
                     .blog-grid { grid-template-columns: repeat(2, 1fr); }
                 }
 
-                /* Mobile 640 */
+                /* 640px — mobile */
                 @media (max-width: 640px) {
-                    .deal-section, .insta-section, .blog-section { padding: 48px 0 44px; }
+                    .deal-section,
+                    .insta-section,
+                    .blog-section { padding: 44px 0; }
 
-                    .deal-inner { padding: 0 16px; }
-                    .deal-title { font-size: 36px; }
-                    .cd-unit { min-width: 52px; }
-                    .cd-num  { font-size: 38px; }
+                    .deal-container,
+                    .insta-container,
+                    .blog-container { padding: 0 16px; }
 
-                    .insta-inner { padding: 0 16px; gap: 28px; }
-                    .insta-grid  {
+                    .deal-img-side img { height: 260px; }
+                    .deal-title { font-size: 38px; }
+                    .cd-unit { min-width: 56px; }
+                    .cd-num  { font-size: 40px; }
+                    .cd-sep  { font-size: 36px; }
+
+                    .insta-grid {
                         grid-template-columns: repeat(3, 1fr);
-                        grid-template-rows: repeat(2, 110px);
+                        grid-template-rows: repeat(2, 120px);
                         gap: 4px;
                     }
-                    .insta-hashtag { font-size: 30px; }
-                    .insta-desc    { font-size: 13px; }
+                    .insta-hashtag { font-size: 28px; }
 
-                    .blog-inner  { padding: 0 16px; }
-                    .blog-grid   { grid-template-columns: 1fr; gap: 18px; }
-                    .blog-card__pic { height: 175px; }
+                    .blog-grid { grid-template-columns: 1fr; gap: 18px; }
+                    .blog-card__pic { height: 180px; }
                 }
 
-                /* Very small 400 */
+                /* 400px — very small */
                 @media (max-width: 400px) {
-                    .insta-grid { grid-template-rows: repeat(2, 90px); }
-                    .countdown  { gap: 0; }
-                    .cd-unit    { min-width: 44px; }
-                    .cd-num     { font-size: 32px; }
-                    .cd-sep     { font-size: 28px; }
+                    .deal-container,
+                    .insta-container,
+                    .blog-container { padding: 0 12px; }
+                    .insta-grid { grid-template-rows: repeat(2, 100px); }
+                    .cd-unit { min-width: 46px; }
+                    .cd-num  { font-size: 34px; }
+                    .cd-sep  { font-size: 30px; }
                 }
             `}</style>
 
-            {/* ══════════════════════ DEAL OF THE WEEK ══════════════════════ */}
+            {/* ══════════ DEAL OF THE WEEK ══════════ */}
             <section className="deal-section">
-                <div className="deal-inner" ref={dealRef}>
-
-                    {/* empty left col on desktop, hidden on mobile via grid-area */}
-                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                        <div className={`deal-img-wrap ${dealVisible ? "visible" : ""}`}>
-                            <img src={saleImg} alt="Deal of the week" />
-                            <div className="deal-sticker">
-                                <span>Sale Of</span>
-                                <h5>Rs.2900/-</h5>
-                            </div>
+                <div className="deal-container" ref={dealRef}>
+                    <div className={`deal-img-side ${dealVisible ? "visible" : ""}`}>
+                        <img src={saleImg} alt="Deal of the week" />
+                        <div className="deal-sticker">
+                            <span>Sale Of</span>
+                            <strong>Rs.2900/-</strong>
                         </div>
                     </div>
 
-                    <div className={`deal-text ${dealVisible ? "visible" : ""}`}>
+                    <div className={`deal-text-side ${dealVisible ? "visible" : ""}`}>
                         <p className="deal-eyebrow">Deal Of The Week</p>
                         <h2 className="deal-title">Multi-pocket<br />Chest Bag Black</h2>
 
@@ -558,38 +537,34 @@ const Category = () => {
 
                         <a href="/shop" className="deal-btn">Shop Now</a>
                     </div>
-
-                    {/* spacer col — hidden on mobile */}
-                    <div />
                 </div>
             </section>
 
-            {/* ══════════════════════ INSTAGRAM ══════════════════════ */}
+            {/* ══════════ INSTAGRAM ══════════ */}
             <section className="insta-section">
-                <div className="insta-inner" ref={instaRef}>
-
-                    {/* Grid */}
-                    <div className="insta-grid">
-                        {instaPics.map((img, i) => (
-                            <div
-                                key={i}
-                                className={`insta-tile ${instaVisible ? "visible" : ""}`}
-                                style={{ transitionDelay: instaVisible ? `${i * 0.07}s` : "0s" }}
-                            >
-                                <img src={img} alt={`Instagram ${i + 1}`} />
-                                <div className="insta-tile__overlay">
-                                    <svg className="insta-tile__icon" viewBox="0 0 24 24">
-                                        <rect x="2" y="2" width="20" height="20" rx="5" />
-                                        <circle cx="12" cy="12" r="4" />
-                                        <circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none" />
-                                    </svg>
+                <div className="insta-container" ref={instaRef}>
+                    <div className="insta-grid-wrap">
+                        <div className="insta-grid">
+                            {instaPics.map((img, i) => (
+                                <div
+                                    key={i}
+                                    className={`insta-tile ${instaVisible ? "visible" : ""}`}
+                                    style={{ transitionDelay: instaVisible ? `${i * 0.07}s` : "0s" }}
+                                >
+                                    <img src={img} alt={`Instagram ${i + 1}`} />
+                                    <div className="insta-overlay">
+                                        <svg viewBox="0 0 24 24">
+                                            <rect x="2" y="2" width="20" height="20" rx="5" />
+                                            <circle cx="12" cy="12" r="4" />
+                                            <circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none" />
+                                        </svg>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Text */}
-                    <div className={`insta-text ${instaVisible ? "visible" : ""}`}>
+                    <div className={`insta-text-wrap ${instaVisible ? "visible" : ""}`}>
                         <h2 className="insta-hashtag">#ShopOurStyle</h2>
                         <p className="insta-desc">
                             Tag us in your photos for a chance to be featured!
@@ -597,12 +572,7 @@ const Category = () => {
                             sharing their daily outfits and seasonal inspirations.
                         </p>
                         <span className="insta-handle">@shopvista</span>
-                        <a
-                            href="https://instagram.com"
-                            className="insta-btn"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
+                        <a href="https://instagram.com" className="insta-btn" target="_blank" rel="noopener noreferrer">
                             <svg viewBox="0 0 24 24">
                                 <rect x="2" y="2" width="20" height="20" rx="5" />
                                 <circle cx="12" cy="12" r="4" />
@@ -614,9 +584,9 @@ const Category = () => {
                 </div>
             </section>
 
-            {/* ══════════════════════ BLOG ══════════════════════ */}
+            {/* ══════════ BLOG ══════════ */}
             <section className="blog-section">
-                <div className="blog-inner">
+                <div className="blog-container">
                     <div className="section-head">
                         <span>Latest News</span>
                         <h2>Fashion New Trends</h2>
@@ -669,14 +639,14 @@ const Category = () => {
     );
 };
 
-/* ── Animated countdown unit ── */
+/* Animated countdown digit */
 const CountUnit = ({ num, label }) => {
     const [tick, setTick] = useState(false);
     const prev = useRef(num);
     useEffect(() => {
         if (prev.current !== num) {
             setTick(true);
-            const t = setTimeout(() => setTick(false), 200);
+            const t = setTimeout(() => setTick(false), 180);
             prev.current = num;
             return () => clearTimeout(t);
         }
