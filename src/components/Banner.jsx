@@ -98,8 +98,6 @@
 //         </>
 //     );
 // };
-
-
 // export default Banner;
 
 import React from "react";
@@ -121,7 +119,7 @@ const Banner = () => (
 
             .banner-section {
                 padding: 40px 20px;
-                background: #0d0d0d;
+                background: #ffffff;
                 font-family: 'DM Sans', sans-serif;
             }
 
@@ -129,8 +127,8 @@ const Banner = () => (
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
                 gap: 3px;
-                max-width: 1100px;
-                margin: 0 auto;
+                max-width: 100%;
+                margin: 0 ;
             }
 
             .banner-col {
@@ -190,7 +188,6 @@ const Banner = () => (
                 padding: 28px 24px 32px;
                 background: linear-gradient(to top, rgba(250, 250, 250, 0.85) 0%, transparent 100%);
             }
-
             .banner-col__tag {
                 font-size: 9px;
                 letter-spacing: 4px;
@@ -199,7 +196,6 @@ const Banner = () => (
                 margin-bottom: 10px;
                 font-weight: 500;
             }
-
             .banner-col__title {
                 font-family: 'Bebas Neue', sans-serif;
                 font-size: 38px;
@@ -213,7 +209,6 @@ const Banner = () => (
             .banner-col:hover .banner-col__title {
                 letter-spacing: 2px;
             }
-
             .banner-col__link {
                 display: inline-flex;
                 align-items: center;
@@ -228,12 +223,10 @@ const Banner = () => (
                 transform: translateY(8px);
                 transition: opacity 0.4s 0.1s ease, transform 0.4s 0.1s ease;
             }
-
             .banner-col:hover .banner-col__link {
                 opacity: 1;
                 transform: translateY(0);
             }
-
             .banner-col__link-line {
                 width: 28px;
                 height: 1px;
