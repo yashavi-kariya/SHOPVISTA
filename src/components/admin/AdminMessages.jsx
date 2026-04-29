@@ -672,6 +672,8 @@ export default function AdminMessages({ toggleSidebar, sidebarOpen }) {
                         inset: 0 !important;
                         z-index: 10 !important;
                         background: #fff !important;
+                         height: 100% !important;             /* ← add this */
+                         overflow: hidden !important;   
                     }
 
                     .msg-back-btn { display: block !important; }
@@ -787,9 +789,10 @@ export default function AdminMessages({ toggleSidebar, sidebarOpen }) {
                     </div>
 
                     {/* RIGHT: detail pane — correct className now */}
+                    {/* RIGHT: detail pane */}
                     <div
                         className={`msg-detail-pane${showDetail ? " active" : ""}`}
-                        style={{ flex: 1, display: "flex", overflow: "hidden", minWidth: 0 }}
+                        style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}
                     >
                         {selected ? (
                             <MessageDetail
