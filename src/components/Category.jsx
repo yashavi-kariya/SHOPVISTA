@@ -65,11 +65,6 @@ const Category = () => {
                         {/* Left Content */}
                         <div className="col-lg-3">
                             <div className="categories__text">
-                                {/* <ul className="filter__controls">
-                                    <li className="active" data-filter="*">Best Sellers</li>
-                                    <li className="active" data-filter="*">New Arrivals</li>
-                                    <li className="active" data-filter="*">Hot Sales</li>
-                                </ul> */}
                             </div>
                         </div>
 
