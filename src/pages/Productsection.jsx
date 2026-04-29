@@ -4,12 +4,12 @@ import { useCart } from "../context/CartContext";
 import { WishlistContext } from "../context/WishlistContext";
 import { CompareContext } from "../context/CompareContext";
 import { Link, useNavigate } from "react-router-dom";
-import heart from "../assets/img/icon/heart.png";
+// import heart from "../assets/img/icon/heart.png";
 import compareIcon from "../assets/img/icon/compare.png";
 import search from "../assets/img/icon/search.png";
 
 const Product = () => {
-    const { addToCart } = useCart();
+    const { addToCart, cartItems } = useCart();
     const { toggleWishlist, isInWishlist } = useContext(WishlistContext);
     const { compare, toggleCompare, isInCompare, clearCompare } = useContext(CompareContext);
 
@@ -19,16 +19,21 @@ const Product = () => {
     const isLoggedIn = !!localStorage.getItem("token");
     const navigate = useNavigate();
 
-    const handleAddToCart = (product) => {
+    const handleAddToCart = async (product) => {
         if (!isLoggedIn) {
             alert("Please login first to add items to your cart!");
             navigate("/login");
             return;
         }
-        addToCart(product);
+        await addToCart(product);
     };
-    const { cartItems } = useCart();
-    const isInCart = (id) => cartItems?.some(item => item._id === id || item.id === id);
+    // const { cartItems } = useCart();
+    const isInCart = (id) => cartItems?.some(item =>
+        item.product?._id === id ||
+        item.productId === id ||
+        item._id === id ||
+        item.id === id
+    );
 
     const handleWishlist = (e, product) => {
         e.preventDefault();
@@ -71,12 +76,9 @@ const Product = () => {
         <>
             <style>{`
               /* Wishlist active — red background + white icon */
-               .product__hover li a.wishlisted {
-                    background: #e74c3c !important;
-                    border-color: #e74c3c !important;
-                }
-                .product__hover li a.wishlisted img {
-                    filter: brightness(0) invert(1) !important;
+               
+              .product__hover li a.wishlisted {
+                  background: #fdecea !important;
                 }
 
                 /* Compare active — green background + white icon */
@@ -240,10 +242,20 @@ const Product = () => {
                                                             className={wishlisted ? "wishlisted" : ""}
                                                             title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
                                                         >
-                                                            <img src={heart} alt="wishlist" />
+                                                            <svg
+                                                                width="18" height="18"
+                                                                viewBox="0 0 24 24"
+                                                                fill={wishlisted ? "#e74c3c" : "none"}
+                                                                stroke={wishlisted ? "#e74c3c" : "#333"}
+                                                                strokeWidth="2"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                style={{ transition: "fill 0.2s, stroke 0.2s" }}
+                                                            >
+                                                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                                            </svg>
                                                         </a>
                                                     </li>
-
                                                     {/* 🔄 Compare */}
                                                     <li>
 
@@ -270,7 +282,10 @@ const Product = () => {
                                                 <h6>{product.name}</h6>
                                                 <button
                                                     className="add-cart"
-                                                    onClick={() => isInCart(product._id) ? navigate("/cart") : handleAddToCart(product)}
+                                                    onClick={() => isInCart(product._id)
+                                                        ? navigate("/cart")
+                                                        : handleAddToCart(product)
+                                                    }
                                                     style={{
                                                         opacity: !isLoggedIn ? 0.6 : 1,
                                                         cursor: "pointer",

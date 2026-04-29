@@ -191,19 +191,15 @@ export const CartProvider = ({ children }) => {
     // -----------------------------
     const addToCart = async (product) => {
         const config = getAuthConfig();
-        console.log("token:", localStorage.getItem("token")); // ← add this
-        console.log("product._id being sent:", product._id);
 
         if (config) {
-            // Logged-in → backend
             try {
                 await api.post(`${API_BASE}/add`, { productId: product._id, quantity: product.quantity || 1 }, config);
-                fetchCart();
+                await fetchCart(); // ← await so state updates immediately
             } catch (err) {
                 console.error("Add to cart failed:", err);
             }
         } else {
-            // Guest → localStorage
             const existing = cartItems.find(i => i.productId === product._id);
             let updatedCart;
             if (existing) {
@@ -217,6 +213,34 @@ export const CartProvider = ({ children }) => {
             localStorage.setItem("cart", JSON.stringify(updatedCart));
         }
     };
+    // const addToCart = async (product) => {
+    //     const config = getAuthConfig();
+    //     console.log("token:", localStorage.getItem("token")); // ← add this
+    //     console.log("product._id being sent:", product._id);
+
+    //     if (config) {
+    //         // Logged-in → backend
+    //         try {
+    //             await api.post(`${API_BASE}/add`, { productId: product._id, quantity: product.quantity || 1 }, config);
+    //             fetchCart();
+    //         } catch (err) {
+    //             console.error("Add to cart failed:", err);
+    //         }
+    //     } else {
+    //         // Guest → localStorage
+    //         const existing = cartItems.find(i => i.productId === product._id);
+    //         let updatedCart;
+    //         if (existing) {
+    //             updatedCart = cartItems.map(i =>
+    //                 i.productId === product._id ? { ...i, quantity: i.quantity + 1 } : i
+    //             );
+    //         } else {
+    //             updatedCart = [...cartItems, { productId: product._id, quantity: 1, product }];
+    //         }
+    //         setCartItems(updatedCart);
+    //         localStorage.setItem("cart", JSON.stringify(updatedCart));
+    //     }
+    // };
 
     // Change signature:
     const updateQty = async (productId, newQty, variantId = null) => {
