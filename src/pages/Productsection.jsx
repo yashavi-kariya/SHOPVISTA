@@ -176,7 +176,7 @@ const Product = () => {
                 }
             `}</style>
 
-            <section className="product spad">
+            <section className="product spad" style={{ paddingBottom: "0" }}>
                 <div className="container">
 
                     {/* Filters */}

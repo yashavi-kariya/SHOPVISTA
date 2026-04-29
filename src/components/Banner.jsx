@@ -18,7 +18,7 @@ const Banner = () => (
             .bn-wrap {
                 width: 100%;
                 background: #ffffff;
-                padding: 40px 20px 48px;
+                padding: 16px 20px 48px;
                 box-sizing: border-box;
             }
 
