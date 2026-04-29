@@ -206,21 +206,50 @@ export default function AdminMessages({ toggleSidebar, sidebarOpen }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", height: "100%", fontFamily: "inherit", background: "#f9fafb" }}>
             <style>{`
-        @keyframes msgSpin { to { transform: rotate(360deg); } }
-        @media (max-width: 640px) {
-          .msg-layout { flex-direction: column !important; }
-          .msg-list-pane { width: 100% !important; min-width: 0 !important; border-right: none !important; border-bottom: 1px solid #e5e7eb !important; max-height: 40vh; }
-          .msg-detail-pane { display: none; }
-          .msg-detail-pane.active { display: flex !important; flex: 1; }
-          .msg-list-pane.hidden { display: none !important; }
+    @keyframes msgSpin { to { transform: rotate(360deg); } }
+
+    /* Hamburger — hidden on desktop, visible on tablet/mobile */
+    .msg-hamburger {
+        display: none;
+    }
+    @media (max-width: 1024px) {
+        .msg-hamburger {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
         }
-      `}</style>
+    }
+
+    @media (max-width: 640px) {
+        .msg-layout { flex-direction: column !important; }
+        .msg-list-pane { width: 100% !important; min-width: 0 !important; border-right: none !important; border-bottom: 1px solid #e5e7eb !important; max-height: 40vh; }
+        .msg-detail-pane { display: none; }
+        .msg-detail-pane.active { display: flex !important; flex: 1; }
+        .msg-list-pane.hidden { display: none !important; }
+        .msg-back-btn { display: block !important; }
+    }
+`}</style>
 
             {/* Page Header */}
             <div style={{ padding: "20px 24px 14px", borderBottom: "1px solid #e5e7eb", background: "#fff", flexShrink: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <button onClick={toggleSidebar} style={{ display: "none", border: "none", background: "none", cursor: "pointer", fontSize: 18, color: "#374151", padding: 0 }} className="msg-hamburger">☰</button>
+                        <button
+                            onClick={toggleSidebar}
+                            className="msg-hamburger"
+                            style={{
+                                border: "none",
+                                background: "none",
+                                cursor: "pointer",
+                                fontSize: 20,
+                                color: "#374151",
+                                padding: "4px 6px",
+                                borderRadius: "6px",
+                                lineHeight: 1,
+                            }}
+                        >
+                            ☰
+                        </button>
                         <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>Messages</h1>
                         {unreadCount > 0 && (
                             <span style={{ background: "#ef4444", color: "#fff", borderRadius: 10, fontSize: 11, fontWeight: 700, padding: "2px 8px" }}>
