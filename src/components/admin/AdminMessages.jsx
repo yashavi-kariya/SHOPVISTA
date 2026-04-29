@@ -728,74 +728,74 @@ export default function AdminMessages({ toggleSidebar }) {
             overflow: "hidden",
         }}>
             <style>{`
-                @keyframes msgSpin { to { transform: rotate(360deg); } }
+    @keyframes msgSpin { to { transform: rotate(360deg); } }
 
-                /* ── Hamburger: hidden desktop, visible ≤1024px ── */
-                .msg-hamburger { display: none !important; }
-                @media (max-width: 1024px) {
-                    .msg-hamburger { display: flex !important; align-items: center; justify-content: center; }
-                }
+    .msg-hamburger { display: none !important; }
+    @media (max-width: 1024px) {
+        .msg-hamburger { display: flex !important; align-items: center; justify-content: center; }
+    }
 
-                /* ── List pane widths ── */
-                .msg-list-pane { width: 300px; min-width: 300px; }
-                @media (max-width: 1024px) and (min-width: 641px) {
-                    .msg-list-pane { width: 260px !important; min-width: 260px !important; }
-                }
+    /* ── Desktop / Tablet side-by-side layout ── */
+    .msg-list-pane { width: 300px; min-width: 300px; flex-shrink: 0; }
+    @media (max-width: 1024px) and (min-width: 641px) {
+        .msg-list-pane { width: 260px !important; min-width: 260px !important; }
+    }
+    @media (min-width: 641px) {
+        .msg-detail-pane {
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+            min-width: 0 !important;
+        }
+        .detail-back-btn { display: none !important; }
+        .detail-close-btn { display: flex !important; }
+    }
 
-                /* ── Mobile (≤640px): full-screen stack ── */
-                @media (max-width: 640px) {
-                    .msg-list-pane {
-                        position: absolute !important;
-                        inset: 0 !important;
-                        width: 100% !important;
-                        min-width: 0 !important;
-                        border-right: none !important;
-                        z-index: 1;
-                        transition: transform 0.25s ease, opacity 0.25s ease;
-                    }
-                    .msg-list-pane.slide-out {
-                        transform: translateX(-100%) !important;
-                        opacity: 0 !important;
-                        pointer-events: none !important;
-                    }
-
-                    .msg-detail-pane {
-                        position: absolute !important;
-                        inset: 0 !important;
-                        width: 100% !important;
-                        min-width: 0 !important;
-                        z-index: 2;
-                        transform: translateX(100%);
-                        opacity: 0;
-                        pointer-events: none;
-                        transition: transform 0.25s ease, opacity 0.25s ease;
-                    }
-                    .msg-detail-pane.slide-in {
-                        transform: translateX(0) !important;
-                        opacity: 1 !important;
-                        pointer-events: auto !important;
-                    }
-
-                    /* Show back arrow, hide × on mobile */
-                    .detail-back-btn { display: flex !important; }
-                    .detail-close-btn { display: none !important; }
-                }
-
-                /* ── Tablet / Desktop: side-by-side ── */
-                @media (min-width: 641px) {
-                    .msg-detail-pane {
-                        flex: 1 !important;
-                        display: flex !important;
-                        flex-direction: column !important;
-                        overflow: hidden !important;
-                        min-width: 0 !important;
-                    }
-                    /* Hide back arrow, show × */
-                    .detail-back-btn { display: none !important; }
-                    .detail-close-btn { display: flex !important; }
-                }
-            `}</style>
-
+    /* ── Mobile (≤640px): full-screen stack ── */
+    @media (max-width: 640px) {
+        .msg-layout {
+            position: relative;
+            overflow: hidden;
+        }
+        .msg-list-pane {
+            position: absolute !important;
+            inset: 0 !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            border-right: none !important;
+            z-index: 1;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .msg-list-pane.slide-out {
+            transform: translateX(-100%) !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        .msg-detail-pane {
+            position: absolute !important;
+            inset: 0 !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            z-index: 2;
+            transform: translateX(100%);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        .msg-detail-pane.slide-in {
+            transform: translateX(0) !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+        .detail-back-btn { display: flex !important; }
+        .detail-close-btn { display: none !important; }
+    }
+`}</style>
             {/* ── Page Header ── */}
             <div style={{
                 padding: "16px 20px 14px",
@@ -884,12 +884,31 @@ export default function AdminMessages({ toggleSidebar }) {
                         }}
                     >Retry</button>
                 </div>
+                // ) : (
+                //     /* msg-layout: relative container so absolute children fill it on mobile */
+                //     <div style={{
+                //         flex: 1, display: "flex", overflow: "hidden",
+                //         position: "relative",
+                //     }}>
+
+                //         {/* LEFT: message list */}
+                //         <div
+                //             className={`msg-list-pane${showDetail ? " slide-out" : ""}`}
+                //             style={{
+                //                 borderRight: "1px solid #e5e7eb",
+                //                 display: "flex", flexDirection: "column",
+                //                 background: "#fff", overflow: "hidden",
+                //             }}
+                //         >
             ) : (
-                /* msg-layout: relative container so absolute children fill it on mobile */
-                <div style={{
-                    flex: 1, display: "flex", overflow: "hidden",
-                    position: "relative",
-                }}>
+                <div
+                    className="msg-layout"
+                    style={{
+                        flex: 1, display: "flex", overflow: "hidden",
+                        position: "relative",
+                        minHeight: 0,
+                    }}
+                >
 
                     {/* LEFT: message list */}
                     <div
@@ -898,6 +917,7 @@ export default function AdminMessages({ toggleSidebar }) {
                             borderRight: "1px solid #e5e7eb",
                             display: "flex", flexDirection: "column",
                             background: "#fff", overflow: "hidden",
+                            height: "100%",
                         }}
                     >
                         {/* Filter pills */}
