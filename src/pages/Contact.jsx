@@ -1,224 +1,225 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import api from "../api";
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap');
 
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-@keyframes checkPop { 0% { transform: scale(0); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
-@keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes checkPop { 0% { transform: scale(0); } 70% { transform: scale(1.12); } 100% { transform: scale(1); } }
 
-.cf-wrap * { box-sizing: border-box; font-family: 'DM Sans', sans-serif; }
+.cp * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
 
-.cf-wrap .map-section iframe {
-  width: 100%; height: 420px; border: 0; display: block;
+.cp-hero { position: relative; height: 340px; overflow: hidden; }
+.cp-hero iframe { width: 100%; height: 100%; border: 0; display: block; filter: saturate(.8); }
+.cp-hero-overlay {
+  position: absolute; inset: 0;
+  background: rgba(12,30,58,.54);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 2rem;
 }
-
-.cf-form-outer {
-  max-width: 560px; margin: 0 auto; padding: 3rem 1.25rem 4rem;
+.cp-hero-overlay h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px,5vw,48px); font-weight: 600;
+  color: #fff; line-height: 1.1; margin-bottom: .5rem;
 }
+.cp-hero-overlay h1 em { font-style: italic; font-weight: 400; color: #85B7EB; }
+.cp-hero-overlay p { font-size: 14px; color: rgba(255,255,255,.72); max-width: 340px; line-height: 1.7; }
 
-.cf-eyebrow {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
-  text-transform: uppercase; color: #c0392b;
-  margin-bottom: 0.4rem; animation: fadeUp .4s ease both;
+.cp-body {
+  display: grid; grid-template-columns: 1fr 1fr;
+  animation: fadeUp .5s .1s ease both;
 }
+@media (max-width: 640px) { .cp-body { grid-template-columns: 1fr; } }
 
-.cf-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: clamp(28px, 5vw, 38px); font-weight: 400;
-  color: var(--color-text-primary); line-height: 1.15;
-  margin: 0 0 0.5rem; animation: fadeUp .45s .05s ease both;
+.cp-left { padding: 2.5rem 2rem; border-right: 0.5px solid var(--color-border-tertiary); }
+
+.cp-section-tag {
+  font-size: 10px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: #993C1D;
+  margin-bottom: .6rem; display: flex; align-items: center; gap: 7px;
 }
+.cp-section-tag::before { content: ''; display: inline-block; width: 18px; height: 1px; background: #993C1D; }
 
-.cf-subtitle {
-  font-size: 14px; color: var(--color-text-secondary);
-  line-height: 1.65; margin: 0 0 2rem;
-  animation: fadeUp .45s .1s ease both;
+.cp-left h2 {
+  font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400;
+  color: var(--color-text-primary); line-height: 1.25; margin-bottom: .6rem;
 }
+.cp-left h2 em { font-style: italic; color: #185FA5; }
+.cp-desc { font-size: 13.5px; color: var(--color-text-secondary); line-height: 1.75; margin-bottom: 1.75rem; }
 
-.cf-card {
-  background: var(--color-background-primary);
-  border: 0.5px solid var(--color-border-tertiary);
-  border-radius: 16px; padding: 1.75rem;
-  animation: fadeUp .5s .15s ease both;
-  position: relative; overflow: hidden;
+.cp-info-item { display: flex; gap: 13px; align-items: flex-start; margin-bottom: 1.4rem; }
+.cp-info-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: #E6F1FB; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
+.cp-info-icon svg { width: 16px; height: 16px; stroke: #185FA5; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.cp-info-label { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 3px; }
+.cp-info-val { font-size: 13.5px; color: var(--color-text-primary); line-height: 1.65; }
+.cp-info-val a { color: #185FA5; text-decoration: none; }
 
-.cf-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, #c0392b 0%, #e74c3c 40%, #185FA5 100%);
+.cp-hours {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  margin-top: 1.5rem; padding-top: 1.5rem; border-top: 0.5px solid var(--color-border-tertiary);
 }
+.cp-hour-row { font-size: 12px; color: var(--color-text-secondary); display: flex; justify-content: space-between; gap: 8px; }
+.cp-hour-row span:last-child { color: var(--color-text-primary); font-weight: 500; }
 
-.cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-@media (max-width: 480px) { .cf-row { grid-template-columns: 1fr; } }
-
-.cf-field { position: relative; }
-.cf-field label {
-  display: block; font-size: 11px; font-weight: 500;
-  text-transform: uppercase; letter-spacing: 0.07em;
-  color: var(--color-text-secondary); margin-bottom: 6px;
+.cp-right { padding: 2.5rem 2rem; }
+.cp-right h2 {
+  font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400;
+  color: var(--color-text-primary); margin-bottom: .6rem;
 }
+.cp-right h2 em { font-style: italic; color: #185FA5; }
 
-.cf-input {
-  width: 100%; padding: 10px 14px; border-radius: 10px;
+.cp-chips-label { font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 8px; }
+.cp-chips { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+.cp-chip {
+  font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px;
+  border: 1px solid var(--color-border-secondary); color: var(--color-text-secondary);
+  cursor: pointer; transition: all .15s; background: transparent; font-family: 'Outfit', sans-serif;
+}
+.cp-chip:hover { border-color: #185FA5; color: #185FA5; }
+.cp-chip.active { background: #185FA5; color: #fff; border-color: #185FA5; }
+
+.cp-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+@media (max-width: 400px) { .cp-row2 { grid-template-columns: 1fr; } }
+
+.cp-field { position: relative; margin-bottom: 10px; }
+.cp-field label {
+  display: block; font-size: 10px; font-weight: 600; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 5px;
+}
+.cp-input {
+  width: 100%; padding: 10px 13px;
+  background: var(--color-background-secondary);
   border: 1px solid var(--color-border-tertiary);
+  border-radius: 9px; font-size: 13.5px;
+  font-family: 'Outfit', sans-serif; color: var(--color-text-primary);
+  outline: none; transition: border .18s, box-shadow .18s, background .18s;
+}
+.cp-input:hover { border-color: var(--color-border-secondary); }
+.cp-input:focus { border-color: #185FA5; box-shadow: 0 0 0 3px rgba(24,95,165,.08); background: var(--color-background-primary); }
+.cp-input::placeholder { color: var(--color-text-tertiary); }
+textarea.cp-input { resize: vertical; min-height: 100px; }
+
+.cp-ai-box {
   background: var(--color-background-secondary);
-  color: var(--color-text-primary); font-size: 14px;
-  outline: none; transition: border .2s, background .2s, box-shadow .2s;
-  font-family: 'DM Sans', sans-serif;
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: 11px; padding: 13px; margin-bottom: 12px; transition: border .2s;
 }
-.cf-input:hover { border-color: var(--color-border-secondary); }
-.cf-input:focus {
-  border-color: #185FA5; background: var(--color-background-primary);
-  box-shadow: 0 0 0 3px rgba(24,95,165,0.08);
-}
-.cf-input::placeholder { color: var(--color-text-tertiary); }
+.cp-ai-box:focus-within { border-color: rgba(24,95,165,.3); }
+.cp-ai-head { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+.cp-ai-dot { width: 6px; height: 6px; border-radius: 50%; background: #378ADD; animation: pulse 2s infinite; }
+.cp-ai-badge { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; background: #E6F1FB; color: #0C447C; }
+.cp-ai-sub { font-size: 12px; color: var(--color-text-secondary); }
+.cp-ai-row { display: flex; gap: 8px; }
 
-.cf-ai-box {
-  background: var(--color-background-secondary);
-  border: 0.5px solid var(--color-border-tertiary);
-  border-radius: 12px; padding: 14px; margin-bottom: 14px;
-  transition: border .2s;
-}
-.cf-ai-box:focus-within { border-color: rgba(24,95,165,.3); }
-
-.cf-ai-label {
-  font-size: 12px; font-weight: 500;
-  color: var(--color-text-secondary);
-  margin-bottom: 10px;
-  display: flex; align-items: center; gap: 6px;
-}
-
-.cf-ai-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #185FA5; animation: pulse 2s infinite;
-}
-
-.cf-ai-row { display: flex; gap: 8px; }
-
-.cf-suggest-btn {
+.cp-suggest-btn {
   padding: 9px 15px; border-radius: 9px; border: none;
-  background: #185FA5; color: white;
-  font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif;
-  cursor: pointer; white-space: nowrap;
-  display: flex; align-items: center; gap: 5px;
+  background: #185FA5; color: #fff;
+  font-size: 12px; font-weight: 600; font-family: 'Outfit', sans-serif;
+  cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px;
   transition: background .15s, transform .1s;
 }
-.cf-suggest-btn:hover:not(:disabled) { background: #0C447C; transform: translateY(-1px); }
-.cf-suggest-btn:active:not(:disabled) { transform: translateY(0); }
-.cf-suggest-btn:disabled { background: #85B7EB; cursor: not-allowed; }
+.cp-suggest-btn:hover:not(:disabled) { background: #0C447C; transform: translateY(-1px); }
+.cp-suggest-btn:disabled { background: #85B7EB; cursor: not-allowed; }
 
-.cf-suggestion {
-  margin-top: 8px; padding: 10px 12px; border-radius: 9px;
-  background: var(--color-background-primary);
-  border: 0.5px solid var(--color-border-tertiary);
-  cursor: pointer; font-size: 13px; line-height: 1.55;
-  color: var(--color-text-primary); transition: border .15s, transform .15s;
-  animation: slideIn .25s ease both;
+.cp-suggestion {
+  margin-top: 8px; padding: 10px 12px; border-radius: 8px;
+  background: var(--color-background-primary); border: 1px solid var(--color-border-tertiary);
+  cursor: pointer; font-size: 13px; line-height: 1.55; color: var(--color-text-primary);
+  transition: border .15s, transform .15s; animation: slideIn .2s ease both;
 }
-.cf-suggestion:hover {
-  border-color: #185FA5; transform: translateX(3px);
-}
+.cp-suggestion:hover { border-color: #185FA5; transform: translateX(3px); }
 
-.cf-divider {
-  height: 0.5px; background: var(--color-border-tertiary);
-  margin: 16px 0;
-}
+.cp-sep { display: flex; align-items: center; gap: 10px; margin: 13px 0; }
+.cp-sep-line { flex: 1; height: .5px; background: var(--color-border-tertiary); }
+.cp-sep-txt { font-size: 11px; color: var(--color-text-tertiary); }
 
-.cf-error {
-  font-size: 12px; color: #E24B4A;
-  margin-bottom: 12px; padding: 9px 12px;
-  background: #FCEBEB; border-radius: 8px;
-  animation: fadeUp .2s ease;
-}
+.cp-error { font-size: 12px; color: #A32D2D; background: #FCEBEB; padding: 9px 12px; border-radius: 8px; margin-bottom: 12px; animation: fadeUp .2s ease; }
 
-.cf-submit {
-  width: 100%; padding: 13px; border-radius: 11px; border: none;
-  background: #185FA5; color: white;
-  font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+.cp-submit {
+  width: 100%; padding: 13px; border: none; border-radius: 11px;
+  background: #185FA5; color: #fff;
+  font-size: 14px; font-weight: 600; font-family: 'Outfit', sans-serif;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  gap: 8px; transition: background .15s, transform .1s, box-shadow .15s;
-  letter-spacing: 0.01em;
+  gap: 8px; margin-top: 14px; letter-spacing: .01em;
+  transition: background .15s, transform .1s;
 }
-.cf-submit:hover:not(:disabled) {
-  background: #0C447C;
-  box-shadow: 0 4px 14px rgba(24,95,165,.25);
-  transform: translateY(-1px);
+.cp-submit:hover:not(:disabled) { background: #0C447C; transform: translateY(-1px); }
+.cp-submit:disabled { background: #85B7EB; cursor: not-allowed; transform: none; }
+.cp-submit .arr {
+  width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,.2);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: transform .15s;
 }
-.cf-submit:active:not(:disabled) { transform: translateY(0); }
-.cf-submit:disabled { background: #85B7EB; cursor: not-allowed; }
+.cp-submit:hover:not(:disabled) .arr { transform: translateX(3px); }
 
-.cf-offices {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px; margin-top: 20px;
-  animation: fadeUp .6s .25s ease both;
-}
-
-.cf-office {
-  padding: 14px 16px; border-radius: 12px;
-  background: var(--color-background-secondary);
-  border: 0.5px solid var(--color-border-tertiary);
-  transition: border .2s, transform .2s;
-}
-.cf-office:hover { border-color: var(--color-border-secondary); transform: translateY(-2px); }
-
-.cf-office-city {
-  font-size: 13px; font-weight: 500;
-  color: var(--color-text-primary); margin-bottom: 5px;
-  display: flex; align-items: center; gap: 7px;
-}
-.cf-office-flag { font-size: 16px; }
-.cf-office-detail {
-  font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; margin: 0;
-}
-
-.cf-sent-wrap {
-  max-width: 420px; margin: 5rem auto; padding: 0 1.25rem;
-  text-align: center; animation: fadeUp .4s ease both;
-}
-.cf-sent-icon {
-  width: 60px; height: 60px; border-radius: 50%;
-  background: #E1F5EE; margin: 0 auto 1.25rem;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px; color: #0F6E56;
-  animation: checkPop .4s .1s ease both;
-}
-.cf-sent-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 26px; font-weight: 400; margin-bottom: 8px;
-  color: var(--color-text-primary);
-}
-.cf-sent-sub { font-size: 13.5px; color: var(--color-text-secondary); line-height: 1.65; margin-bottom: 1.75rem; }
-.cf-reset-btn {
-  padding: 9px 22px; border-radius: 9px;
-  border: 0.5px solid var(--color-border-secondary);
-  background: transparent; color: var(--color-text-secondary);
-  cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif;
-  transition: background .15s;
-}
-.cf-reset-btn:hover { background: var(--color-background-secondary); }
-
-.cf-spinner {
+.cp-spinner {
   display: inline-block; width: 13px; height: 13px;
-  border: 2px solid currentColor; border-top-color: transparent;
-  border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle;
+  border: 2px solid #fff; border-top-color: transparent;
+  border-radius: 50%; animation: spin .7s linear infinite;
 }
+
+.cp-success { text-align: center; padding: 4rem 1rem; animation: fadeUp .4s ease both; }
+.cp-check {
+  width: 58px; height: 58px; border-radius: 50%; background: #E1F5EE;
+  margin: 0 auto 1.25rem; display: flex; align-items: center; justify-content: center;
+  animation: checkPop .4s ease;
+}
+.cp-check svg { width: 24px; height: 24px; stroke: #0F6E56; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.cp-success h3 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 400; color: var(--color-text-primary); margin-bottom: .5rem; }
+.cp-success p { font-size: 13.5px; color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1.5rem; }
+.cp-reset-btn {
+  padding: 9px 22px; border-radius: 9px; border: 1px solid var(--color-border-secondary);
+  background: transparent; color: var(--color-text-secondary);
+  cursor: pointer; font-size: 13px; font-family: 'Outfit', sans-serif; transition: background .15s;
+}
+.cp-reset-btn:hover { background: var(--color-background-secondary); }
 `;
 
-const Spinner = () => <span className="cf-spinner" />;
+const Spinner = () => <span className="cp-spinner" />;
 
-const offices = [
-    { city: "America", flag: "🇺🇸", addr: "195 E Parker Square Dr, Parker, CO", phone: "+1 982-314-0958" },
-    { city: "France", flag: "🇫🇷", addr: "109 Avenue Léon, Clermont-Ferrand", phone: "+33 345-423-9893" },
+const TOPICS = ["General inquiry", "Partnership", "Support", "Billing", "Other"];
+
+const INFO = [
+    {
+        label: "Americas",
+        val: <span>195 E Parker Square Dr<br />Parker, CO 80134</span>,
+        icon: <><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" /><circle cx="12" cy="9" r="2.5" /></>,
+    },
+    {
+        label: "Europe",
+        val: <span>109 Avenue Léon<br />Clermont-Ferrand, France</span>,
+        icon: <><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" /><circle cx="12" cy="9" r="2.5" /></>,
+    },
+    {
+        label: "Phone",
+        val: <span>+1 982-314-0958 (US)<br />+33 345-423-9893 (FR)</span>,
+        icon: <path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 012 4.18 2 2 0 014 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />,
+    },
+    {
+        label: "Email",
+        val: <span><a href="mailto:hello@company.com">hello@company.com</a><br /><a href="mailto:support@company.com">support@company.com</a></span>,
+        icon: <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></>,
+    },
+];
+
+const HOURS = [
+    ["Mon – Fri", "9am – 6pm"],
+    ["Saturday", "10am – 4pm"],
+    ["Sunday", "Closed"],
+    ["Holidays", "Varies"],
 ];
 
 export default function ContactPage() {
     const [form, setForm] = useState({ name: "", email: "", message: "" });
     const [topic, setTopic] = useState("");
+    const [activeTopic, setActiveTopic] = useState("");
     const [suggestions, setSuggestions] = useState([]);
     const [aiLoading, setAiLoading] = useState(false);
     const [sendLoading, setSendLoading] = useState(false);
@@ -229,11 +230,21 @@ export default function ContactPage() {
         const token = localStorage.getItem("token");
         if (!token) return;
         api.get("/api/users/profile", { headers: { Authorization: `Bearer ${token}` } })
-            .then(res => {
-                setForm(p => ({ ...p, name: res.data.name || "", email: res.data.email || "" }));
-            })
+            .then(res => setForm(p => ({ ...p, name: res.data.name || "", email: res.data.email || "" })))
             .catch(() => { });
     }, []);
+
+    const firstName = form.name.split(" ")[0] || "";
+
+    const setFirstName = val => setForm(p => {
+        const last = p.name.split(" ").slice(1).join(" ");
+        return { ...p, name: val + (last ? " " + last : "") };
+    });
+
+    const setLastName = val => setForm(p => {
+        const first = p.name.split(" ")[0] || "";
+        return { ...p, name: first + (val ? " " + val : "") };
+    });
 
     const handleAISuggest = async () => {
         if (!topic.trim()) return;
@@ -250,7 +261,7 @@ export default function ContactPage() {
     const handleSend = async () => {
         setError("");
         if (!form.name || !form.email || !form.message) {
-            setError("Please fill in all fields before sending.");
+            setError("Please fill in your name, email, and message.");
             return;
         }
         setSendLoading(true);
@@ -267,144 +278,154 @@ export default function ContactPage() {
     const reset = () => {
         setSent(false);
         setForm({ name: "", email: "", message: "" });
-        setTopic("");
-        setSuggestions([]);
-        setError("");
+        setTopic(""); setActiveTopic(""); setSuggestions([]); setError("");
     };
 
-    if (sent) return (
-        <div className="cf-wrap">
-            <style>{css}</style>
-            <div className="cf-sent-wrap">
-                <div className="cf-sent-icon">✓</div>
-                <h2 className="cf-sent-title">Message received</h2>
-                <p className="cf-sent-sub">
-                    We got your message and will get back to you as soon as possible. Thank you for reaching out.
-                </p>
-                <button onClick={reset} className="cf-reset-btn">Send another message</button>
-            </div>
-        </div>
-    );
-
     return (
-        <div className="cf-wrap">
+        <div className="cp">
             <style>{css}</style>
 
-            {/* Map — untouched */}
-            <div className="map-section">
+            {/* Map Hero */}
+            <div className="cp-hero">
                 <iframe
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d111551.9926412813!2d-90.27317134641879!3d38.606612219170856!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x54eab584e432360b%3A0x1c3bb99243deb742!2sUnited%20States!5e0!3m2!1sen!2sbd!4v1597926938024!5m2!1sen!2sbd"
-                    height="500"
-                    style={{ border: 0 }}
-                    allowFullScreen=""
-                    aria-hidden="false"
-                    tabIndex="0"
-                    title="Office Location"
+                    allowFullScreen="" loading="lazy" title="Office Location"
                 />
+                <div className="cp-hero-overlay">
+                    <h1>Let's <em>connect</em></h1>
+                    <p>Our team is ready to hear from you — reach out and we'll get back to you promptly.</p>
+                </div>
             </div>
 
-            {/* Form Section */}
-            <div className="cf-form-outer">
+            {/* Two-column body */}
+            <div className="cp-body">
 
-                {/* Header */}
-                <p className="cf-eyebrow">Get in touch</p>
-                <h1 className="cf-title">Send us a message</h1>
-                <p className="cf-subtitle">
-                    We pay attention to every detail —<br />from first contact to final delivery.
-                </p>
+                {/* Left: Company details */}
+                <div className="cp-left">
+                    <p className="cp-section-tag">Company info</p>
+                    <h2>We're a team<br />that <em>cares.</em></h2>
+                    <p className="cp-desc">
+                        From first inquiry to final delivery, every detail matters to us. Find us at any of our offices below.
+                    </p>
 
-                {/* Card */}
-                <div className="cf-card">
-
-                    {/* Name + Email */}
-                    <div className="cf-row">
-                        {[
-                            { key: "name", label: "Name", type: "text", ph: "Jane Smith" },
-                            { key: "email", label: "Email", type: "email", ph: "you@example.com" },
-                        ].map(({ key, label, type, ph }) => (
-                            <div className="cf-field" key={key}>
-                                <label>{label}</label>
-                                <input
-                                    className="cf-input"
-                                    type={type}
-                                    placeholder={ph}
-                                    value={form[key]}
-                                    onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
-                                />
+                    {INFO.map(({ label, val, icon }) => (
+                        <div className="cp-info-item" key={label}>
+                            <div className="cp-info-icon">
+                                <svg viewBox="0 0 24 24">{icon}</svg>
                             </div>
-                        ))}
-                    </div>
-
-                    {/* AI Helper */}
-                    <div className="cf-ai-box">
-                        <p className="cf-ai-label">
-                            <span className="cf-ai-dot" />
-                            AI message helper
-                        </p>
-                        <div className="cf-ai-row">
-                            <input
-                                className="cf-input"
-                                style={{ flex: 1, background: "var(--color-background-primary)" }}
-                                value={topic}
-                                onChange={e => setTopic(e.target.value)}
-                                onKeyDown={e => e.key === "Enter" && handleAISuggest()}
-                                placeholder="Describe your topic…"
-                            />
-                            <button
-                                className="cf-suggest-btn"
-                                onClick={handleAISuggest}
-                                disabled={aiLoading || !topic.trim()}
-                            >
-                                {aiLoading ? <Spinner /> : "✦"} Suggest
-                            </button>
-                        </div>
-                        {suggestions.map((s, i) => (
-                            <div
-                                key={i}
-                                className="cf-suggestion"
-                                onClick={() => { setForm(p => ({ ...p, message: s })); setSuggestions([]); }}
-                            >
-                                {s}
+                            <div>
+                                <p className="cp-info-label">{label}</p>
+                                <p className="cp-info-val">{val}</p>
                             </div>
-                        ))}
-                    </div>
-
-                    <div className="cf-divider" />
-
-                    {/* Message */}
-                    <div className="cf-field" style={{ marginBottom: 16 }}>
-                        <label>Message</label>
-                        <textarea
-                            className="cf-input"
-                            rows={4}
-                            placeholder="How can we help you?"
-                            value={form.message}
-                            onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
-                            style={{ resize: "vertical", minHeight: 110 }}
-                        />
-                    </div>
-
-                    {/* Error */}
-                    {error && <div className="cf-error">{error}</div>}
-
-                    {/* Submit */}
-                    <button className="cf-submit" onClick={handleSend} disabled={sendLoading}>
-                        {sendLoading ? <><Spinner /> Sending…</> : "Send message →"}
-                    </button>
-                </div>
-
-                {/* Offices */}
-                <div className="cf-offices">
-                    {offices.map(loc => (
-                        <div key={loc.city} className="cf-office">
-                            <p className="cf-office-city">
-                                <span className="cf-office-flag">{loc.flag}</span>
-                                {loc.city}
-                            </p>
-                            <p className="cf-office-detail">{loc.addr}<br />{loc.phone}</p>
                         </div>
                     ))}
+
+                    <div className="cp-hours">
+                        {HOURS.map(([day, time]) => (
+                            <div className="cp-hour-row" key={day}>
+                                <span>{day}</span><span>{time}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
+
+                {/* Right: Contact form */}
+                <div className="cp-right">
+                    {sent ? (
+                        <div className="cp-success">
+                            <div className="cp-check">
+                                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+                            </div>
+                            <h3>Message sent{firstName ? `, ${firstName}` : ""}!</h3>
+                            <p>We received your note and will get back to you within 24 hours.<br />Talk soon.</p>
+                            <button onClick={reset} className="cp-reset-btn">Send another message</button>
+                        </div>
+                    ) : (
+                        <>
+                            <p className="cp-section-tag">Send a message</p>
+                            <h2>How can we<br /><em>help you?</em></h2>
+                            <p className="cp-desc">Fill in the form and we'll get back to you within 24 hours.</p>
+
+                            <p className="cp-chips-label">Topic</p>
+                            <div className="cp-chips">
+                                {TOPICS.map(t => (
+                                    <button
+                                        key={t}
+                                        className={`cp-chip${activeTopic === t ? " active" : ""}`}
+                                        onClick={() => setActiveTopic(prev => prev === t ? "" : t)}
+                                    >{t}</button>
+                                ))}
+                            </div>
+
+                            <div className="cp-row2">
+                                <div className="cp-field">
+                                    <label>First name</label>
+                                    <input className="cp-input" placeholder="Jane"
+                                        value={form.name.split(" ")[0] || ""}
+                                        onChange={e => setFirstName(e.target.value)} />
+                                </div>
+                                <div className="cp-field">
+                                    <label>Last name</label>
+                                    <input className="cp-input" placeholder="Smith"
+                                        value={form.name.split(" ").slice(1).join(" ") || ""}
+                                        onChange={e => setLastName(e.target.value)} />
+                                </div>
+                            </div>
+
+                            <div className="cp-field">
+                                <label>Email address</label>
+                                <input className="cp-input" type="email" placeholder="you@example.com"
+                                    value={form.email}
+                                    onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
+                            </div>
+
+                            <div className="cp-ai-box">
+                                <div className="cp-ai-head">
+                                    <span className="cp-ai-dot" />
+                                    <span className="cp-ai-badge">AI helper</span>
+                                    <span className="cp-ai-sub">Describe topic, get a draft</span>
+                                </div>
+                                <div className="cp-ai-row">
+                                    <input
+                                        className="cp-input"
+                                        style={{ flex: 1, background: "var(--color-background-primary)" }}
+                                        value={topic}
+                                        onChange={e => setTopic(e.target.value)}
+                                        onKeyDown={e => e.key === "Enter" && handleAISuggest()}
+                                        placeholder="e.g. issue with my order…"
+                                    />
+                                    <button className="cp-suggest-btn" onClick={handleAISuggest} disabled={aiLoading || !topic.trim()}>
+                                        {aiLoading ? <Spinner /> : "✦"} Suggest
+                                    </button>
+                                </div>
+                                {suggestions.map((s, i) => (
+                                    <div key={i} className="cp-suggestion"
+                                        onClick={() => { setForm(p => ({ ...p, message: s })); setSuggestions([]); }}>
+                                        {s}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="cp-sep">
+                                <span className="cp-sep-line" /><span className="cp-sep-txt">your message</span><span className="cp-sep-line" />
+                            </div>
+
+                            <div className="cp-field">
+                                <label>Message</label>
+                                <textarea className="cp-input" placeholder="Tell us what's on your mind…"
+                                    value={form.message}
+                                    onChange={e => setForm(p => ({ ...p, message: e.target.value }))} />
+                            </div>
+
+                            {error && <div className="cp-error">{error}</div>}
+
+                            <button className="cp-submit" onClick={handleSend} disabled={sendLoading}>
+                                {sendLoading ? <><Spinner /> Sending…</> : <>Send message <span className="arr">→</span></>}
+                            </button>
+                        </>
+                    )}
+                </div>
+
             </div>
         </div>
     );
