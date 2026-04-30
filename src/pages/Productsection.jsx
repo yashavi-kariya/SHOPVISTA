@@ -21,7 +21,12 @@ const Product = () => {
 
     const handleAddToCart = async (product) => {
         if (!isLoggedIn) {
-            toast({ type: "warn", title: "Login required", ...actions: [{ label: "Sign in", onClick: () => navigate("/login") }] });
+            toast({
+                type: "warn",
+                title: "Login required",
+                message: "Please sign in to add items to your cart.",
+                actions: [{ label: "Sign in", onClick: () => navigate("/login") }]
+            });
             return;
         }
         await addToCart(product);
