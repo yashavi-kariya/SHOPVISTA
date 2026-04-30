@@ -7,7 +7,9 @@ const css = `
 @keyframes toastBar { from { width: 100%; } to { width: 0%; } }
 
 .toast-viewport {
-  position: fixed; bottom: 24px; right: 24px;
+  position: fixed; top: 24px; left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
   display: flex; flex-direction: column; gap: 10px;
   z-index: 9999; pointer-events: none;
 }
@@ -46,7 +48,7 @@ const css = `
 .toast-actions { display: flex; gap: 7px; margin-top: 9px; }
 .toast-btn-primary {
   font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600;
-  background: #185FA5; color: #fff; border: none;
+  background: #185FA5; color: #c6c5c5; border: none;
   border-radius: 7px; padding: 6px 14px; cursor: pointer; transition: background .15s;
 }
 .toast-btn-primary:hover { background: #0C447C; }
