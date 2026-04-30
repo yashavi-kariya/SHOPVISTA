@@ -21,8 +21,7 @@ const Product = () => {
 
     const handleAddToCart = async (product) => {
         if (!isLoggedIn) {
-            alert("Please login first to add items to your cart!");
-            navigate("/login");
+            toast({ type: "warn", title: "Login required", ...actions: [{ label: "Sign in", onClick: () => navigate("/login") }] });
             return;
         }
         await addToCart(product);
@@ -45,7 +44,7 @@ const Product = () => {
         e.preventDefault();
         const normalized = { ...product, id: product._id };
         if (!isInCompare(product._id) && compare.length >= 3) {
-            alert("You can compare up to 3 products only.");
+            toast({ type: "info", title: "Compare limit reached", message: "..." });
             return;
         }
         toggleCompare(normalized);
