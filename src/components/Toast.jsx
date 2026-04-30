@@ -32,10 +32,10 @@ const css = `
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; font-size: 15px;
 }
-.toast-icon.warn    { background: #FFF3CD; }
-.toast-icon.success { background: #D1FAE5; }
-.toast-icon.error   { background: #FCEBEB; }
-.toast-icon.info    { background: #DBEAFE; }
+.toast-icon.warn    { background: #e8d082; }
+.toast-icon.success { background: #5578ea; }
+.toast-icon.error   { background: #de2626; }
+.toast-icon.info    { background: #304259; }
 
 .toast-title {
   font-size: 13.5px; font-weight: 600;
