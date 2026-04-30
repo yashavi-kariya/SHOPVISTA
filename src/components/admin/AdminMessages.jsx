@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import api from "../../api";
 
 const timeAgo = (d) => {
@@ -65,34 +65,23 @@ function MessageDetail({ msg, onReply, onClose }) {
             width: "100%", height: "100%",
             background: "#fff", overflow: "hidden",
         }}>
-            {/* Detail Header */}
+            {/* Header */}
             <div style={{
-                padding: "14px 16px",
-                borderBottom: "1px solid #e5e7eb",
-                display: "flex", alignItems: "center",
-                justifyContent: "space-between",
+                padding: "14px 16px", borderBottom: "1px solid #e5e7eb",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
                 flexShrink: 0, gap: 8,
             }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-                    <button
-                        onClick={onClose}
-                        className="detail-back-btn"
-                        style={{
-                            border: "none", background: "none",
-                            cursor: "pointer", color: "#ef4444", fontSize: 20,
-                            lineHeight: 1, padding: "2px 4px", flexShrink: 0,
-                        }}
-                    >
-                        ←
-                    </button>
+                    <button onClick={onClose} className="detail-back-btn" style={{
+                        border: "none", background: "none", cursor: "pointer",
+                        color: "#ef4444", fontSize: 20, lineHeight: 1,
+                        padding: "2px 4px", flexShrink: 0,
+                    }}>←</button>
                     <div style={{
-                        width: 36, height: 36, borderRadius: "50%",
-                        background: "#fee2e2", display: "flex", alignItems: "center",
-                        justifyContent: "center", fontWeight: 700, fontSize: 12,
-                        color: "#dc2626", flexShrink: 0,
-                    }}>
-                        {initials(msg.name)}
-                    </div>
+                        width: 36, height: 36, borderRadius: "50%", background: "#fee2e2",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontWeight: 700, fontSize: 12, color: "#dc2626", flexShrink: 0,
+                    }}>{initials(msg.name)}</div>
                     <div style={{ minWidth: 0 }}>
                         <p style={{
                             margin: 0, fontWeight: 600, fontSize: 14, color: "#111827",
@@ -107,38 +96,25 @@ function MessageDetail({ msg, onReply, onClose }) {
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                     <span style={{
                         fontSize: 10, padding: "2px 8px", borderRadius: 10,
-                        background: STATUS[msg.status].bg, color: STATUS[msg.status].color,
-                        fontWeight: 600,
-                    }}>
-                        {STATUS[msg.status].label}
-                    </span>
-                    <button
-                        onClick={onClose}
-                        className="detail-close-btn"
-                        style={{
-                            border: "none", background: "none", cursor: "pointer",
-                            color: "#9ca3af", fontSize: 22, lineHeight: 1, padding: "2px 4px",
-                        }}
-                    >×</button>
+                        background: STATUS[msg.status].bg, color: STATUS[msg.status].color, fontWeight: 600,
+                    }}>{STATUS[msg.status].label}</span>
+                    <button onClick={onClose} className="detail-close-btn" style={{
+                        border: "none", background: "none", cursor: "pointer",
+                        color: "#9ca3af", fontSize: 22, lineHeight: 1, padding: "2px 4px",
+                    }}>×</button>
                 </div>
             </div>
 
             {/* Chat body */}
             <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
-                {/* Customer bubble */}
                 <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
                     <div style={{
                         width: 28, height: 28, borderRadius: "50%", background: "#e5e7eb",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         fontSize: 10, fontWeight: 600, color: "#6b7280", flexShrink: 0, marginTop: 2,
-                    }}>
-                        {initials(msg.name)}
-                    </div>
+                    }}>{initials(msg.name)}</div>
                     <div style={{ minWidth: 0 }}>
-                        <div style={{
-                            background: "#f3f4f6", borderRadius: "4px 12px 12px 12px",
-                            padding: "10px 13px",
-                        }}>
+                        <div style={{ background: "#f3f4f6", borderRadius: "4px 12px 12px 12px", padding: "10px 13px" }}>
                             <p style={{ margin: 0, fontSize: 13, color: "#1f2937", lineHeight: 1.6, wordBreak: "break-word" }}>
                                 {msg.message}
                             </p>
@@ -149,17 +125,11 @@ function MessageDetail({ msg, onReply, onClose }) {
                     </div>
                 </div>
 
-                {/* Admin reply bubble */}
                 {msg.adminReply && (
                     <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 16 }}>
                         <div style={{ minWidth: 0, maxWidth: "80%" }}>
-                            <div style={{
-                                background: "#ef4444", borderRadius: "12px 4px 12px 12px",
-                                padding: "10px 13px",
-                            }}>
-                                <p style={{ margin: "0 0 3px", fontSize: 10, color: "#fecaca", fontWeight: 600 }}>
-                                    You replied
-                                </p>
+                            <div style={{ background: "#ef4444", borderRadius: "12px 4px 12px 12px", padding: "10px 13px" }}>
+                                <p style={{ margin: "0 0 3px", fontSize: 10, color: "#fecaca", fontWeight: 600 }}>You replied</p>
                                 <p style={{ margin: 0, fontSize: 13, color: "#fff", lineHeight: 1.6, wordBreak: "break-word" }}>
                                     {msg.adminReply}
                                 </p>
@@ -177,37 +147,22 @@ function MessageDetail({ msg, onReply, onClose }) {
 
             {/* Reply composer */}
             {msg.status !== "replied" && (
-                <div style={{
-                    padding: "12px 16px", borderTop: "1px solid #e5e7eb",
-                    background: "#fff", flexShrink: 0,
-                }}>
-                    <div style={{
-                        display: "flex", justifyContent: "space-between",
-                        alignItems: "center", marginBottom: 7, gap: 8,
-                    }}>
+                <div style={{ padding: "12px 16px", borderTop: "1px solid #e5e7eb", background: "#fff", flexShrink: 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7, gap: 8 }}>
                         <span style={{ fontSize: 12, fontWeight: 500, color: "#374151", flexShrink: 0 }}>
                             Reply to {msg.name}
                         </span>
-                        <button
-                            onClick={handleAISuggest}
-                            disabled={aiLoading}
-                            style={{
-                                display: "flex", alignItems: "center", gap: 4,
-                                padding: "4px 11px", borderRadius: 20,
-                                border: "1px solid #fca5a5",
-                                background: aiLoading ? "#fff5f5" : "#fff",
-                                color: "#ef4444",
-                                cursor: aiLoading ? "not-allowed" : "pointer",
-                                fontSize: 11, fontWeight: 600, fontFamily: "inherit",
-                                flexShrink: 0,
-                            }}
-                        >
+                        <button onClick={handleAISuggest} disabled={aiLoading} style={{
+                            display: "flex", alignItems: "center", gap: 4,
+                            padding: "4px 11px", borderRadius: 20, border: "1px solid #fca5a5",
+                            background: aiLoading ? "#fff5f5" : "#fff", color: "#ef4444",
+                            cursor: aiLoading ? "not-allowed" : "pointer",
+                            fontSize: 11, fontWeight: 600, fontFamily: "inherit", flexShrink: 0,
+                        }}>
                             {aiLoading ? <><Spinner /> Generating…</> : <>✦ AI suggest</>}
                         </button>
                     </div>
-                    {aiError && (
-                        <p style={{ fontSize: 11, color: "#ef4444", marginBottom: 7 }}>{aiError}</p>
-                    )}
+                    {aiError && <p style={{ fontSize: 11, color: "#ef4444", marginBottom: 7 }}>{aiError}</p>}
                     <textarea
                         value={reply}
                         onChange={(e) => setReply(e.target.value)}
@@ -223,18 +178,14 @@ function MessageDetail({ msg, onReply, onClose }) {
                         onFocus={(e) => (e.target.style.borderColor = "#ef4444")}
                         onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                     />
-                    <button
-                        onClick={handleSend}
-                        disabled={sendLoading || !reply.trim()}
-                        style={{
-                            width: "100%", padding: "9px", borderRadius: 8, border: "none",
-                            background: reply.trim() && !sendLoading ? "#ef4444" : "#fca5a5",
-                            color: "#fff", fontSize: 13, fontWeight: 600,
-                            cursor: reply.trim() ? "pointer" : "not-allowed",
-                            display: "flex", alignItems: "center",
-                            justifyContent: "center", gap: 6, fontFamily: "inherit",
-                        }}
-                    >
+                    <button onClick={handleSend} disabled={sendLoading || !reply.trim()} style={{
+                        width: "100%", padding: "9px", borderRadius: 8, border: "none",
+                        background: reply.trim() && !sendLoading ? "#ef4444" : "#fca5a5",
+                        color: "#fff", fontSize: 13, fontWeight: 600,
+                        cursor: reply.trim() ? "pointer" : "not-allowed",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        gap: 6, fontFamily: "inherit",
+                    }}>
                         {sendLoading ? <><Spinner /> Sending…</> : "Send reply"}
                     </button>
                 </div>
@@ -250,6 +201,23 @@ export default function AdminMessages({ toggleSidebar }) {
     const [selected, setSelected] = useState(null);
     const [filter, setFilter] = useState("all");
     const [showDetail, setShowDetail] = useState(false);
+    const headerRef = useRef(null);
+    const [bodyHeight, setBodyHeight] = useState("60vh");
+
+    // Compute remaining viewport height after the header
+    useEffect(() => {
+        const update = () => {
+            if (headerRef.current) {
+                const hh = headerRef.current.getBoundingClientRect().height;
+                // Use dvh (dynamic viewport height) so mobile browser chrome is excluded
+                setBodyHeight(`calc(100dvh - ${hh}px)`);
+            }
+        };
+        // Run after paint so header has its real size
+        const raf = requestAnimationFrame(update);
+        window.addEventListener("resize", update);
+        return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", update); };
+    }, [loading, messages.length]); // re-measure if loading/stats area changes height
 
     const loadMessages = useCallback(async () => {
         try {
@@ -288,10 +256,7 @@ export default function AdminMessages({ toggleSidebar }) {
         } catch { alert("Failed to send reply. Try again."); }
     };
 
-    const handleClose = () => {
-        setSelected(null);
-        setShowDetail(false);
-    };
+    const handleClose = () => { setSelected(null); setShowDetail(false); };
 
     const filtered = filter === "all" ? messages : messages.filter((m) => m.status === filter);
     const counts = {
@@ -302,66 +267,60 @@ export default function AdminMessages({ toggleSidebar }) {
     };
 
     return (
-        <div style={{
-            display: "flex", flexDirection: "column",
-            height: "100%", fontFamily: "inherit", background: "#f9fafb",
-            overflow: "hidden",
-        }}>
+        <>
             <style>{`
                 @keyframes msgSpin { to { transform: rotate(360deg); } }
 
                 .msg-hamburger { display: none !important; }
                 @media (max-width: 1024px) {
-                    .msg-hamburger { display: flex !important; align-items: center; justify-content: center; }
+                    .msg-hamburger { display: flex !important; align-items: center; }
                 }
 
-                /* ── Desktop layout ── */
+                /* ── body container ── */
+                .msg-body {
+                    width: 100%;
+                    overflow: hidden;
+                    position: relative;
+                    display: flex;
+                    background: #f9fafb;
+                }
+
+                /* ── DESKTOP ≥641px: side-by-side ── */
                 @media (min-width: 641px) {
-                    .msg-layout {
-                        display: flex !important;
-                        flex-direction: row !important;
-                    }
                     .msg-list-pane {
-                        width: 300px !important;
-                        min-width: 260px !important;
-                        flex-shrink: 0 !important;
-                        position: relative !important;
-                        transform: none !important;
-                        opacity: 1 !important;
-                        pointer-events: auto !important;
-                        height: 100% !important;
+                        width: 300px;
+                        flex-shrink: 0;
+                        display: flex;
+                        flex-direction: column;
+                        border-right: 1px solid #e5e7eb;
+                        background: #fff;
+                        overflow: hidden;
+                        height: 100%;
                     }
                     .msg-detail-pane {
-                        flex: 1 !important;
-                        display: flex !important;
-                        flex-direction: column !important;
-                        overflow: hidden !important;
-                        min-width: 0 !important;
-                        position: relative !important;
-                        transform: none !important;
-                        opacity: 1 !important;
-                        pointer-events: auto !important;
-                        height: 100% !important;
+                        flex: 1;
+                        min-width: 0;
+                        display: flex;
+                        flex-direction: column;
+                        background: #fff;
+                        overflow: hidden;
+                        height: 100%;
                     }
-                    .detail-back-btn { display: none !important; }
+                    .detail-back-btn  { display: none !important; }
                     .detail-close-btn { display: flex !important; }
                 }
 
-                /* ── Mobile (≤640px): full-screen stack ── */
+                /* ── MOBILE ≤640px: full-screen slide ── */
                 @media (max-width: 640px) {
-                    .msg-layout {
-                        position: relative !important;
-                        overflow: hidden !important;
-                    }
                     .msg-list-pane {
                         position: absolute !important;
-                        top: 0 !important; left: 0 !important;
-                        right: 0 !important; bottom: 0 !important;
-                        width: 100% !important;
-                        min-width: 0 !important;
-                        border-right: none !important;
+                        inset: 0 !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        background: #fff !important;
+                        overflow: hidden !important;
                         z-index: 1 !important;
-                        transition: transform 0.25s ease, opacity 0.25s ease !important;
+                        transition: transform .25s ease, opacity .25s ease !important;
                         transform: translateX(0) !important;
                         opacity: 1 !important;
                         pointer-events: auto !important;
@@ -373,74 +332,53 @@ export default function AdminMessages({ toggleSidebar }) {
                     }
                     .msg-detail-pane {
                         position: absolute !important;
-                        top: 0 !important; left: 0 !important;
-                        right: 0 !important; bottom: 0 !important;
-                        width: 100% !important;
-                        min-width: 0 !important;
+                        inset: 0 !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        background: #fff !important;
+                        overflow: hidden !important;
                         z-index: 2 !important;
+                        transition: transform .25s ease, opacity .25s ease !important;
                         transform: translateX(100%) !important;
                         opacity: 0 !important;
                         pointer-events: none !important;
-                        transition: transform 0.25s ease, opacity 0.25s ease !important;
-                        display: flex !important;
-                        flex-direction: column !important;
                     }
                     .msg-detail-pane.slide-in {
                         transform: translateX(0) !important;
                         opacity: 1 !important;
                         pointer-events: auto !important;
                     }
-                    .detail-back-btn { display: flex !important; }
+                    .detail-back-btn  { display: flex !important; }
                     .detail-close-btn { display: none !important; }
                 }
             `}</style>
 
-            {/* ── Page Header ── */}
-            <div style={{
-                padding: "16px 20px 14px",
-                borderBottom: "1px solid #e5e7eb",
+            {/* ── Page Header — measured by ref ── */}
+            <div ref={headerRef} style={{
+                padding: "16px 20px 14px", borderBottom: "1px solid #e5e7eb",
                 background: "#fff", flexShrink: 0,
             }}>
-                <div style={{
-                    display: "flex", alignItems: "center",
-                    justifyContent: "space-between", marginBottom: 4,
-                }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <button
-                            onClick={toggleSidebar}
-                            className="msg-hamburger"
-                            style={{
-                                border: "none", background: "none", cursor: "pointer",
-                                fontSize: 20, color: "#374151", padding: "4px 6px",
-                                borderRadius: 6, lineHeight: 1,
-                            }}
-                        >☰</button>
-                        <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>
-                            Messages
-                        </h1>
+                        <button onClick={toggleSidebar} className="msg-hamburger" style={{
+                            border: "none", background: "none", cursor: "pointer",
+                            fontSize: 20, color: "#374151", padding: "4px 6px", borderRadius: 6, lineHeight: 1,
+                        }}>☰</button>
+                        <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>Messages</h1>
                         {counts.unread > 0 && (
                             <span style={{
                                 background: "#ef4444", color: "#fff", borderRadius: 10,
                                 fontSize: 11, fontWeight: 700, padding: "2px 8px",
-                            }}>
-                                {counts.unread} new
-                            </span>
+                            }}>{counts.unread} new</span>
                         )}
                     </div>
-                    <button
-                        onClick={loadMessages}
-                        style={{
-                            border: "1px solid #e5e7eb", background: "#fff", borderRadius: 8,
-                            padding: "5px 12px", fontSize: 12, color: "#6b7280",
-                            cursor: "pointer", fontFamily: "inherit",
-                        }}
-                    >↻ Refresh</button>
+                    <button onClick={loadMessages} style={{
+                        border: "1px solid #e5e7eb", background: "#fff", borderRadius: 8,
+                        padding: "5px 12px", fontSize: 12, color: "#6b7280",
+                        cursor: "pointer", fontFamily: "inherit",
+                    }}>↻ Refresh</button>
                 </div>
-                <p style={{ margin: 0, fontSize: 13, color: "#6b7280" }}>
-                    Customer messages from the contact form
-                </p>
-
-                {/* Stats */}
+                <p style={{ margin: 0, fontSize: 13, color: "#6b7280" }}>Customer messages from the contact form</p>
                 <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
                     {[
                         { label: "Total", value: counts.all, color: "#374151" },
@@ -450,8 +388,7 @@ export default function AdminMessages({ toggleSidebar }) {
                     ].map(({ label, value, color }) => (
                         <div key={label} style={{
                             background: "#f9fafb", border: "1px solid #e5e7eb",
-                            borderRadius: 10, padding: "6px 14px",
-                            minWidth: 56, textAlign: "center",
+                            borderRadius: 10, padding: "6px 14px", minWidth: 56, textAlign: "center",
                         }}>
                             <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color }}>{value}</p>
                             <p style={{ margin: 0, fontSize: 10, color: "#9ca3af" }}>{label}</p>
@@ -460,62 +397,37 @@ export default function AdminMessages({ toggleSidebar }) {
                 </div>
             </div>
 
-            {/* ── Body ── */}
-            {loading ? (
-                <div style={{
-                    flex: 1, display: "flex", alignItems: "center",
-                    justifyContent: "center", gap: 8, color: "#9ca3af", fontSize: 14,
-                }}>
-                    <Spinner /> Loading messages…
-                </div>
-            ) : error ? (
-                <div style={{
-                    flex: 1, display: "flex", alignItems: "center",
-                    justifyContent: "center", flexDirection: "column", gap: 10,
-                }}>
-                    <p style={{ color: "#ef4444", fontSize: 14 }}>{error}</p>
-                    <button
-                        onClick={loadMessages}
-                        style={{
-                            padding: "7px 18px", borderRadius: 8,
-                            border: "1px solid #ef4444", background: "transparent",
-                            color: "#ef4444", cursor: "pointer", fontSize: 13, fontFamily: "inherit",
-                        }}
-                    >Retry</button>
-                </div>
-            ) : (
-                /* KEY FIX: use flex:1 + minHeight:0 so the child can fill remaining space,
-                   then the absolute children (mobile) will have a real pixel height to fill */
-                <div
-                    className="msg-layout"
-                    style={{
-                        flex: 1,
-                        minHeight: 0,        /* ← critical: allows flex child to shrink below content size */
-                        overflow: "hidden",
-                        position: "relative",
-                    }}
-                >
-                    {/* LEFT: message list */}
-                    <div
-                        className={`msg-list-pane${showDetail ? " slide-out" : ""}`}
-                        style={{
-                            borderRight: "1px solid #e5e7eb",
-                            display: "flex",
-                            flexDirection: "column",
-                            background: "#fff",
-                            overflow: "hidden",
-                        }}
-                    >
-                        {/* Filter pills */}
-                        <div style={{
-                            padding: "10px 12px", borderBottom: "1px solid #e5e7eb",
-                            display: "flex", gap: 4, flexWrap: "wrap", flexShrink: 0,
-                        }}>
-                            {["all", "unread", "read", "replied"].map((f) => (
-                                <button
-                                    key={f}
-                                    onClick={() => setFilter(f)}
-                                    style={{
+            {/* ── Body: explicit pixel height = 100dvh minus measured header ── */}
+            <div className="msg-body" style={{ height: bodyHeight }}>
+                {loading ? (
+                    <div style={{
+                        flex: 1, display: "flex", alignItems: "center",
+                        justifyContent: "center", gap: 8, color: "#9ca3af", fontSize: 14,
+                    }}>
+                        <Spinner /> Loading messages…
+                    </div>
+                ) : error ? (
+                    <div style={{
+                        flex: 1, display: "flex", alignItems: "center",
+                        justifyContent: "center", flexDirection: "column", gap: 10,
+                    }}>
+                        <p style={{ color: "#ef4444", fontSize: 14 }}>{error}</p>
+                        <button onClick={loadMessages} style={{
+                            padding: "7px 18px", borderRadius: 8, border: "1px solid #ef4444",
+                            background: "transparent", color: "#ef4444",
+                            cursor: "pointer", fontSize: 13, fontFamily: "inherit",
+                        }}>Retry</button>
+                    </div>
+                ) : (
+                    <>
+                        {/* LEFT — message list */}
+                        <div className={`msg-list-pane${showDetail ? " slide-out" : ""}`}>
+                            <div style={{
+                                padding: "10px 12px", borderBottom: "1px solid #e5e7eb",
+                                display: "flex", gap: 4, flexWrap: "wrap", flexShrink: 0,
+                            }}>
+                                {["all", "unread", "read", "replied"].map((f) => (
+                                    <button key={f} onClick={() => setFilter(f)} style={{
                                         padding: "3px 10px", borderRadius: 20,
                                         border: `1px solid ${filter === f ? "#ef4444" : "#e5e7eb"}`,
                                         background: filter === f ? "#ef4444" : "transparent",
@@ -523,127 +435,85 @@ export default function AdminMessages({ toggleSidebar }) {
                                         cursor: "pointer", fontSize: 11,
                                         fontWeight: filter === f ? 600 : 400,
                                         textTransform: "capitalize", fontFamily: "inherit",
-                                    }}
-                                >
-                                    {f}{f !== "all" && counts[f] > 0 ? ` (${counts[f]})` : ""}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Message list */}
-                        <div style={{ overflowY: "auto", flex: 1 }}>
-                            {filtered.length === 0 && (
-                                <p style={{
-                                    padding: "2rem", textAlign: "center",
-                                    color: "#9ca3af", fontSize: 13,
-                                }}>No messages</p>
-                            )}
-                            {filtered.map((msg) => (
-                                <div
-                                    key={msg._id}
-                                    onClick={() => handleSelect(msg)}
-                                    style={{
-                                        padding: "12px 14px",
-                                        borderBottom: "1px solid #f3f4f6",
-                                        cursor: "pointer",
-                                        background: selected?._id === msg._id ? "#fef2f2" : "#fff",
-                                        borderLeft: selected?._id === msg._id
-                                            ? "3px solid #ef4444" : "3px solid transparent",
-                                        transition: "background 0.15s",
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (selected?._id !== msg._id)
-                                            e.currentTarget.style.background = "#f9fafb";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (selected?._id !== msg._id)
-                                            e.currentTarget.style.background = "#fff";
-                                    }}
-                                >
-                                    <div style={{
-                                        display: "flex", justifyContent: "space-between",
-                                        alignItems: "flex-start", marginBottom: 4,
                                     }}>
-                                        <div style={{
-                                            display: "flex", alignItems: "center",
-                                            gap: 7, minWidth: 0,
-                                        }}>
-                                            <div style={{
-                                                width: 28, height: 28, borderRadius: "50%",
-                                                background: "#fee2e2", display: "flex",
-                                                alignItems: "center", justifyContent: "center",
-                                                fontSize: 10, fontWeight: 600, color: "#dc2626",
-                                                flexShrink: 0,
-                                            }}>
-                                                {initials(msg.name)}
+                                        {f}{f !== "all" && counts[f] > 0 ? ` (${counts[f]})` : ""}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div style={{ overflowY: "auto", flex: 1 }}>
+                                {filtered.length === 0 && (
+                                    <p style={{ padding: "2rem", textAlign: "center", color: "#9ca3af", fontSize: 13 }}>
+                                        No messages
+                                    </p>
+                                )}
+                                {filtered.map((msg) => (
+                                    <div key={msg._id} onClick={() => handleSelect(msg)}
+                                        style={{
+                                            padding: "12px 14px", borderBottom: "1px solid #f3f4f6",
+                                            cursor: "pointer",
+                                            background: selected?._id === msg._id ? "#fef2f2" : "#fff",
+                                            borderLeft: selected?._id === msg._id ? "3px solid #ef4444" : "3px solid transparent",
+                                            transition: "background 0.15s",
+                                        }}
+                                        onMouseEnter={(e) => { if (selected?._id !== msg._id) e.currentTarget.style.background = "#f9fafb"; }}
+                                        onMouseLeave={(e) => { if (selected?._id !== msg._id) e.currentTarget.style.background = "#fff"; }}
+                                    >
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+                                                <div style={{
+                                                    width: 28, height: 28, borderRadius: "50%", background: "#fee2e2",
+                                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                                    fontSize: 10, fontWeight: 600, color: "#dc2626", flexShrink: 0,
+                                                }}>{initials(msg.name)}</div>
+                                                <span style={{
+                                                    fontWeight: msg.status === "unread" ? 600 : 400,
+                                                    fontSize: 13, color: "#111827",
+                                                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                                                }}>{msg.name}</span>
                                             </div>
                                             <span style={{
-                                                fontWeight: msg.status === "unread" ? 600 : 400,
-                                                fontSize: 13, color: "#111827",
-                                                overflow: "hidden", textOverflow: "ellipsis",
-                                                whiteSpace: "nowrap",
-                                            }}>
-                                                {msg.name}
-                                            </span>
+                                                fontSize: 10, padding: "2px 6px", borderRadius: 10,
+                                                background: STATUS[msg.status].bg, color: STATUS[msg.status].color,
+                                                fontWeight: 600, flexShrink: 0, marginLeft: 4,
+                                            }}>{STATUS[msg.status].label}</span>
                                         </div>
-                                        <span style={{
-                                            fontSize: 10, padding: "2px 6px", borderRadius: 10,
-                                            background: STATUS[msg.status].bg,
-                                            color: STATUS[msg.status].color,
-                                            fontWeight: 600, flexShrink: 0, marginLeft: 4,
-                                        }}>
-                                            {STATUS[msg.status].label}
-                                        </span>
+                                        <p style={{ margin: "0 0 3px 35px", fontSize: 12, color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                            {msg.message}
+                                        </p>
+                                        <p style={{ margin: "0 0 0 35px", fontSize: 10, color: "#9ca3af" }}>
+                                            {timeAgo(msg.createdAt)}
+                                        </p>
                                     </div>
-                                    <p style={{
-                                        margin: "0 0 3px 35px", fontSize: 12, color: "#6b7280",
-                                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                                    }}>
-                                        {msg.message}
-                                    </p>
-                                    <p style={{ margin: "0 0 0 35px", fontSize: 10, color: "#9ca3af" }}>
-                                        {timeAgo(msg.createdAt)}
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* RIGHT — detail pane */}
+                        <div className={`msg-detail-pane${showDetail ? " slide-in" : ""}`}>
+                            {selected ? (
+                                <MessageDetail msg={selected} onReply={handleReply} onClose={handleClose} />
+                            ) : (
+                                <div style={{
+                                    flex: 1, display: "flex", alignItems: "center",
+                                    justifyContent: "center", flexDirection: "column", gap: 8, height: "100%",
+                                }}>
+                                    <div style={{
+                                        width: 48, height: 48, borderRadius: "50%", background: "#fee2e2",
+                                        display: "flex", alignItems: "center", justifyContent: "center",
+                                        fontSize: 20, color: "#ef4444", marginBottom: 4,
+                                    }}>✉</div>
+                                    <p style={{ fontSize: 14, fontWeight: 600, color: "#374151", margin: 0 }}>Select a message</p>
+                                    <p style={{ fontSize: 12, color: "#9ca3af", margin: 0, textAlign: "center", padding: "0 20px" }}>
+                                        Click any message on the left to read and reply
                                     </p>
                                 </div>
-                            ))}
+                            )}
                         </div>
-                    </div>
-
-                    {/* RIGHT: detail pane */}
-                    <div
-                        className={`msg-detail-pane${showDetail ? " slide-in" : ""}`}
-                        style={{ background: "#fff" }}
-                    >
-                        {selected ? (
-                            <MessageDetail
-                                msg={selected}
-                                onReply={handleReply}
-                                onClose={handleClose}
-                            />
-                        ) : (
-                            <div style={{
-                                flex: 1, display: "flex", alignItems: "center",
-                                justifyContent: "center", flexDirection: "column",
-                                gap: 8, height: "100%",
-                            }}>
-                                <div style={{
-                                    width: 48, height: 48, borderRadius: "50%",
-                                    background: "#fee2e2", display: "flex",
-                                    alignItems: "center", justifyContent: "center",
-                                    fontSize: 20, color: "#ef4444", marginBottom: 4,
-                                }}>✉</div>
-                                <p style={{ fontSize: 14, fontWeight: 600, color: "#374151", margin: 0 }}>
-                                    Select a message
-                                </p>
-                                <p style={{ fontSize: 12, color: "#9ca3af", margin: 0, textAlign: "center", padding: "0 20px" }}>
-                                    Click any message on the left to read and reply
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-        </div>
+                    </>
+                )}
+            </div>
+        </>
     );
 }
 
