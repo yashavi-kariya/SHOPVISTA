@@ -16,14 +16,15 @@ const css = `
 .toast-item {
   pointer-events: all;
   display: flex; align-items: flex-start; gap: 11px;
-  background: var(--color-background-primary);
-  border: 0.5px solid var(--color-border-secondary);
-  border-radius: 14px; padding: 13px 15px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.10);
-  max-width: 340px; min-width: 280px;
-  animation: toastIn .25s ease both;
-  font-family: 'Outfit', sans-serif;
-  overflow: hidden; position: relative;
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    border-radius: 14px; padding: 13px 15px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+    max-width: 340px; min-width: 280px;
+    animation: toastIn .25s ease both;
+    font-family: 'Outfit', sans-serif;
+    overflow: hidden; position: relative;
 }
 .toast-item.leaving { animation: toastOut .2s ease forwards; }
 
@@ -39,16 +40,16 @@ const css = `
 
 .toast-title {
   font-size: 13.5px; font-weight: 600;
-  color: var(--color-text-primary); margin: 0 0 2px;
+ color: #1a1a1a; margin: 0 0 2px;
 }
 .toast-msg {
-  font-size: 12.5px; color: var(--color-text-secondary);
+  font-size: 12.5px; color: #555555;
   margin: 0; line-height: 1.45;
 }
 .toast-actions { display: flex; gap: 7px; margin-top: 9px; }
 .toast-btn-primary {
   font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600;
-  background: #185FA5; color: #c6c5c5; border: none;
+  background: #185FA5; color:#ffffff; border: none;
   border-radius: 7px; padding: 6px 14px; cursor: pointer; transition: background .15s;
 }
 .toast-btn-primary:hover { background: #0C447C; }
