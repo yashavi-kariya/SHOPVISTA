@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import api from "../api";
+import api from "../../api";
 
 const timeAgo = (d) => {
     const diff = Date.now() - new Date(d);
