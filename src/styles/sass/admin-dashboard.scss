@@ -70,6 +70,11 @@
         min-width: 0;
         overflow-x: hidden;
         margin-left: 260px;
+
+        &.page--messages {
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
     }
 
     // ═══════════════ CARD ═══════════════
@@ -766,6 +771,10 @@
         &__content {
             padding: 16px;
             margin-left: 0;
+
+            &.page--messages {
+                padding: 0 !important;
+            }
         }
 
         &__form {
@@ -811,6 +820,10 @@
 
     .admin__content {
         padding: 12px;
+    }
+
+    .admin__content.page--messages {
+        padding: 0 !important;
     }
 
     .stats-grid {

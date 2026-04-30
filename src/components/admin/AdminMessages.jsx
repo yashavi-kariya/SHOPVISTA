@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import api from "../../api";
+import { useLocation } from "react-router-dom";
+
+const location = useLocation();
+const isMessages = location.pathname.includes("messages");
 
 const timeAgo = (d) => {
     const diff = Date.now() - new Date(d);

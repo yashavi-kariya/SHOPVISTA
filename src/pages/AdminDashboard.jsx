@@ -85,7 +85,10 @@ const AdminDashboard = () => {
                 unreadCount={unreadCount}
             />
 
-            <div className="admin__content">{renderPage()}</div>
+            {/* <div className="admin__content">{renderPage()}</div> */}
+            <div className={`admin__content${activeTab === "messages" ? " page--messages" : ""}`}>
+                {renderPage()}
+            </div>
         </div>
     );
 };
