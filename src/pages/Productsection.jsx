@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { WishlistContext } from "../context/WishlistContext";
 import { CompareContext } from "../context/CompareContext";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "../components/Toast";
 // import heart from "../assets/img/icon/heart.png";
 import compareIcon from "../assets/img/icon/compare.png";
 import search from "../assets/img/icon/search.png";
