@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { WishlistContext } from "../context/WishlistContext";
 import { getProducts } from "../services/productService";
+import { toast } from "../components/Toast";
 
 const Shop = () => {
     const navigate = useNavigate();
@@ -40,7 +41,6 @@ const Shop = () => {
         }
         return true;
     };
-
 
     //  Listen for login/logout changes
     useEffect(() => {
@@ -84,26 +84,6 @@ const Shop = () => {
         };
     }, []);
 
-    // const handleAddToCart = async (product) => {
-    //     if (!requireLogin()) return;
-
-    //     try {
-    //         const alreadyInCart = cartItems?.some(
-    //             (item) => item.product?._id === product._id
-    //         );
-
-    //         await addToCart(product);
-
-    //         if (alreadyInCart) {
-    //             alert("✅ Quantity updated in cart!");
-    //         } else {
-    //             alert("🛒 Product added to cart!");
-    //         }
-    //     } catch (error) {
-    //         console.error("Cart error:", error);
-    //         alert("Failed to add product to cart");
-    //     }
-    // };
     const handleAddToCart = async (product) => {
         if (!requireLogin()) return;
 
@@ -306,7 +286,18 @@ const Shop = () => {
                                             <div
                                                 className="product__item__pic"
                                                 style={{ cursor: "pointer" }}
-                                                onClick={() => navigate(`/product/${product._id}`)}
+                                                onClick={() => {
+                                                    if (!isLoggedIn) {
+                                                        toast({
+                                                            type: "warn",
+                                                            title: "Login required",
+                                                            message: "Please sign in to view product details.",
+                                                            actions: [{ label: "Sign in", onClick: () => navigate("/login") }]
+                                                        });
+                                                        return;
+                                                    }
+                                                    navigate(`/product/${product._id}`);
+                                                }}
                                             >
                                                 <img
                                                     src={

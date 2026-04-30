@@ -80,14 +80,12 @@ const css = `
 .toast-progress-fill.error   { background: #E24B4A; }
 .toast-progress-fill.info    { background: #378ADD; }
 `;
-
 const ICONS = {
     warn: "🔐",
     success: "✓",
     error: "✕",
     info: "ℹ",
 };
-
 let _addToast = null;
 
 export function toast(options) {
