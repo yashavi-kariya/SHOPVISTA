@@ -18,15 +18,13 @@ import couponRoutes from "./routes/couponRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
-import paymentRoutes from "./routes/paymentRoutes.js"; // 👈 ADD THIS
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 const app = express();
 dbconnect();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// ── Middleware ──────────────────────────────────────────────────
 app.use(cors({
     origin: ["https://shopvista-zreu.vercel.app", "http://localhost:5173"],
     credentials: true,
@@ -55,7 +53,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/ai", aiRoutes);
-app.use("/api/payment", paymentRoutes); //  ADD THIS
+app.use("/api/payment", paymentRoutes);
 
 const PORT = process.env.PORT || 3001;
 
