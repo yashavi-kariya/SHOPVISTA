@@ -14,11 +14,11 @@ const router = express.Router();
 // User routes
 router.post("/", protect, createOrder);
 router.get("/my", protect, getMyOrders);
-router.get("/:id", protect, getOrderById);      // 👈 single order
+router.get("/:id", protect, getOrderById);
 
 // Admin routes
-router.get("/", protect, adminOnly, getOrders); // 👈 only admin
-router.put("/:id/status", protect, adminOnly, updateOrderStatus);  // 👈 only admin
+router.get("/", protect, adminOnly, getOrders);
+router.put("/:id/status", protect, adminOnly, updateOrderStatus);
 router.put("/:id/cancel", protect, cancelOrder);
 
 export default router;
