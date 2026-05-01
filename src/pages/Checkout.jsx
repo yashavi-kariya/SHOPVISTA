@@ -11,7 +11,12 @@ const Checkout = () => {
     const buyNowItem = location.state?.buyNowItem || null;
     const [product, setProduct] = useState(null);
     const [placing, setPlacing] = useState(false);
-    const [step, setStep] = useState(1);
+
+    // 👇 ADD THESE NEW STATES
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState("card");
+    const [paymentProcessing, setPaymentProcessing] = useState(false);
+    const [savedOrderId, setSavedOrderId] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -48,35 +53,7 @@ const Checkout = () => {
     const shippingCharge = finalTotal >= freeLimit ? 0 : 79;
     const grandTotal = finalTotal + shippingCharge;
 
-    // const placeOrder = async (e) => {
-    //     e.preventDefault();
-    //     if (displayItems.length === 0) { alert("Your cart is empty!"); return; }
-    //     setPlacing(true);
-    //     try {
-    //         const token = localStorage.getItem("token");
-    //         const config = {
-    //             headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    //         };
-    //         const orderData = {
-    //             billing: form,
-    //             items: displayItems,
-    //             totalAmount: grandTotal,
-    //             coupon: coupon || null,
-    //             discount: buyNowItem || (id && product) ? 0 : discount || 0,
-    //         };
-    //         await api.post("/api/orders", orderData, config);
-    //         if (!buyNowItem && !id) clearCart();
-    //         localStorage.removeItem("discount");
-    //         localStorage.removeItem("coupon");
-    //         navigate("/order-success");
-    //     } catch (error) {
-    //         console.error("Order error:", error);
-    //         alert("Failed to place order. Make sure you are logged in.");
-    //     } finally {
-    //         setPlacing(false);
-    //     }
-    // };
-
+    // ── STEP 1: Place Order → Save in DB → Show Payment Modal
     const placeOrder = async (e) => {
         e.preventDefault();
         if (displayItems.length === 0) { alert("Your cart is empty!"); return; }
@@ -91,82 +68,18 @@ const Checkout = () => {
                 },
             };
 
-            // ── Step 1: Create order in DB ──────────────────────
-            const orderData = {
+            // Save order in DB
+            const orderRes = await api.post("/api/orders", {
                 billing: form,
                 items: displayItems,
                 totalAmount: grandTotal,
                 coupon: coupon || null,
                 discount: buyNowItem || (id && product) ? 0 : discount || 0,
-            };
+            }, config);
 
-            const orderRes = await api.post("/api/orders", orderData, config);
-            const savedOrder = orderRes.data;
-
-            // ── Step 2: Create Razorpay order ───────────────────
-            const paymentRes = await api.post("/api/payment/create-order",
-                { totalAmount: grandTotal },
-                config
-            );
-            const { razorpayOrderId, amount } = paymentRes.data;
-
-            // ── Step 3: Open Razorpay popup ─────────────────────
-            const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-                amount: amount,
-                currency: "INR",
-                name: "ShopVista",
-                description: `Order #${savedOrder._id}`,
-                order_id: razorpayOrderId,
-
-                // ── Step 4: On payment success ──────────────────
-                handler: async function (response) {
-                    try {
-                        const verifyRes = await api.post("/api/payment/verify", {
-                            orderId: savedOrder._id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_signature: response.razorpay_signature,
-                        }, config);
-
-                        if (verifyRes.data.success) {
-                            //  Payment successful!
-                            if (!buyNowItem && !id) clearCart();
-                            localStorage.removeItem("discount");
-                            localStorage.removeItem("coupon");
-                            navigate("/order-success", {
-                                state: { orderId: savedOrder._id }
-                            });
-                        }
-                    } catch (err) {
-                        console.error("Verify error:", err);
-                        alert("Payment verification failed!");
-                    }
-                },
-
-                // ── Step 5: On payment failure ──────────────────
-                modal: {
-                    ondismiss: async function () {
-                        await api.post("/api/payment/failed",
-                            { orderId: savedOrder._id },
-                            config
-                        );
-                        alert("Payment cancelled. Your order is saved as Pending.");
-                        setPlacing(false);
-                    }
-                },
-
-                prefill: {
-                    name: `${form.firstName} ${form.lastName}`,
-                    email: form.email,
-                    contact: form.phone,
-                },
-
-                theme: { color: "#1a1a1a" },  // matches your black UI
-            };
-
-            const rzp = new window.Razorpay(options);
-            rzp.open();
+            // Save order ID and show payment modal
+            setSavedOrderId(orderRes.data._id);
+            setShowPaymentModal(true);
 
         } catch (error) {
             console.error("Order error:", error);
@@ -176,174 +89,77 @@ const Checkout = () => {
         }
     };
 
+    // ── STEP 2: Mock Payment → Confirm Order
+    const handleMockPayment = async () => {
+        setPaymentProcessing(true);
+
+        // Simulate payment delay
+        await new Promise(resolve => setTimeout(resolve, 2500));
+
+        try {
+            const token = localStorage.getItem("token");
+            const config = {
+                headers: { Authorization: `Bearer ${token}` }
+            };
+
+            // Confirm order
+            await api.post("/api/payment/verify",
+                { orderId: savedOrderId },
+                config
+            );
+
+            // Cleanup
+            if (!buyNowItem && !id) clearCart();
+            localStorage.removeItem("discount");
+            localStorage.removeItem("coupon");
+
+            setShowPaymentModal(false);
+            navigate("/order-success", {
+                state: { orderId: savedOrderId }
+            });
+
+        } catch (error) {
+            console.error("Payment error:", error);
+            alert("Payment failed. Try again.");
+        } finally {
+            setPaymentProcessing(false);
+        }
+    };
+
     return (
         <section style={{ minHeight: "100vh", background: "#f8f7f4", paddingBottom: "60px" }}>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap');
-
                 .checkout-page * { font-family: 'DM Sans', sans-serif; box-sizing: border-box; }
                 .checkout-page h1, .checkout-page h2, .checkout-page h3 { font-family: 'Playfair Display', serif; }
-
-                .checkout-input-group {
-                    margin-bottom: 18px;
-                    animation: fadeUp 0.4s ease both;
-                }
-                .checkout-input-group label {
-                    display: block;
-                    font-size: 13px;
-                    font-weight: 600;
-                    color: #555;
-                    margin-bottom: 6px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.04em;
-                }
+                .checkout-input-group { margin-bottom: 18px; animation: fadeUp 0.4s ease both; }
+                .checkout-input-group label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
                 .checkout-input-group label span { color: #ef4444; margin-left: 2px; }
-                .checkout-input-group input, .checkout-input-group textarea {
-                    width: 100%;
-                    padding: 11px 14px;
-                    border: 1.5px solid #e2ddd8;
-                    border-radius: 10px;
-                    font-size: 14px;
-                    background: #fff;
-                    color: #1a1a1a;
-                    transition: border-color 0.2s, box-shadow 0.2s;
-                    font-family: 'DM Sans', sans-serif;
-                    outline: none;
-                }
-                .checkout-input-group input:focus, .checkout-input-group textarea:focus {
-                    border-color: #1a1a1a;
-                    box-shadow: 0 0 0 3px rgba(26,26,26,0.07);
-                }
-
-                .order-card-sticky {
-                    background: #fff;
-                    border-radius: 16px;
-                    border: 1.5px solid #ede9e3;
-                    overflow: hidden;
-                    position: sticky;
-                    top: 20px;
-                    animation: slideIn 0.45s ease both;
-                }
-                @keyframes slideIn {
-                    from { opacity: 0; transform: translateX(20px); }
-                    to   { opacity: 1; transform: translateX(0); }
-                }
-                .form-card {
-                    background: #fff;
-                    border-radius: 16px;
-                    border: 1.5px solid #ede9e3;
-                    padding: 32px;
-                    animation: fadeUp 0.4s ease both;
-                }
-                @keyframes fadeUp { 
-                    from { opacity: 0; transform: translateY(16px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-
-                .place-btn {
-                    width: 100%;
-                    padding: 14px;
-                    background: #1a1a1a;
-                    color: #fff;
-                    border: none;
-                    border-radius: 10px;
-                    font-size: 15px;
-                    font-weight: 700;
-                    cursor: pointer;
-                    letter-spacing: 0.05em;
-                    font-family: 'DM Sans', sans-serif;
-                    transition: background 0.2s, transform 0.15s;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    margin-top: 16px;
-                }
-                .place-btn:hover:not(:disabled) { background: #333; transform: translateY(-1px); }
+                .checkout-input-group input, .checkout-input-group textarea { width: 100%; padding: 11px 14px; border: 1.5px solid #e2ddd8; border-radius: 10px; font-size: 14px; background: #fff; color: #1a1a1a; transition: border-color 0.2s, box-shadow 0.2s; font-family: 'DM Sans', sans-serif; outline: none; }
+                .checkout-input-group input:focus { border-color: #1a1a1a; box-shadow: 0 0 0 3px rgba(26,26,26,0.07); }
+                .order-card-sticky { background: #fff; border-radius: 16px; border: 1.5px solid #ede9e3; overflow: hidden; position: sticky; top: 20px; }
+                .form-card { background: #fff; border-radius: 16px; border: 1.5px solid #ede9e3; padding: 32px; }
+                @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+                .place-btn { width: 100%; padding: 14px; background: #1a1a1a; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; }
+                .place-btn:hover:not(:disabled) { background: #333; }
                 .place-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-                .cancel-btn {
-                    width: 100%;
-                    padding: 12px;
-                    background: transparent;
-                    color: #888;
-                    border: 1.5px solid #e2ddd8;
-                    border-radius: 10px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    font-family: 'DM Sans', sans-serif;
-                    transition: all 0.2s;
-                    margin-top: 10px;
-                }
+                .cancel-btn { width: 100%; padding: 12px; background: transparent; color: #888; border: 1.5px solid #e2ddd8; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; margin-top: 10px; }
                 .cancel-btn:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
-
-                .item-line {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 10px 0;
-                    border-bottom: 1px dashed #f0ece5;
-                    gap: 10px;
-                    font-size: 14px;
-                }
+                .item-line { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #f0ece5; gap: 10px; font-size: 14px; }
                 .item-line:last-child { border-bottom: none; }
-
-                .summary-row {
-                    display: flex;
-                    justify-content: space-between;
-                    font-size: 14px;
-                    padding: 6px 0;
-                    color: #555;
-                }
-                .summary-row.total {
-                    font-size: 17px;
-                    font-weight: 700;
-                    color: #1a1a1a;
-                    border-top: 1.5px solid #ede9e3;
-                    padding-top: 14px;
-                    margin-top: 6px;
-                }
-
-                .spinner {
-                    width: 18px; height: 18px;
-                    border: 2px solid rgba(255,255,255,0.3);
-                    border-top-color: #fff;
-                    border-radius: 50%;
-                    animation: spin 0.7s linear infinite;
-                    display: inline-block;
-                }
+                .summary-row { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; color: #555; }
+                .summary-row.total { font-size: 17px; font-weight: 700; color: #1a1a1a; border-top: 1.5px solid #ede9e3; padding-top: 14px; margin-top: 6px; }
+                .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
                 @keyframes spin { to { transform: rotate(360deg); } }
-
-                .page-header {
-                    background: #1a1a1a;
-                    padding: 36px 0 28px;
-                    margin-bottom: 36px;
-                }
-
-                .section-title {
-                    font-size: 13px;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    letter-spacing: 0.08em;
-                    color: #888;
-                    margin: 0 0 18px;
-                }
-
-                @media (max-width: 768px) {
-                    .checkout-grid {
-                        flex-direction: column-reverse !important;
-                    }
-                    .order-card-sticky {
-                        position: static !important;
-                    }
-                    .form-card { padding: 20px; }
-                }
+                .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin: 0 0 18px; }
+                .payment-method-option { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; border: 2px solid #e2ddd8; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+                .payment-method-option.selected { border-color: #1a1a1a; background: #f8f8f8; }
+                @media (max-width: 768px) { .checkout-grid { flex-direction: column-reverse !important; } .order-card-sticky { position: static !important; } .form-card { padding: 20px; } }
             `}</style>
 
             <div className="checkout-page">
                 {/* HEADER */}
-                <div className="page-header">
+                <div style={{ background: "#1a1a1a", padding: "36px 0 28px", marginBottom: "36px" }}>
                     <div className="container">
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
                             <div>
@@ -352,14 +168,7 @@ const Checkout = () => {
                                     {displayItems.length} item{displayItems.length !== 1 ? "s" : ""} in your order
                                 </p>
                             </div>
-                            <Link to="/cart" style={{
-                                display: "inline-flex", alignItems: "center", gap: "6px",
-                                background: "transparent", color: "#fff",
-                                border: "1.5px solid #444",
-                                padding: "9px 18px", borderRadius: "8px",
-                                fontWeight: "600", fontSize: "14px",
-                                textDecoration: "none", transition: "border-color 0.2s"
-                            }}>
+                            <Link to="/cart" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#fff", border: "1.5px solid #444", padding: "9px 18px", borderRadius: "8px", fontWeight: "600", fontSize: "14px", textDecoration: "none" }}>
                                 ← Back to Cart
                             </Link>
                         </div>
@@ -374,7 +183,6 @@ const Checkout = () => {
                             <div style={{ flex: "1 1 0", minWidth: 0 }}>
                                 <div className="form-card">
                                     <p className="section-title">Billing Details</p>
-
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
                                         <div className="checkout-input-group">
                                             <label>First Name <span>*</span></label>
@@ -385,17 +193,14 @@ const Checkout = () => {
                                             <input name="lastName" value={form.lastName} onChange={handleChange} required placeholder="Doe" />
                                         </div>
                                     </div>
-
                                     <div className="checkout-input-group">
                                         <label>Country <span>*</span></label>
                                         <input name="country" value={form.country} onChange={handleChange} required placeholder="India" />
                                     </div>
-
                                     <div className="checkout-input-group">
                                         <label>Address <span>*</span></label>
                                         <input name="address" value={form.address} onChange={handleChange} required placeholder="123, Street Name, Area" />
                                     </div>
-
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
                                         <div className="checkout-input-group">
                                             <label>City <span>*</span></label>
@@ -406,7 +211,6 @@ const Checkout = () => {
                                             <input name="state" value={form.state} onChange={handleChange} required placeholder="Gujarat" />
                                         </div>
                                     </div>
-
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
                                         <div className="checkout-input-group">
                                             <label>ZIP / Postcode <span>*</span></label>
@@ -417,12 +221,10 @@ const Checkout = () => {
                                             <input name="phone" value={form.phone} onChange={handleChange} required placeholder="+91 98765 43210" />
                                         </div>
                                     </div>
-
                                     <div className="checkout-input-group">
                                         <label>Email <span>*</span></label>
                                         <input type="email" name="email" value={form.email} onChange={handleChange} required placeholder="you@example.com" />
                                     </div>
-
                                     <div className="checkout-input-group">
                                         <label>Order Notes</label>
                                         <input name="notes" value={form.notes} onChange={handleChange} placeholder="Any special instructions..." />
@@ -433,25 +235,16 @@ const Checkout = () => {
                             {/* RIGHT — ORDER SUMMARY */}
                             <div style={{ width: "340px", flexShrink: 0 }}>
                                 <div className="order-card-sticky">
-                                    {/* Header */}
                                     <div style={{ padding: "20px 24px", borderBottom: "1.5px solid #f0ece5" }}>
                                         <p className="section-title" style={{ margin: 0 }}>Order Summary</p>
                                     </div>
-
-                                    {/* Items */}
                                     <div style={{ padding: "16px 24px", maxHeight: "260px", overflowY: "auto" }}>
                                         {displayItems.map((item, index) => (
                                             <div className="item-line" key={`${item.productId || item.product?._id}-${index}`}>
                                                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                                    <img
-                                                        src={item.product?.img || "/placeholder.png"}
-                                                        alt={item.product?.name}
-                                                        style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "8px", border: "1px solid #ede9e3", flexShrink: 0 }}
-                                                    />
+                                                    <img src={item.product?.img || "/placeholder.png"} alt={item.product?.name} style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "8px", border: "1px solid #ede9e3", flexShrink: 0 }} />
                                                     <div>
-                                                        <div style={{ fontWeight: "600", color: "#1a1a1a", lineHeight: 1.3 }}>
-                                                            {item.product?.name}
-                                                        </div>
+                                                        <div style={{ fontWeight: "600", color: "#1a1a1a" }}>{item.product?.name}</div>
                                                         <div style={{ fontSize: "12px", color: "#888" }}>Qty: {item.quantity}</div>
                                                     </div>
                                                 </div>
@@ -461,17 +254,11 @@ const Checkout = () => {
                                             </div>
                                         ))}
                                     </div>
-
-                                    {/* Totals */}
                                     <div style={{ padding: "16px 24px", borderTop: "1.5px solid #f0ece5" }}>
-                                        <div className="summary-row">
-                                            <span>Subtotal</span>
-                                            <span>Rs.{total.toFixed(2)}</span>
-                                        </div>
+                                        <div className="summary-row"><span>Subtotal</span><span>Rs.{total.toFixed(2)}</span></div>
                                         {coupon && discount > 0 && (
                                             <div className="summary-row" style={{ color: "#16a34a" }}>
-                                                <span>🎟️ {coupon}</span>
-                                                <span>− Rs.{discount.toFixed(2)}</span>
+                                                <span>🎟️ {coupon}</span><span>− Rs.{discount.toFixed(2)}</span>
                                             </div>
                                         )}
                                         <div className="summary-row">
@@ -480,47 +267,108 @@ const Checkout = () => {
                                                 {shippingCharge === 0 ? "Free 🎉" : `Rs.${shippingCharge}`}
                                             </span>
                                         </div>
-                                        <div className="summary-row total">
-                                            <span>Total</span>
-                                            <span>Rs.{grandTotal.toFixed(2)}</span>
-                                        </div>
-
+                                        <div className="summary-row total"><span>Total</span><span>Rs.{grandTotal.toFixed(2)}</span></div>
                                         {discount > 0 && (
-                                            <div style={{
-                                                background: "#ecfdf5", border: "1px dashed #6ee7b7",
-                                                borderRadius: "8px", padding: "8px 12px",
-                                                textAlign: "center", marginTop: "12px",
-                                                fontSize: "13px", color: "#065f46", fontWeight: "600"
-                                            }}>
+                                            <div style={{ background: "#ecfdf5", border: "1px dashed #6ee7b7", borderRadius: "8px", padding: "8px 12px", textAlign: "center", marginTop: "12px", fontSize: "13px", color: "#065f46", fontWeight: "600" }}>
                                                 🎉 You're saving Rs.{discount.toFixed(2)} on this order!
                                             </div>
                                         )}
-
-                                        {/* PLACE ORDER */}
                                         <button type="submit" className="place-btn" disabled={placing}>
-                                            {placing ? (
-                                                <><span className="spinner" /> Placing Order...</>
-                                            ) : (
-                                                <>✓ Place Order</>
-                                            )}
+                                            {placing ? <><span className="spinner" /> Placing Order...</> : <>✓ Place Order</>}
                                         </button>
-
-                                        {/* CANCEL */}
-                                        <button
-                                            type="button"
-                                            className="cancel-btn"
-                                            onClick={() => navigate("/cart")}
-                                        >
+                                        <button type="button" className="cancel-btn" onClick={() => navigate("/cart")}>
                                             ✖ Cancel & Return to Cart
                                         </button>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </form>
                 </div>
             </div>
+
+            {/* ── PAYMENT MODAL ── */}
+            {showPaymentModal && (
+                <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: "20px" }}>
+                    <div style={{ background: "#fff", borderRadius: "16px", padding: "32px", width: "100%", maxWidth: "420px", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", fontFamily: "'DM Sans', sans-serif" }}>
+
+                        {/* Modal Header */}
+                        <div style={{ textAlign: "center", marginBottom: "24px" }}>
+                            <div style={{ fontSize: "36px" }}>💳</div>
+                            <h2 style={{ margin: "8px 0 4px", fontSize: "20px" }}>Complete Payment</h2>
+                            <p style={{ color: "#888", fontSize: "14px", margin: 0 }}>
+                                Amount: <strong style={{ color: "#1a1a1a" }}>Rs.{grandTotal.toFixed(2)}</strong>
+                            </p>
+                        </div>
+
+                        {/* Payment Methods */}
+                        <p style={{ fontSize: "13px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
+                            Select Payment Method
+                        </p>
+
+                        {[
+                            { key: "card", icon: "💳", label: "Credit / Debit Card", sub: "Visa, Mastercard, Rupay" },
+                            { key: "upi", icon: "📱", label: "UPI Payment", sub: "GPay, PhonePe, Paytm" },
+                            { key: "netbanking", icon: "🏦", label: "Net Banking", sub: "All major banks" },
+                            { key: "cod", icon: "💵", label: "Cash on Delivery", sub: "Pay when delivered" },
+                        ].map((method) => (
+                            <div
+                                key={method.key}
+                                className={`payment-method-option ${paymentMethod === method.key ? "selected" : ""}`}
+                                onClick={() => setPaymentMethod(method.key)}
+                            >
+                                <span style={{ fontSize: "22px" }}>{method.icon}</span>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: "600", fontSize: "14px" }}>{method.label}</div>
+                                    <div style={{ fontSize: "12px", color: "#888" }}>{method.sub}</div>
+                                </div>
+                                {paymentMethod === method.key && <span style={{ color: "#1a1a1a", fontSize: "18px", fontWeight: "700" }}>✓</span>}
+                            </div>
+                        ))}
+
+                        {/* Card Input */}
+                        {paymentMethod === "card" && (
+                            <div style={{ marginTop: "12px" }}>
+                                <input defaultValue="4111 1111 1111 1111" placeholder="Card Number" style={{ width: "100%", padding: "10px 14px", border: "1.5px solid #e2ddd8", borderRadius: "8px", marginBottom: "10px", fontSize: "14px", boxSizing: "border-box" }} />
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                                    <input defaultValue="12/26" placeholder="Expiry" style={{ padding: "10px 14px", border: "1.5px solid #e2ddd8", borderRadius: "8px", fontSize: "14px" }} />
+                                    <input defaultValue="123" placeholder="CVV" style={{ padding: "10px 14px", border: "1.5px solid #e2ddd8", borderRadius: "8px", fontSize: "14px" }} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* UPI Input */}
+                        {paymentMethod === "upi" && (
+                            <input defaultValue="success@razorpay" placeholder="UPI ID" style={{ width: "100%", padding: "10px 14px", border: "1.5px solid #e2ddd8", borderRadius: "8px", marginTop: "12px", fontSize: "14px", boxSizing: "border-box" }} />
+                        )}
+
+                        {/* Pay Button */}
+                        <button
+                            onClick={handleMockPayment}
+                            disabled={paymentProcessing}
+                            style={{ width: "100%", padding: "14px", background: "#1a1a1a", color: "#fff", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: paymentProcessing ? "not-allowed" : "pointer", marginTop: "20px", opacity: paymentProcessing ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", fontFamily: "'DM Sans', sans-serif" }}
+                        >
+                            {paymentProcessing
+                                ? <><span style={{ width: "18px", height: "18px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.7s linear infinite", display: "inline-block" }} /> Processing...</>
+                                : <>✓ Pay Rs.{grandTotal.toFixed(2)}</>
+                            }
+                        </button>
+
+                        {/* Cancel */}
+                        <button
+                            onClick={() => !paymentProcessing && setShowPaymentModal(false)}
+                            disabled={paymentProcessing}
+                            style={{ width: "100%", padding: "11px", background: "transparent", color: "#888", border: "1.5px solid #e2ddd8", borderRadius: "10px", fontSize: "14px", fontWeight: "600", cursor: "pointer", marginTop: "10px", fontFamily: "'DM Sans', sans-serif" }}
+                        >
+                            ✖ Cancel
+                        </button>
+
+                        <p style={{ textAlign: "center", fontSize: "12px", color: "#aaa", marginTop: "16px", margin: "16px 0 0" }}>
+                            🔒 Secure Mock Payment for Testing
+                        </p>
+                    </div>
+                </div>
+            )}
         </section>
     );
 };
