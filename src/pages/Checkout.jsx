@@ -48,50 +48,15 @@ const Checkout = () => {
     const shippingCharge = finalTotal >= freeLimit ? 0 : 79;
     const grandTotal = finalTotal + shippingCharge;
 
-    const placeOrder = async (e) => {
-        e.preventDefault();
-        if (displayItems.length === 0) { alert("Your cart is empty!"); return; }
-        setPlacing(true);
-        try {
-            const token = localStorage.getItem("token");
-            const config = {
-                headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-            };
-            const orderData = {
-                billing: form,
-                items: displayItems,
-                totalAmount: grandTotal,
-                coupon: coupon || null,
-                discount: buyNowItem || (id && product) ? 0 : discount || 0,
-            };
-            await api.post("/api/orders", orderData, config);
-            if (!buyNowItem && !id) clearCart();
-            localStorage.removeItem("discount");
-            localStorage.removeItem("coupon");
-            navigate("/order-success");
-        } catch (error) {
-            console.error("Order error:", error);
-            alert("Failed to place order. Make sure you are logged in.");
-        } finally {
-            setPlacing(false);
-        }
-    };
-
-    //     const placeOrder = async (e) => {
+    // const placeOrder = async (e) => {
     //     e.preventDefault();
     //     if (displayItems.length === 0) { alert("Your cart is empty!"); return; }
     //     setPlacing(true);
-
     //     try {
     //         const token = localStorage.getItem("token");
     //         const config = {
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`,
-    //                 "Content-Type": "application/json"
-    //             },
+    //             headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     //         };
-
-    //         // ── Step 1: Create order in DB ──────────────────────
     //         const orderData = {
     //             billing: form,
     //             items: displayItems,
@@ -99,82 +64,117 @@ const Checkout = () => {
     //             coupon: coupon || null,
     //             discount: buyNowItem || (id && product) ? 0 : discount || 0,
     //         };
-
-    //         const orderRes = await api.post("/api/orders", orderData, config);
-    //         const savedOrder = orderRes.data;
-
-    //         // ── Step 2: Create Razorpay order ───────────────────
-    //         const paymentRes = await api.post("/api/payment/create-order",
-    //             { totalAmount: grandTotal },
-    //             config
-    //         );
-    //         const { razorpayOrderId, amount } = paymentRes.data;
-
-    //         // ── Step 3: Open Razorpay popup ─────────────────────
-    //         const options = {
-    //             key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-    //             amount: amount,
-    //             currency: "INR",
-    //             name: "ShopVista",
-    //             description: `Order #${savedOrder._id}`,
-    //             order_id: razorpayOrderId,
-
-    //             // ── Step 4: On payment success ──────────────────
-    //             handler: async function (response) {
-    //                 try {
-    //                     const verifyRes = await api.post("/api/payment/verify", {
-    //                         orderId: savedOrder._id,
-    //                         razorpay_payment_id: response.razorpay_payment_id,
-    //                         razorpay_order_id: response.razorpay_order_id,
-    //                         razorpay_signature: response.razorpay_signature,
-    //                     }, config);
-
-    //                     if (verifyRes.data.success) {
-    //                         //  Payment successful!
-    //                         if (!buyNowItem && !id) clearCart();
-    //                         localStorage.removeItem("discount");
-    //                         localStorage.removeItem("coupon");
-    //                         navigate("/order-success", {
-    //                             state: { orderId: savedOrder._id }
-    //                         });
-    //                     }
-    //                 } catch (err) {
-    //                     console.error("Verify error:", err);
-    //                     alert("Payment verification failed!");
-    //                 }
-    //             },
-
-    //             // ── Step 5: On payment failure ──────────────────
-    //             modal: {
-    //                 ondismiss: async function () {
-    //                     await api.post("/api/payment/failed",
-    //                         { orderId: savedOrder._id },
-    //                         config
-    //                     );
-    //                     alert("Payment cancelled. Your order is saved as Pending.");
-    //                     setPlacing(false);
-    //                 }
-    //             },
-
-    //             prefill: {
-    //                 name:    `${form.firstName} ${form.lastName}`,
-    //                 email:   form.email,
-    //                 contact: form.phone,
-    //             },
-
-    //             theme: { color: "#1a1a1a" },  // matches your black UI
-    //         };
-
-    //         const rzp = new window.Razorpay(options);
-    //         rzp.open();
-
+    //         await api.post("/api/orders", orderData, config);
+    //         if (!buyNowItem && !id) clearCart();
+    //         localStorage.removeItem("discount");
+    //         localStorage.removeItem("coupon");
+    //         navigate("/order-success");
     //     } catch (error) {
     //         console.error("Order error:", error);
-    //         alert("Failed to place order. Please try again.");
+    //         alert("Failed to place order. Make sure you are logged in.");
     //     } finally {
     //         setPlacing(false);
     //     }
     // };
+
+    const placeOrder = async (e) => {
+        e.preventDefault();
+        if (displayItems.length === 0) { alert("Your cart is empty!"); return; }
+        setPlacing(true);
+
+        try {
+            const token = localStorage.getItem("token");
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+            };
+
+            // ── Step 1: Create order in DB ──────────────────────
+            const orderData = {
+                billing: form,
+                items: displayItems,
+                totalAmount: grandTotal,
+                coupon: coupon || null,
+                discount: buyNowItem || (id && product) ? 0 : discount || 0,
+            };
+
+            const orderRes = await api.post("/api/orders", orderData, config);
+            const savedOrder = orderRes.data;
+
+            // ── Step 2: Create Razorpay order ───────────────────
+            const paymentRes = await api.post("/api/payment/create-order",
+                { totalAmount: grandTotal },
+                config
+            );
+            const { razorpayOrderId, amount } = paymentRes.data;
+
+            // ── Step 3: Open Razorpay popup ─────────────────────
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: amount,
+                currency: "INR",
+                name: "ShopVista",
+                description: `Order #${savedOrder._id}`,
+                order_id: razorpayOrderId,
+
+                // ── Step 4: On payment success ──────────────────
+                handler: async function (response) {
+                    try {
+                        const verifyRes = await api.post("/api/payment/verify", {
+                            orderId: savedOrder._id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature,
+                        }, config);
+
+                        if (verifyRes.data.success) {
+                            //  Payment successful!
+                            if (!buyNowItem && !id) clearCart();
+                            localStorage.removeItem("discount");
+                            localStorage.removeItem("coupon");
+                            navigate("/order-success", {
+                                state: { orderId: savedOrder._id }
+                            });
+                        }
+                    } catch (err) {
+                        console.error("Verify error:", err);
+                        alert("Payment verification failed!");
+                    }
+                },
+
+                // ── Step 5: On payment failure ──────────────────
+                modal: {
+                    ondismiss: async function () {
+                        await api.post("/api/payment/failed",
+                            { orderId: savedOrder._id },
+                            config
+                        );
+                        alert("Payment cancelled. Your order is saved as Pending.");
+                        setPlacing(false);
+                    }
+                },
+
+                prefill: {
+                    name: `${form.firstName} ${form.lastName}`,
+                    email: form.email,
+                    contact: form.phone,
+                },
+
+                theme: { color: "#1a1a1a" },  // matches your black UI
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+
+        } catch (error) {
+            console.error("Order error:", error);
+            alert("Failed to place order. Please try again.");
+        } finally {
+            setPlacing(false);
+        }
+    };
 
     return (
         <section style={{ minHeight: "100vh", background: "#f8f7f4", paddingBottom: "60px" }}>
