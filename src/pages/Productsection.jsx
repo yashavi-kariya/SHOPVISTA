@@ -276,9 +276,25 @@ const Product = () => {
 
                                                     {/* 🔍 Quick View */}
                                                     <li>
-                                                        <Link to={`/product/${product._id}`} title="View product">
+                                                        <a href="#"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                if (!isLoggedIn) {
+                                                                    toast({
+                                                                        type: "warn",
+                                                                        title: "Login required",
+                                                                        message: "Please sign in to view product details.",
+                                                                        actions: [{ label: "Sign in", onClick: () => navigate("/login") }]
+                                                                    });
+                                                                    return;
+                                                                }
+                                                                navigate(`/product/${product._id}`);
+                                                            }}
+                                                            title="View product"
+                                                        >
                                                             <img src={search} alt="view" />
-                                                        </Link>
+                                                        </a>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -329,16 +345,14 @@ const Product = () => {
                             <div className="col-12 text-center py-5">No products found.</div>
                         )}
                     </div>
-
                 </div>
             </section >
-
             {/* Compare Bar */}
             {
                 compare.length > 0 && (
                     <div className="compare-bar">
                         <div className="compare-bar__items">
-                            <span className="compare-bar__label">Compare ({compare.length}/3):</span>
+                            <span className="compare-bar__label">Compare({compare.length}/3):</span>
                             {compare.map((p) => (
                                 <div key={p.id} className="compare-bar__chip">
                                     <img src={getImgUrl(p.image || p.img)} alt={p.name} />

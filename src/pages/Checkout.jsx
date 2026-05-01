@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
-// import api from "api";
 import api from "../api";
 import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
 
@@ -12,7 +11,7 @@ const Checkout = () => {
     const buyNowItem = location.state?.buyNowItem || null;
     const [product, setProduct] = useState(null);
     const [placing, setPlacing] = useState(false);
-    const [step, setStep] = useState(1); // 1 = form, 2 = confirm
+    const [step, setStep] = useState(1);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -78,6 +77,105 @@ const Checkout = () => {
         }
     };
 
+    //     const placeOrder = async (e) => {
+    //     e.preventDefault();
+    //     if (displayItems.length === 0) { alert("Your cart is empty!"); return; }
+    //     setPlacing(true);
+
+    //     try {
+    //         const token = localStorage.getItem("token");
+    //         const config = {
+    //             headers: {
+    //                 Authorization: `Bearer ${token}`,
+    //                 "Content-Type": "application/json"
+    //             },
+    //         };
+
+    //         // ── Step 1: Create order in DB ──────────────────────
+    //         const orderData = {
+    //             billing: form,
+    //             items: displayItems,
+    //             totalAmount: grandTotal,
+    //             coupon: coupon || null,
+    //             discount: buyNowItem || (id && product) ? 0 : discount || 0,
+    //         };
+
+    //         const orderRes = await api.post("/api/orders", orderData, config);
+    //         const savedOrder = orderRes.data;
+
+    //         // ── Step 2: Create Razorpay order ───────────────────
+    //         const paymentRes = await api.post("/api/payment/create-order",
+    //             { totalAmount: grandTotal },
+    //             config
+    //         );
+    //         const { razorpayOrderId, amount } = paymentRes.data;
+
+    //         // ── Step 3: Open Razorpay popup ─────────────────────
+    //         const options = {
+    //             key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+    //             amount: amount,
+    //             currency: "INR",
+    //             name: "ShopVista",
+    //             description: `Order #${savedOrder._id}`,
+    //             order_id: razorpayOrderId,
+
+    //             // ── Step 4: On payment success ──────────────────
+    //             handler: async function (response) {
+    //                 try {
+    //                     const verifyRes = await api.post("/api/payment/verify", {
+    //                         orderId: savedOrder._id,
+    //                         razorpay_payment_id: response.razorpay_payment_id,
+    //                         razorpay_order_id: response.razorpay_order_id,
+    //                         razorpay_signature: response.razorpay_signature,
+    //                     }, config);
+
+    //                     if (verifyRes.data.success) {
+    //                         //  Payment successful!
+    //                         if (!buyNowItem && !id) clearCart();
+    //                         localStorage.removeItem("discount");
+    //                         localStorage.removeItem("coupon");
+    //                         navigate("/order-success", {
+    //                             state: { orderId: savedOrder._id }
+    //                         });
+    //                     }
+    //                 } catch (err) {
+    //                     console.error("Verify error:", err);
+    //                     alert("Payment verification failed!");
+    //                 }
+    //             },
+
+    //             // ── Step 5: On payment failure ──────────────────
+    //             modal: {
+    //                 ondismiss: async function () {
+    //                     await api.post("/api/payment/failed",
+    //                         { orderId: savedOrder._id },
+    //                         config
+    //                     );
+    //                     alert("Payment cancelled. Your order is saved as Pending.");
+    //                     setPlacing(false);
+    //                 }
+    //             },
+
+    //             prefill: {
+    //                 name:    `${form.firstName} ${form.lastName}`,
+    //                 email:   form.email,
+    //                 contact: form.phone,
+    //             },
+
+    //             theme: { color: "#1a1a1a" },  // matches your black UI
+    //         };
+
+    //         const rzp = new window.Razorpay(options);
+    //         rzp.open();
+
+    //     } catch (error) {
+    //         console.error("Order error:", error);
+    //         alert("Failed to place order. Please try again.");
+    //     } finally {
+    //         setPlacing(false);
+    //     }
+    // };
+
     return (
         <section style={{ minHeight: "100vh", background: "#f8f7f4", paddingBottom: "60px" }}>
             <style>{`
@@ -130,7 +228,6 @@ const Checkout = () => {
                     from { opacity: 0; transform: translateX(20px); }
                     to   { opacity: 1; transform: translateX(0); }
                 }
-
                 .form-card {
                     background: #fff;
                     border-radius: 16px;
@@ -138,7 +235,7 @@ const Checkout = () => {
                     padding: 32px;
                     animation: fadeUp 0.4s ease both;
                 }
-                @keyframes fadeUp {
+                @keyframes fadeUp { 
                     from { opacity: 0; transform: translateY(16px); }
                     to   { opacity: 1; transform: translateY(0); }
                 }

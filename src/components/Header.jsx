@@ -3,7 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 
 import logo from "../assets/img/logo1.png";
-import searchIcon from "../assets/img/icon/search.png";
+// import searchIcon from "../assets/img/icon/search.png";
 import heartIcon from "../assets/img/icon/heart.png";
 import cartIcon from "../assets/img/icon/cart.png";
 
@@ -160,7 +160,6 @@ const Header = ({ cartCount = 0 }) => {
                         </div>
                     </div>
                 </div>
-
                 {/* MAIN HEADER */}
                 <div className="container">
                     <div className="row align-items-center">
@@ -257,7 +256,7 @@ const Header = ({ cartCount = 0 }) => {
                                         <i className="fa fa-user"></i>
                                     </Link>
                                 )}
-                                <img src={searchIcon} alt="" />
+                                {/* <img src={searchIcon} alt="" /> */}
                                 <Link to="/wishlist">
                                     <img src={heartIcon} alt="" />
                                 </Link>

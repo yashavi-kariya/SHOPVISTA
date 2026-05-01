@@ -18,6 +18,7 @@ import couponRoutes from "./routes/couponRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js"; // 👈 ADD THIS
 
 const app = express();
 dbconnect();
@@ -37,7 +38,7 @@ app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 app.use("/products", express.static(path.join(__dirname, "..", "..", "public", "products")));
 
-// ── Upload Route ──────────────────────────────────────────────────────
+// ── Upload Route ────────────────────────────────────────────────
 app.post("/api/upload", upload.single("image"), (req, res) => {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
     res.json({ url: req.file.path });
@@ -54,6 +55,8 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/payment", paymentRoutes); //  ADD THIS
+
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, "0.0.0.0", () => {
