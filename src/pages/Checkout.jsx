@@ -68,10 +68,16 @@ const Checkout = () => {
                 },
             };
 
-            // Save order in DB
+            // ✅ ADD THIS ABOVE API CALL
+            const cleanItems = displayItems.map(item => ({
+                product: item.product?._id || item.productId,
+                quantity: Number(item.quantity) || 1,
+                price: Number(item.price || item.product?.price) || 0
+            }));
+            // ✅ THEN USE cleanItems HERE
             const orderRes = await api.post("/api/orders", {
                 billing: form,
-                items: displayItems,
+                items: cleanItems,   // ✅ FIXED
                 totalAmount: grandTotal,
                 coupon: coupon || null,
                 discount: buyNowItem || (id && product) ? 0 : discount || 0,

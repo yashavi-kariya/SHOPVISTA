@@ -40,12 +40,12 @@ export const createOrder = async (req, res) => {
         const order = new Order({
             user: userId,
             items: mappedItems,
-            totalAmount: req.body.totalAmount || req.body.totalPrice, // 👈 FIX: support both
+            totalAmount: req.body.totalAmount || req.body.totalPrice,
             coupon: req.body.coupon || null,
             discount: req.body.discount || 0,
-            billingDetails: req.body.billing || null,  // 👈 FIX: save billing
-            status: "Pending",                          // 👈 FIX: start as Pending
-            paymentStatus: "Unpaid",                    // 👈 FIX: add payment status
+            billingDetails: req.body.billing || null,
+            status: "Pending",
+            paymentStatus: "Unpaid",
         });
 
         const savedOrder = await order.save();
