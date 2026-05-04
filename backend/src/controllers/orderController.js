@@ -9,34 +9,51 @@ export const createOrder = async (req, res) => {
         const userId = req.user.id;
         const items = req.body.items;
 
+        console.log("BODY:", items);
+
         if (!items || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ message: "Cart is empty" });
         }
 
         for (const item of items) {
-            const product = await Product.findById(item.product || item.productId);
+
+            // ✅ FIX: ensure only ID is passed
+            const productId =
+                typeof item.product === "object"
+                    ? item.product._id
+                    : item.product || item.productId;
+
+            if (!productId) {
+                return res.status(400).json({ message: "Product ID missing" });
+            }
+
+            const product = await Product.findById(productId);
 
             if (!product) {
                 return res.status(404).json({ message: "Product not found" });
             }
 
-            if (item.variantId) {
-                const variant = product.variants.id(item.variantId);
-                if (!variant) return res.status(404).json({ message: "Variant not found" });
-                if (variant.stock < item.quantity) return res.status(400).json({ message: `${product.name} stock not available` });
-                variant.stock -= item.quantity;
-            } else {
-                if (product.stock < item.quantity) return res.status(400).json({ message: `${product.name} stock not available` });
+            if (product.stock < item.quantity) {
+                return res.status(400).json({ message: `${product.name} stock not available` });
             }
+
             product.stock -= item.quantity;
             product.sold += item.quantity;
+
             await product.save();
         }
+
+        // ✅ FIX: clean mapping
         const mappedItems = items.map(item => ({
-            product: item.product || item.productId,
-            quantity: item.quantity,
-            price: item.price || item.product?.price || 0,
+            product:
+                typeof item.product === "object"
+                    ? item.product._id
+                    : item.product || item.productId,
+
+            quantity: Number(item.quantity) || 1,
+            price: Number(item.price) || 0,
         }));
+
         const order = new Order({
             user: userId,
             items: mappedItems,
@@ -44,21 +61,11 @@ export const createOrder = async (req, res) => {
             coupon: req.body.coupon || null,
             discount: req.body.discount || 0,
             billingDetails: req.body.billing || null,
-            status: "Pending",
-            paymentStatus: "Unpaid",
+            status: "Processing",
         });
 
         const savedOrder = await order.save();
 
-        // Mark coupon as used
-        if (req.body.coupon) {
-            await Coupon.findOneAndUpdate(
-                { code: req.body.coupon },
-                { isUsed: true }
-            );
-        }
-
-        // Clear cart
         await Cart.findOneAndUpdate(
             { user: userId },
             { $set: { items: [] } }
@@ -68,7 +75,7 @@ export const createOrder = async (req, res) => {
 
     } catch (error) {
         console.error("ORDER ERROR:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: error.message });
     }
 };
 
