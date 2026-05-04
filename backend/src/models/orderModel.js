@@ -29,9 +29,10 @@ const orderSchema = new mongoose.Schema(
             {
                 product: {
                     type: mongoose.Schema.Types.ObjectId,
-                    ref: "Product", // ✅ FIX
+                    ref: "Product", // FIX
                     required: true
                 },
+                name: String,
                 price: Number,
                 quantity: Number
             }

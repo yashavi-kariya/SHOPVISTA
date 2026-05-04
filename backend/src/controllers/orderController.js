@@ -9,15 +9,14 @@ export const createOrder = async (req, res) => {
         const userId = req.user.id;
         const items = req.body.items;
 
-        console.log("BODY:", items);
-
         if (!items || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ message: "Cart is empty" });
         }
 
+        const mappedItems = [];
+
         for (const item of items) {
 
-            // FIX: ensure only ID is passed
             const productId =
                 typeof item.product === "object"
                     ? item.product._id
@@ -34,25 +33,24 @@ export const createOrder = async (req, res) => {
             }
 
             if (product.stock < item.quantity) {
-                return res.status(400).json({ message: `${product.name} stock not available` });
+                return res.status(400).json({
+                    message: `${product.name} stock not available`
+                });
             }
 
+            // ✅ Update stock
             product.stock -= item.quantity;
             product.sold += item.quantity;
-
             await product.save();
+
+            // ✅ Build order item at same time
+            mappedItems.push({
+                product: productId,
+                name: product.name,
+                price: product.price,
+                quantity: item.quantity
+            });
         }
-
-        // ✅ FIX: clean mapping
-        const mappedItems = items.map(item => ({
-            product:
-                typeof item.product === "object"
-                    ? item.product._id
-                    : item.product || item.productId,
-
-            quantity: Number(item.quantity) || 1,
-            price: Number(item.price) || 0,
-        }));
 
         const order = new Order({
             user: userId,
@@ -78,7 +76,6 @@ export const createOrder = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
 /* =========================
    GET ALL ORDERS
 ========================= */
