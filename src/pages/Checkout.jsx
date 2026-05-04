@@ -12,7 +12,7 @@ const Checkout = () => {
     const [product, setProduct] = useState(null);
     const [placing, setPlacing] = useState(false);
 
-    // 👇 ADD THESE NEW STATES
+    // ADD THESE NEW STATES
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("card");
     const [paymentProcessing, setPaymentProcessing] = useState(false);

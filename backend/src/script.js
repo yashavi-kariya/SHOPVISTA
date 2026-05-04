@@ -1,11 +1,12 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import path from "path";
-import dotenv from "dotenv";
+// import dotenv from "dotenv";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { upload } from "./config/cloudinary.js";
-dotenv.config();
+// dotenv.config();
 
 import dbconnect from "./config/dbConnect.js";
 import productRoutes from "./routes/productRoutes.js";
