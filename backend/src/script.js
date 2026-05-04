@@ -27,7 +27,18 @@ dbconnect();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(cors({
-    origin: ["https://shopvista-zreu.vercel.app", "http://localhost:5173"],
+    origin: function (origin, callback) {
+        const allowed = [
+            "https://shopvista-zreu.vercel.app",
+            "http://localhost:5173"
+        ];
+        // Allow any vercel.app preview URL for this project
+        if (!origin || allowed.includes(origin) || origin.endsWith(".vercel.app")) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
