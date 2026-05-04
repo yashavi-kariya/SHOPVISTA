@@ -17,7 +17,7 @@ export const createOrder = async (req, res) => {
 
         for (const item of items) {
 
-            // ✅ FIX: ensure only ID is passed
+            // FIX: ensure only ID is passed
             const productId =
                 typeof item.product === "object"
                     ? item.product._id

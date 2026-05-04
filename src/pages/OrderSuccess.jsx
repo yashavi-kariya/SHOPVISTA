@@ -327,7 +327,13 @@ const Orders = () => {
 
                     {/* ORDER CARDS */}
                     {!loading && filteredOrders.map((order, idx) => {
-                        const status = statusConfig[order.status] || statusConfig.pending;
+                        const status = statusConfig[order.status] || {
+                            color: "#6b7280",
+                            bg: "#f3f4f6",
+                            border: "#e5e7eb",
+                            icon: "❓",
+                            label: order.status || "Unknown"
+                        };
                         const isExpanded = expandedOrder === order._id;
                         const canCancel = ["Pending", "Processing"].includes(order.status);
 
