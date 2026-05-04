@@ -5,6 +5,9 @@ import mongoose from "mongoose";
 import Coupon from "../models/Coupon.js";
 
 export const createOrder = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
         const userId = req.user.id;
         const items = req.body.items;
@@ -16,7 +19,6 @@ export const createOrder = async (req, res) => {
         const mappedItems = [];
 
         for (const item of items) {
-
             const productId =
                 typeof item.product === "object"
                     ? item.product._id
@@ -26,24 +28,22 @@ export const createOrder = async (req, res) => {
                 return res.status(400).json({ message: "Product ID missing" });
             }
 
-            const product = await Product.findById(productId);
+            // Atomic stock check + deduct (no race condition)
+            const product = await Product.findOneAndUpdate(
+                { _id: productId, stock: { $gte: item.quantity } },
+                { $inc: { stock: -item.quantity, sold: item.quantity } },
+                { new: true, session }
+            );
 
             if (!product) {
-                return res.status(404).json({ message: "Product not found" });
+                // Could be not found OR out of stock
+                const exists = await Product.findById(productId).session(session);
+                const msg = !exists
+                    ? "Product not found"
+                    : `${exists.name} has insufficient stock`;
+                return res.status(400).json({ message: msg });
             }
 
-            if (product.stock < item.quantity) {
-                return res.status(400).json({
-                    message: `${product.name} stock not available`
-                });
-            }
-
-            // ✅ Update stock
-            product.stock -= item.quantity;
-            product.sold += item.quantity;
-            await product.save();
-
-            // ✅ Build order item at same time
             mappedItems.push({
                 product: productId,
                 name: product.name,
@@ -52,28 +52,38 @@ export const createOrder = async (req, res) => {
             });
         }
 
+        //  Always calculate server-side
+        const totalAmount = mappedItems.reduce(
+            (sum, item) => sum + item.price * item.quantity, 0
+        );
+
         const order = new Order({
             user: userId,
             items: mappedItems,
-            totalAmount: req.body.totalAmount || req.body.totalPrice,
+            totalAmount,
             coupon: req.body.coupon || null,
             discount: req.body.discount || 0,
             billingDetails: req.body.billing || null,
             status: "Processing",
         });
 
-        const savedOrder = await order.save();
+        const savedOrder = await order.save({ session });
 
         await Cart.findOneAndUpdate(
             { user: userId },
-            { $set: { items: [] } }
+            { $set: { items: [] } },
+            { session }
         );
 
-        res.json(savedOrder);
+        await session.commitTransaction();
+        res.status(201).json(savedOrder);
 
     } catch (error) {
+        await session.abortTransaction();
         console.error("ORDER ERROR:", error);
         res.status(500).json({ message: error.message });
+    } finally {
+        session.endSession();
     }
 };
 /* =========================

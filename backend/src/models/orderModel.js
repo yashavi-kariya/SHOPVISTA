@@ -29,7 +29,7 @@ const orderSchema = new mongoose.Schema(
             {
                 product: {
                     type: mongoose.Schema.Types.ObjectId,
-                    ref: "Product", // FIX
+                    ref: "Product",
                     required: true
                 },
                 name: String,
@@ -37,7 +37,6 @@ const orderSchema = new mongoose.Schema(
                 quantity: Number
             }
         ],
-
         totalAmount: Number,
         coupon: { type: String, default: null },
         discount: { type: Number, default: 0 },
@@ -51,7 +50,6 @@ const orderSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
-
 const Order = mongoose.model("Order", orderSchema);
 
 export default Order;
