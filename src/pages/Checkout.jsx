@@ -68,11 +68,12 @@ const Checkout = () => {
                 },
             };
 
-            // ✅ ADD THIS ABOVE API CALL
+            //  ADD THIS ABOVE API CALL
             const cleanItems = displayItems.map(item => ({
                 product: item.product?._id || item.productId,
+                name: item.product?.name || item.name || "",   // ← add this
+                price: Number(item.price || item.product?.price) || 0,
                 quantity: Number(item.quantity) || 1,
-                price: Number(item.price || item.product?.price) || 0
             }));
             // ✅ THEN USE cleanItems HERE
             const orderRes = await api.post("/api/orders", {
@@ -246,7 +247,7 @@ const Checkout = () => {
                                     </div>
                                     <div style={{ padding: "16px 24px", maxHeight: "260px", overflowY: "auto" }}>
                                         {displayItems.map((item, index) => (
-                                            <div className="item-line" key={`${item.productId || item.product?._id}-${index}`}>
+                                            <div className="item-line" key={`${item.product?._id || item.productId || index}-${index}`}>
                                                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                                                     <img src={item.product?.img || "/placeholder.png"} alt={item.product?.name} style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "8px", border: "1px solid #ede9e3", flexShrink: 0 }} />
                                                     <div>

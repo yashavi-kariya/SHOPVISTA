@@ -16,7 +16,6 @@ export const createOrder = async (req, res) => {
             return res.status(400).json({ message: "Cart is empty" });
         }
         const mappedItems = [];
-
         for (const item of items) {
             const productId =
                 typeof item.product === "object"
@@ -43,16 +42,14 @@ export const createOrder = async (req, res) => {
 
             mappedItems.push({
                 product: productId,
-                name: product.name,      // ✅ saved at order time
+                name: product.name,
                 price: product.price,
                 quantity: item.quantity
             });
         }
-
         const totalAmount = mappedItems.reduce(
             (sum, item) => sum + item.price * item.quantity, 0
         );
-
         const order = new Order({
             user: userId,
             items: mappedItems,
@@ -62,15 +59,12 @@ export const createOrder = async (req, res) => {
             billingDetails: req.body.billing || null,
             status: "Processing",
         });
-
         const savedOrder = await order.save({ session });
-
         await Cart.findOneAndUpdate(
             { user: userId },
             { $set: { items: [] } },
             { session }
         );
-
         await session.commitTransaction();
         res.status(201).json(savedOrder);
 
@@ -86,18 +80,16 @@ export const createOrder = async (req, res) => {
 /* =========================
    GET ALL ORDERS
 ========================= */
+
 export const getOrders = async (req, res) => {
     try {
         const isAdmin = req.user.role === "admin";
         const query = isAdmin ? {} : { user: req.user.id };
-
         const orders = await Order.find(query)
             .populate("user", "name email")  // ✅ only populate user
             // ❌ removed: .populate("items.product") — name is already saved
             .sort({ createdAt: -1 });
-
         res.json(orders);
-
     } catch (error) {
         console.error("Get Orders Error:", error);
         res.status(500).json({ message: "Error fetching orders" });
@@ -111,7 +103,7 @@ export const getOrderById = async (req, res) => {
     try {
         const order = await Order.findById(req.params.id)
             .populate("user", "name email");  // ✅ only populate user
-        // ❌ removed: .populate("items.product")
+        //  removed: .populate("items.product")
 
         if (!order) return res.status(404).json({ message: "Order not found" });
 
@@ -124,10 +116,11 @@ export const getOrderById = async (req, res) => {
 /* =========================
    GET MY ORDERS
 ========================= */
+
 export const getMyOrders = async (req, res) => {
     try {
         const orders = await Order.find({ user: req.user.id })
-            // ❌ removed: .populate("items.product") — name is already saved
+            //  removed: .populate("items.product") — name is already saved
             .sort({ createdAt: -1 });
 
         res.json(orders);
@@ -176,7 +169,6 @@ export const cancelOrder = async (req, res) => {
         if (order.user.toString() !== req.user.id.toString()) {
             return res.status(403).json({ message: "Not authorized" });
         }
-
         order.status = "Cancelled";
         await order.save();
         res.json({ message: "Order cancelled", order });

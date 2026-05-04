@@ -385,21 +385,21 @@ const Orders = () => {
                                                 <div className="item-row" key={i}>
                                                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                                                         <img
-                                                            src={item.product?.img || "/placeholder.png"}
-                                                            alt={item.product?.name}
+                                                            src={item.img || "/placeholder.png"}
+                                                            alt={item.name}
                                                             style={{ width: "48px", height: "48px", borderRadius: "8px", objectFit: "cover", border: "1px solid #ede9e3" }}
                                                         />
                                                         <div>
                                                             <div style={{ fontWeight: "600", fontSize: "14px", color: "#1a1a1a" }}>
-                                                                {item.product?.name || "Product"}
+                                                                {item.name || "Product"}
                                                             </div>
                                                             <div style={{ fontSize: "13px", color: "#888" }}>
-                                                                Qty: {item.quantity} × Rs.{(item.price || item.product?.price || 0).toFixed(2)}
+                                                                Qty: {item.quantity} × Rs.{(item.price || 0).toFixed(2)}
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div style={{ fontWeight: "600", color: "#1a1a1a", fontSize: "14px", flexShrink: 0 }}>
-                                                        Rs.{((item.price || item.product?.price || 0) * item.quantity).toFixed(2)}
+                                                        Rs.{(item.price * item.quantity).toFixed(2)}
                                                     </div>
                                                 </div>
                                             ))}
