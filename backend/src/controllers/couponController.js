@@ -49,7 +49,6 @@ export const getBestCoupon = async (req, res) => {
                 });
             }
         }
-
         // Generate new coupon
         const code = generateCode(tier.prefix);
         const expiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000);

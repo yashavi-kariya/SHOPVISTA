@@ -28,8 +28,6 @@ export const registerUser = async (req, res) => {
             password: hashedPassword,
             role: "user"
         });
-
-
         res.status(201).json({
             message: "Account created successfully",
             token: generateToken(user._id, user.role),

@@ -4,9 +4,6 @@ import Cart from "../models/cartModel.js";
 import mongoose from "mongoose";
 import Coupon from "../models/Coupon.js";
 
-/* =========================
-   CREATE ORDER
-========================= */
 export const createOrder = async (req, res) => {
     try {
         const userId = req.user.id;
