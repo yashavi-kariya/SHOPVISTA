@@ -36,7 +36,10 @@ const Category = () => {
 
     useEffect(() => {
         api.get("/api/blogs")
-            .then(res => setBlogs(res.data.slice(0, 4)))
+            .then(res => {
+                const list = Array.isArray(res.data) ? res.data : res.data.blogs || res.data.data || [];
+                setBlogs(list.slice(0, 4));
+            })
             .catch(err => console.error(err));
     }, []);
 

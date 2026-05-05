@@ -25,7 +25,6 @@ export const createOrder = async (req, res) => {
             if (!productId) {
                 return res.status(400).json({ message: "Product ID missing" });
             }
-
             const product = await Product.findOneAndUpdate(
                 { _id: productId, stock: { $gte: item.quantity } },
                 { $inc: { stock: -item.quantity, sold: item.quantity } },
@@ -39,10 +38,10 @@ export const createOrder = async (req, res) => {
                     : `${exists.name} has insufficient stock`;
                 return res.status(400).json({ message: msg });
             }
-
             mappedItems.push({
                 product: productId,
                 name: product.name,
+                img: product.img || "",
                 price: product.price,
                 quantity: item.quantity
             });

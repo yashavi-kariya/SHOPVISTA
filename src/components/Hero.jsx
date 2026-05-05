@@ -1,10 +1,10 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules";
 
 // Swiper Styles
 import "swiper/css";
-import "swiper/css/navigation";
+// import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 // Images
@@ -32,10 +32,10 @@ const Hero = () => {
     return (
         <section className="hero">
             <Swiper
-                modules={[Navigation, Pagination, Autoplay]}
-                autoplay={{ delay: 5000 }}
+                modules={[Pagination, Autoplay]}
+                autoplay={{ delay: 4000 }}
                 loop={true}
-                navigation={true}
+                navigation={false}
                 pagination={{ clickable: true }}
                 className="hero__slider"
             >
