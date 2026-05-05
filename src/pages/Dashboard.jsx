@@ -100,7 +100,7 @@ const Dashboard = () => {
                 setUser(userData);
                 if (userData.role === "admin") { navigate("/admin-dashboard"); return; }
                 fetchMessages(userData.email);
-                return api.get("/api/orders", { headers });
+                return api.get("/api/orders/my", { headers });
             })
             .then((res) => { if (res) setOrders(res.data); })
             .catch(() => setError("Something went wrong. Please try again."))
@@ -370,5 +370,4 @@ const Dashboard = () => {
         </>
     );
 };
-
 export default Dashboard;
