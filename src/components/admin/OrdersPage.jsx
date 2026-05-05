@@ -72,7 +72,7 @@ const OrdersPage = ({ token, toggleSidebar, sidebarOpen }) => {
     };
 
     const Badge = ({ status }) => {
-        const s = STATUS_MAP[status] || STATUS_MAP.processing;
+        const s = STATUS_MAP[status] || { bg: "#f3f4f6", color: "#374151", dot: "#9ca3af", label: status || "Unknown" };
         return (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 500, background: s.bg, color: s.color }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
@@ -132,6 +132,7 @@ const OrdersPage = ({ token, toggleSidebar, sidebarOpen }) => {
             <div className="op-toolbar">
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by user ID or name..." />
                 <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                    <option value="all">All Statuses</option>  {/* ← add this */}
                     <option value="Delivered">Delivered</option>
                     <option value="Processing">Processing</option>
                     <option value="Shipped">Shipped</option>

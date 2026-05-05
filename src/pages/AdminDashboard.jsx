@@ -14,7 +14,6 @@ import AdminMessages from "../components/admin/AdminMessages";
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-
     const [products, setProducts] = useState([]);
     const [activeTab, setActiveTab] = useState("dashboard");
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -94,3 +93,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

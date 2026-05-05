@@ -9,7 +9,6 @@ const statusColors = {
     cancelled: { bg: "#fee2e2", text: "#991b1b" },
     pending: { bg: "#ede9fe", text: "#5b21b6" },
 };
-
 const statusIcons = {
     delivered: "✓",
     processing: "⏳",
@@ -17,7 +16,6 @@ const statusIcons = {
     cancelled: "✕",
     pending: "◷",
 };
-
 const STYLES = `
 @keyframes db-fadeUp {
     from { opacity: 0; transform: translateY(16px); }
@@ -114,7 +112,7 @@ const Dashboard = () => {
 
     const fetchMessages = async (emailOverride) => {
         const email = emailOverride || user.email;
-        // console.log("fetchMessages called with email:", email); // ← add
+
         if (!email) return;
         setMessagesLoading(true);
         try {
@@ -122,10 +120,9 @@ const Dashboard = () => {
             const { data } = await api.get(`/api/messages/my?email=${email}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            // console.log("messages received:", data); // ← add
+
             setMessages(data);
         } catch (e) {
-            // console.error("Messages error:", e.response?.status, e.response?.data); // ← add
         }
         setMessagesLoading(false);
     };
@@ -196,32 +193,6 @@ const Dashboard = () => {
                             Logout
                         </button>
                     </div>
-
-                    {/* <div className="db2-stats">
-                        {[
-                            { label: "Total Orders", value: orders.length },
-                            { label: "Delivered", value: deliveredCount },
-                            { label: "Total Spent", value: `₹${totalSpent.toLocaleString("en-IN")}`, red: true },
-                        ].map((s, i) => (
-                            <div key={s.label} className="db2-stat" style={{ animationDelay: `${i * 80}ms` }}>
-                                <p className="db2-stat__label">{s.label}</p>
-                                <p className={`db2-stat__val${s.red ? " red" : ""}`}>{s.value}</p>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Tabs */}
-                    {/* <div className="db2-tabs">
-                        {[{ id: "orders", label: "My Orders" }, { id: "profile", label: "Profile" }].map((t) => (
-                            <button key={t.id} className={`db2-tab ${activeTab === t.id ? "active" : ""}`} onClick={() => setActiveTab(t.id)}>
-                                {t.label}
-                            </button>
-                        ))}
-                        <button className="db2-tab" style={{ marginLeft: "auto", color: "#e53935" }} onClick={logout}>
-                            Logout
-                        </button>
-                    </div> */}
-
                     {/* Orders Tab */}
                     {activeTab === "orders" && (
                         <section>
