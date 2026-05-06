@@ -194,20 +194,31 @@ export const CartProvider = ({ children }) => {
 
         if (config) {
             try {
-                await api.post(`${API_BASE}/add`, { productId: product._id, quantity: product.quantity || 1 }, config);
+                await api.post(`${API_BASE}/add`, { productId: product._id, quantity: product.quantity || 1, variantId: product.variantId }, config);
                 await fetchCart(); // ← await so state updates immediately
             } catch (err) {
                 console.error("Add to cart failed:", err);
             }
         } else {
-            const existing = cartItems.find(i => i.productId === product._id);
+            const existing = cartItems.find(i =>
+                i.productId === product._id &&
+                i.variantId === product.variantId
+            );
             let updatedCart;
             if (existing) {
                 updatedCart = cartItems.map(i =>
                     i.productId === product._id ? { ...i, quantity: i.quantity + 1 } : i
                 );
             } else {
-                updatedCart = [...cartItems, { productId: product._id, quantity: 1, product }];
+                updatedCart = [
+                    ...cartItems,
+                    {
+                        productId: product._id,
+                        quantity: 1,
+                        product,
+                        variantId: product.variantId
+                    }
+                ];
             }
             setCartItems(updatedCart);
             localStorage.setItem("cart", JSON.stringify(updatedCart));

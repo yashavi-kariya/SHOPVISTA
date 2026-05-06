@@ -40,7 +40,13 @@ const Product = () => {
         e.preventDefault();
         e.stopPropagation();
         if (!isLoggedIn) { navigate("/login"); return; }
-        toggleWishlist(product);
+        toggleWishlist({
+            ...product,
+            variantId: null,
+            color: null,
+            size: null,
+            img: product.images?.[0] || product.img
+        });
     };
 
     const handleCompare = (e, product) => {
@@ -71,8 +77,8 @@ const Product = () => {
 
     const getImgUrl = (path) => {
         if (!path) return "/no-image.png";
-        if (path.startsWith("http")) return path;
-        return `${import.meta.env.VITE_API_URL || ""}${path}`;
+        if (path.startsWith("http") || path.startsWith("/")) return path;
+        return `${import.meta.env.VITE_API_URL || ""}/${path}`;
     };
 
     const goToProduct = (product) => {
@@ -128,7 +134,7 @@ const Product = () => {
                             ))
                         ) : products.length > 0 ? (
                             products.map((product) => {
-                                const wishlisted = isInWishlist(product._id);
+                                const wishlisted = isInWishlist(product._id, null)
                                 const inCart = isInCart(product._id);
 
                                 return (

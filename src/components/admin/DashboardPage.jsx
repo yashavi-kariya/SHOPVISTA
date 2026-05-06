@@ -160,7 +160,7 @@ const DashboardPage = ({ toggleSidebar, sidebarOpen }) => {
             .then(res => setOrders(Array.isArray(res.data) ? res.data : []))
             .catch(() => { });
 
-        api.get("/api/users", h)
+        api.get("/api/users/admin/users", h)
             .then(res => setUsers(Array.isArray(res.data) ? res.data : []))
             .catch(() => { });
     }, []);

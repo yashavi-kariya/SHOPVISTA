@@ -14,16 +14,26 @@ export const WishlistProvider = ({ children }) => {
 
     const toggleWishlist = (product) => {
         setWishlist((prev) => {
-            const exists = prev.find((p) => p._id === product._id); // ✅ use _id
+            const exists = prev.find((p) =>
+                p._id === product._id &&
+                (p.variantId || null) === (product.variantId || null)
+            );
             if (exists) {
-                return prev.filter((p) => p._id !== product._id); // remove
+                return prev.filter((p) =>
+                    !(p._id === product._id &&
+                        (p.variantId || null) === (product.variantId || null))
+                ); // remove
             } else {
                 return [...prev, product]; // add
             }
         });
     };
 
-    const isInWishlist = (_id) => wishlist.some((p) => p._id === _id);
+    const isInWishlist = (_id, variantId = null) =>
+        wishlist.some((p) =>
+            p._id === _id &&
+            (p.variantId || null) === (variantId || null)
+        );
 
     return (
         <WishlistContext.Provider value={{ wishlist, toggleWishlist, isInWishlist }}>

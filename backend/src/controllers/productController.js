@@ -70,34 +70,71 @@ export const addProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
     try {
         const { variants, subCategory, collection, images, img, ...rest } = req.body;
+
         const updateData = {
             ...rest,
             subCategory: subCategory || null,
             collection: collection || "none",
-            img: images?.[0] || img || "",        // ← ADD THIS
-            images: images || (img ? [img] : []), // ← ADD THIS
         };
 
+        // Only overwrite image fields when the caller actually sent them
+        if (images !== undefined || img !== undefined) {
+            updateData.img = images?.[0] || img || "";
+            updateData.images = images || (img ? [img] : []);
+        }
+
         if (variants) {
+            const prices = variants.map(v => v.price).filter(Boolean);
             updateData.variants = variants;
-            updateData.price = Math.min(...variants.map(v => v.price).filter(Boolean));
+            updateData.price = prices.length ? Math.min(...prices) : 0;
             updateData.stock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
             updateData.colors = [...new Set(variants.map(v => v.attributes?.color).filter(Boolean))];
             updateData.sizes = [...new Set(variants.map(v => v.attributes?.size).filter(Boolean))];
         }
 
-        const updatedProduct = await Product.findByIdAndUpdate(
+        const updated = await Product.findByIdAndUpdate(
             req.params.id,
             updateData,
             { new: true, runValidators: true }
         );
 
-        if (!updatedProduct) return res.status(404).json({ message: "Product not found" });
-        res.json(updatedProduct);
+        if (!updated) return res.status(404).json({ message: "Product not found" });
+        res.json(updated);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+// export const updateProduct = async (req, res) => {
+//     try {
+//         const { variants, subCategory, collection, images, img, ...rest } = req.body;
+//         const updateData = {
+//             ...rest,
+//             subCategory: subCategory || null,
+//             collection: collection || "none",
+//             img: images?.[0] || img || "",        // ← ADD THIS
+//             images: images || (img ? [img] : []), // ← ADD THIS
+//         };
+
+//         if (variants) {
+//             updateData.variants = variants;
+//             updateData.price = Math.min(...variants.map(v => v.price).filter(Boolean));
+//             updateData.stock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+//             updateData.colors = [...new Set(variants.map(v => v.attributes?.color).filter(Boolean))];
+//             updateData.sizes = [...new Set(variants.map(v => v.attributes?.size).filter(Boolean))];
+//         }
+
+//         const updatedProduct = await Product.findByIdAndUpdate(
+//             req.params.id,
+//             updateData,
+//             { new: true, runValidators: true }
+//         );
+
+//         if (!updatedProduct) return res.status(404).json({ message: "Product not found" });
+//         res.json(updatedProduct);
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// };
 
 // GET single product (Updates views automatically)
 export const getSingleProduct = async (req, res) => {
