@@ -3,6 +3,7 @@ import { useCart } from "../context/CartContext";
 import api from "../api";
 import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
 
+
 const Checkout = () => {
     const { cartItems, subtotal, clearCart } = useCart();
     const navigate = useNavigate();
@@ -11,12 +12,12 @@ const Checkout = () => {
     const buyNowItem = location.state?.buyNowItem || null;
     const [product, setProduct] = useState(null);
     const [placing, setPlacing] = useState(false);
-
-    // ADD THESE NEW STATES
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("card");
     const [paymentProcessing, setPaymentProcessing] = useState(false);
     const [savedOrderId, setSavedOrderId] = useState(null);
+    const [savedDiscount] = useState(() => Number(localStorage.getItem("discount")) || 0);
+    const [savedCoupon] = useState(() => localStorage.getItem("coupon") || "");
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -27,13 +28,11 @@ const Checkout = () => {
                 .catch(err => console.error("Product fetch error:", err));
         }
     }, [id]);
-
     const [form, setForm] = useState({
         firstName: "", lastName: "", country: "",
         address: "", city: "", state: "",
         zip: "", phone: "", email: "", notes: "",
     });
-
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
     const displayItems = buyNowItem
@@ -42,23 +41,42 @@ const Checkout = () => {
             ? [{ productId: product._id, quantity: 1, product }]
             : cartItems;
 
-    const total = buyNowItem
-        ? buyNowItem.price * buyNowItem.quantity
-        : id && product ? product.price : subtotal;
+    // useEffect(() => {
+    //     const hasItems = displayItems.length > 0;
 
-    const discount = Number(localStorage.getItem("discount")) || 0;
-    const coupon = localStorage.getItem("coupon") || "";
-    const finalTotal = total - discount;
+    //     if (!hasItems) {
+    //         localStorage.removeItem("coupon");
+    //         localStorage.removeItem("discount");
+    //     }
+    // }, [displayItems]);
+
+    //  STEP 2: hasItems
+    const hasItems = displayItems.length > 0;
+
+    //  STEP 3: total (ONLY ONCE)
+    const total = hasItems
+        ? (buyNowItem
+            ? buyNowItem.price * buyNowItem.quantity
+            : id && product
+                ? product.price
+                : subtotal)
+        : 0;
+
+    // ✅ STEP 4: discount
+    const discount = hasItems ? Math.min(savedDiscount, total) : 0;
+    const coupon = hasItems ? savedCoupon : "";
+    // ✅ STEP 5: final pricing
+    const finalTotal = Math.max(0, total - discount);
+
     const freeLimit = 1000;
     const shippingCharge = finalTotal >= freeLimit ? 0 : 79;
+
     const grandTotal = finalTotal + shippingCharge;
 
-    // ── STEP 1: Place Order → Save in DB → Show Payment Modal
     const placeOrder = async (e) => {
         e.preventDefault();
         if (displayItems.length === 0) { alert("Your cart is empty!"); return; }
         setPlacing(true);
-
         try {
             const token = localStorage.getItem("token");
             const config = {
@@ -67,27 +85,27 @@ const Checkout = () => {
                     "Content-Type": "application/json"
                 },
             };
-
-            //  ADD THIS ABOVE API CALL
             const cleanItems = displayItems.map(item => ({
                 product: item.product?._id || item.productId,
-                name: item.product?.name || item.name || "",   // ← add this
-                price: Number(item.price || item.product?.price) || 0,
+                name: item.product?.name || item.name || "",
+                price: Number(item.price) || Number(item.product?.price) || 0,
                 quantity: Number(item.quantity) || 1,
+                img: item.product?.img || item.img || "",
+                color: item.selectedColor || item.color || null,
+                size: item.selectedSize || item.size || null,
             }));
-            // ✅ THEN USE cleanItems HERE
+            console.log("=== PLACING ORDER totalAmount:", grandTotal, "discount:", discount, "savedDiscount:", savedDiscount);
             const orderRes = await api.post("/api/orders", {
                 billing: form,
-                items: cleanItems,   // ✅ FIXED
+                items: cleanItems,
                 totalAmount: grandTotal,
+                subtotal: total,
                 coupon: coupon || null,
-                discount: buyNowItem || (id && product) ? 0 : discount || 0,
+                discount: (buyNowItem || (id && product)) ? 0 : discount,
+                shippingCharge: shippingCharge,
             }, config);
-
-            // Save order ID and show payment modal
             setSavedOrderId(orderRes.data._id);
             setShowPaymentModal(true);
-
         } catch (error) {
             console.error("Order error:", error);
             alert("Failed to place order. Please try again.");
@@ -95,36 +113,26 @@ const Checkout = () => {
             setPlacing(false);
         }
     };
-
-    // ── STEP 2: Mock Payment → Confirm Order
     const handleMockPayment = async () => {
         setPaymentProcessing(true);
-
-        // Simulate payment delay
         await new Promise(resolve => setTimeout(resolve, 2500));
-
         try {
             const token = localStorage.getItem("token");
             const config = {
                 headers: { Authorization: `Bearer ${token}` }
             };
-
-            // Confirm order
+            console.log("Sending totalAmount:", grandTotal)
             await api.post("/api/payment/verify",
                 { orderId: savedOrderId },
                 config
             );
-
-            // Cleanup
             if (!buyNowItem && !id) clearCart();
             localStorage.removeItem("discount");
             localStorage.removeItem("coupon");
-
             setShowPaymentModal(false);
             navigate("/order-success", {
                 state: { orderId: savedOrderId }
             });
-
         } catch (error) {
             console.error("Payment error:", error);
             alert("Payment failed. Try again.");
@@ -132,9 +140,8 @@ const Checkout = () => {
             setPaymentProcessing(false);
         }
     };
-
     return (
-        <section style={{ minHeight: "100vh", background: "#f8f7f4", paddingBottom: "60px" }}>
+        <section style={{ minHeight: "100vh", background: "#ffffff", paddingBottom: "60px" }}>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap');
                 .checkout-page * { font-family: 'DM Sans', sans-serif; box-sizing: border-box; }
@@ -163,7 +170,6 @@ const Checkout = () => {
                 .payment-method-option.selected { border-color: #1a1a1a; background: #f8f8f8; }
                 @media (max-width: 768px) { .checkout-grid { flex-direction: column-reverse !important; } .order-card-sticky { position: static !important; } .form-card { padding: 20px; } }
             `}</style>
-
             <div className="checkout-page">
                 {/* HEADER */}
                 <div style={{ background: "#1a1a1a", padding: "36px 0 28px", marginBottom: "36px" }}>
@@ -181,12 +187,9 @@ const Checkout = () => {
                         </div>
                     </div>
                 </div>
-
                 <div className="container">
                     <form onSubmit={placeOrder}>
                         <div className="checkout-grid" style={{ display: "flex", gap: "28px", alignItems: "flex-start" }}>
-
-                            {/* LEFT — BILLING FORM */}
                             <div style={{ flex: "1 1 0", minWidth: 0 }}>
                                 <div className="form-card">
                                     <p className="section-title">Billing Details</p>
@@ -238,7 +241,6 @@ const Checkout = () => {
                                     </div>
                                 </div>
                             </div>
-
                             {/* RIGHT — ORDER SUMMARY */}
                             <div style={{ width: "340px", flexShrink: 0 }}>
                                 <div className="order-card-sticky">
@@ -252,18 +254,18 @@ const Checkout = () => {
                                                     <img src={item.product?.img || "/placeholder.png"} alt={item.product?.name} style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "8px", border: "1px solid #ede9e3", flexShrink: 0 }} />
                                                     <div>
                                                         <div style={{ fontWeight: "600", color: "#1a1a1a" }}>{item.product?.name}</div>
-                                                        <div style={{ fontSize: "12px", color: "#888" }}>Qty: {item.quantity}</div>
+                                                        <div style={{ fontSize: "12px", color: "#828282" }}>Qty: {item.quantity}</div>
                                                     </div>
                                                 </div>
                                                 <div style={{ fontWeight: "600", color: "#1a1a1a", flexShrink: 0 }}>
-                                                    Rs.{((item.price || item.product?.price || 0) * item.quantity).toFixed(2)}
+                                                    Rs.{((Number(item.price) || Number(item.product?.price) || 0) * item.quantity).toFixed(2)}
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                     <div style={{ padding: "16px 24px", borderTop: "1.5px solid #f0ece5" }}>
                                         <div className="summary-row"><span>Subtotal</span><span>Rs.{total.toFixed(2)}</span></div>
-                                        {coupon && discount > 0 && (
+                                        {hasItems && coupon && discount > 0 && total > 0 && (
                                             <div className="summary-row" style={{ color: "#16a34a" }}>
                                                 <span>🎟️ {coupon}</span><span>− Rs.{discount.toFixed(2)}</span>
                                             </div>
@@ -293,12 +295,10 @@ const Checkout = () => {
                     </form>
                 </div>
             </div>
-
             {/* ── PAYMENT MODAL ── */}
             {showPaymentModal && (
                 <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: "20px" }}>
                     <div style={{ background: "#fff", borderRadius: "16px", padding: "32px", width: "100%", maxWidth: "420px", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", fontFamily: "'DM Sans', sans-serif" }}>
-
                         {/* Modal Header */}
                         <div style={{ textAlign: "center", marginBottom: "24px" }}>
                             <div style={{ fontSize: "36px" }}>💳</div>
@@ -307,12 +307,10 @@ const Checkout = () => {
                                 Amount: <strong style={{ color: "#1a1a1a" }}>Rs.{grandTotal.toFixed(2)}</strong>
                             </p>
                         </div>
-
                         {/* Payment Methods */}
                         <p style={{ fontSize: "13px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
                             Select Payment Method
                         </p>
-
                         {[
                             { key: "card", icon: "💳", label: "Credit / Debit Card", sub: "Visa, Mastercard, Rupay" },
                             { key: "upi", icon: "📱", label: "UPI Payment", sub: "GPay, PhonePe, Paytm" },
@@ -332,7 +330,6 @@ const Checkout = () => {
                                 {paymentMethod === method.key && <span style={{ color: "#1a1a1a", fontSize: "18px", fontWeight: "700" }}>✓</span>}
                             </div>
                         ))}
-
                         {/* Card Input */}
                         {paymentMethod === "card" && (
                             <div style={{ marginTop: "12px" }}>
@@ -343,12 +340,10 @@ const Checkout = () => {
                                 </div>
                             </div>
                         )}
-
                         {/* UPI Input */}
                         {paymentMethod === "upi" && (
                             <input defaultValue="success@razorpay" placeholder="UPI ID" style={{ width: "100%", padding: "10px 14px", border: "1.5px solid #e2ddd8", borderRadius: "8px", marginTop: "12px", fontSize: "14px", boxSizing: "border-box" }} />
                         )}
-
                         {/* Pay Button */}
                         <button
                             onClick={handleMockPayment}
@@ -360,7 +355,6 @@ const Checkout = () => {
                                 : <>✓ Pay Rs.{grandTotal.toFixed(2)}</>
                             }
                         </button>
-
                         {/* Cancel */}
                         <button
                             onClick={() => !paymentProcessing && setShowPaymentModal(false)}
@@ -369,7 +363,6 @@ const Checkout = () => {
                         >
                             ✖ Cancel
                         </button>
-
                         <p style={{ textAlign: "center", fontSize: "12px", color: "#aaa", marginTop: "16px", margin: "16px 0 0" }}>
                             🔒 Secure Mock Payment for Testing
                         </p>
@@ -379,332 +372,4 @@ const Checkout = () => {
         </section>
     );
 };
-
 export default Checkout;
-
-// import React, { useEffect, useState } from "react";
-// import { useCart } from "../context/CartContext";
-// import api from "api";
-// import { useNavigate, useParams, useLocation } from "react-router-dom";
-// const Checkout = () => {
-//     const { cartItems, subtotal, clearCart, fetchCart } = useCart();
-//     const navigate = useNavigate();
-//     const { id } = useParams(); // optional: for single product checkout
-//     const location = useLocation();
-//     const buyNowItem = location.state?.buyNowItem || null; // get product from state if coming from Buy Now
-//     const [product, setProduct] = useState(null);
-
-//     useEffect(() => {
-//         if (id) {
-//             api
-//                 .get(`/api/products/${id}`)
-//                 .then((res) => setProduct(res.data))
-//                 .catch((err) => console.error("Product fetch error:", err));
-//         }
-//     }, [id]);
-//     const [form, setForm] = useState({
-//         firstName: "",
-//         lastName: "",
-//         country: "",
-//         address: "",
-//         city: "",
-//         state: "",
-//         zip: "",
-//         phone: "",
-//         email: "",
-//         notes: "",
-//     });
-//     const handleChange = (e) => {
-//         setForm({ ...form, [e.target.name]: e.target.value });
-//     };
-//     const placeOrder = async (e) => {
-//         e.preventDefault();
-//         const displayItems = buyNowItem
-//             ? [buyNowItem]
-//             : id && product
-//                 ? [{ productId: product._id, quantity: 1, product }]
-//                 : cartItems;
-//         if (displayItems.length === 0) {
-//             alert("Your cart is empty!");
-//             return;
-//         }
-//         try {
-//             const token = localStorage.getItem("token");
-//             if (!token) {
-//                 alert("Please login first to place order");
-//                 return;
-//             }
-//             const config = {
-//                 headers: {
-//                     Authorization: `Bearer ${token}`,
-//                     "Content-Type": "application/json",
-//                 },
-//             };
-//             const orderData = {
-//                 billing: form,
-//                 items: displayItems,
-//                 totalPrice: buyNowItem
-//                     ? buyNowItem.price * buyNowItem.quantity
-//                     : id && product
-//                         ? product.price
-//                         : grandTotal,
-//                 coupon: coupon || null,
-//                 discount: buyNowItem || (id && product) ? 0 : discount || 0, // ✅ no discount for buyNow/single product
-//             };
-//             await api.post("/api/orders", orderData, config);
-//             alert("Order placed successfully!");
-//             if (!buyNowItem && !id) clearCart();
-//             localStorage.removeItem("discount");
-//             localStorage.removeItem("coupon");
-//             navigate("/order-success");
-//         } catch (error) {
-//             console.error("Order error:", error);
-//             alert("Failed to place order. Make sure you are logged in.");
-//         }
-//     };
-//     const displayItems = buyNowItem
-//         ? [buyNowItem]
-//         : id && product
-//             ? [{ productId: product._id, quantity: 1, product }]
-//             : cartItems;
-
-//     const total = buyNowItem
-//         ? buyNowItem.price * buyNowItem.quantity
-//         : id && product
-//             ? product.price
-//             : subtotal;
-
-//     const discount = Number(localStorage.getItem("discount")) || 0;
-//     const coupon = localStorage.getItem("coupon") || "";
-//     const finalTotal = total - discount;
-//     const freeLimit = 1000;
-//     const shippingCharge = finalTotal >= freeLimit ? 0 : 79;
-//     const grandTotal = finalTotal + shippingCharge;
-//     return (
-//         <section className="checkout spad">
-//             <style>{`
-//                 @media (max-width: 768px) {
-//                     .checkout__form .row {
-//                         display: flex !important;
-//                         flex-direction: column !important;
-//                     }
-//                     .checkout__form .col-lg-4 {
-//                         order: -1 !important;
-//                     }
-//                     .checkout__form .col-lg-8 {
-//                         order: 1 !important;    }
-//                 }
-//             `}</style>
-//             <div className="container">
-//                 <div className="checkout__form">
-//                     <form onSubmit={placeOrder}>
-//                         <div className="row">
-//                             {/* LEFT SIDE FORM */}
-//                             <div className="col-lg-8 col-md-6">
-//                                 <h6 className="checkout__title">Billing Details</h6>
-
-//                                 <div className="row">
-//                                     <div className="col-lg-6">
-//                                         <div className="checkout__input">
-//                                             <p>First Name<span>*</span></p>
-//                                             <input
-//                                                 type="text"
-//                                                 name="firstName"
-//                                                 value={form.firstName}
-//                                                 onChange={handleChange}
-//                                                 required
-//                                             />
-//                                         </div>
-//                                     </div>
-
-//                                     <div className="col-lg-6">
-//                                         <div className="checkout__input">
-//                                             <p>Last Name<span>*</span></p>
-//                                             <input
-//                                                 type="text"
-//                                                 name="lastName"
-//                                                 value={form.lastName}
-//                                                 onChange={handleChange}
-//                                                 required
-//                                             />
-//                                         </div>
-//                                     </div>
-//                                 </div>
-
-//                                 <div className="checkout__input">
-//                                     <p>Country<span>*</span></p>
-//                                     <input
-//                                         type="text"
-//                                         name="country"
-//                                         value={form.country}
-//                                         onChange={handleChange}
-//                                         required
-//                                     />
-//                                 </div>
-
-//                                 <div className="checkout__input">
-//                                     <p>Address<span>*</span></p>
-//                                     <input
-//                                         type="text"
-//                                         placeholder="Street Address"
-//                                         name="address"
-//                                         value={form.address}
-//                                         onChange={handleChange}
-//                                         required
-//                                         className="checkout__input__add"
-//                                     />
-//                                 </div>
-
-//                                 <div className="checkout__input">
-//                                     <p>Town/City<span>*</span></p>
-//                                     <input
-//                                         type="text"
-//                                         name="city"
-//                                         value={form.city}
-//                                         onChange={handleChange}
-//                                         required
-//                                     />
-//                                 </div>
-
-//                                 <div className="checkout__input">
-//                                     <p>State<span>*</span></p>
-//                                     <input
-//                                         type="text"
-//                                         name="state"
-//                                         value={form.state}
-//                                         onChange={handleChange}
-//                                         required
-//                                     />
-//                                 </div>
-
-//                                 <div className="checkout__input">
-//                                     <p>Postcode / ZIP<span>*</span></p>
-//                                     <input
-//                                         type="text"
-//                                         name="zip"
-//                                         value={form.zip}
-//                                         onChange={handleChange}
-//                                         required
-//                                     />
-//                                 </div>
-
-//                                 <div className="row">
-//                                     <div className="col-lg-6">
-//                                         <div className="checkout__input">
-//                                             <p>Phone<span>*</span></p>
-//                                             <input
-//                                                 type="text"
-//                                                 name="phone"
-//                                                 value={form.phone}
-//                                                 onChange={handleChange}
-//                                                 required
-//                                             />
-//                                         </div>
-//                                     </div>
-
-//                                     <div className="col-lg-6">
-//                                         <div className="checkout__input">
-//                                             <p>Email<span>*</span></p>
-//                                             <input
-//                                                 type="email"
-//                                                 name="email"
-//                                                 value={form.email}
-//                                                 onChange={handleChange}
-//                                                 required
-//                                             />
-//                                         </div>
-//                                     </div>
-//                                 </div>
-//                                 <div className="checkout__input">
-//                                     <p>Order Notes</p>
-//                                     <input
-//                                         type="text"
-//                                         placeholder="Notes about your order..."
-//                                         name="notes"
-//                                         value={form.notes}
-//                                         onChange={handleChange}
-//                                     />
-//                                 </div>
-//                             </div>
-//                             {/* RIGHT SIDE ORDER SUMMARY */}
-//                             <div className="col-lg-4 col-md-6">
-//                                 <div className="checkout__order">
-//                                     <h4 className="order__title">Your Order</h4>
-
-//                                     <div className="checkout__order__products">
-//                                         Product <span>Total</span>
-//                                     </div>
-//                                     <ul className="checkout__total__products">
-//                                         {displayItems.map((item, index) => (
-//                                             <li key={`${item.productId}-${index}`}>
-//                                                 {index + 1}. {item.product.name} × {item.quantity}
-//                                                 <span>Rs.{((item.price || item.product.price) * item.quantity).toFixed(2)}</span>
-//                                             </li>
-//                                         ))}
-//                                     </ul>
-//                                     <ul className="checkout__total__all">
-//                                         <li>
-//                                             Subtotal
-//                                             <span>Rs.{total.toFixed(2)}</span>
-//                                         </li>
-
-//                                         {/* ✅ Show coupon code */}
-//                                         {coupon && discount > 0 && (
-//                                             <li>
-//                                                 Coupon
-//                                                 <span className="text-success fw-bold">{coupon}</span>
-//                                             </li>
-//                                         )}
-
-//                                         {discount > 0 && (
-//                                             <li>
-//                                                 Discount
-//                                                 <span className="text-success">
-//                                                     - Rs.{discount.toFixed(2)}
-//                                                 </span>
-//                                             </li>
-//                                         )}
-
-//                                         <li>
-//                                             Shipping
-//                                             <span>
-//                                                 {shippingCharge === 0 ? "Free" : `Rs.${shippingCharge}`}
-//                                             </span>
-//                                         </li>
-
-//                                         <li>
-//                                             Total
-//                                             <span>Rs.{grandTotal.toFixed(2)}</span>
-//                                         </li>
-//                                     </ul>
-
-//                                     {/* ✅ Savings badge */}
-//                                     {discount > 0 && (
-//                                         <div style={{
-//                                             background: "#e8f5e9",
-//                                             border: "1px dashed green",
-//                                             borderRadius: "8px",
-//                                             padding: "8px 12px",
-//                                             textAlign: "center",
-//                                             marginBottom: "12px",
-//                                             fontSize: "14px",
-//                                             color: "green",
-//                                             fontWeight: "600"
-//                                         }}>
-//                                             🎉 You saved Rs.{discount.toFixed(2)} on this order!
-//                                         </div>
-//                                     )}
-
-//                                     <button type="submit" className="site-btn">
-//                                         PLACE ORDER
-//                                     </button>
-//                                 </div>
-//                             </div>
-//                         </div>
-//                     </form>
-//                 </div>
-//             </div>
-//         </section>
-//     );
-// };
-// export default Checkout;

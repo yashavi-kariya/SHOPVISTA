@@ -19,14 +19,6 @@ const OffcanvasMenu = ({ isOpen, closeMenu }) => {
                         <Link onClick={closeMenu} to="/signin">Sign in</Link>
                         <Link onClick={closeMenu} to="/faqs">FAQs</Link>
                     </div>
-
-                    {/* <div className="offcanvas__top__hover">
-                        <span>Usd <i className="arrow_carrot-down"></i></span>
-                        <ul>
-                            <li>USD</li>
-                            <li>EUR</li>
-                        </ul>
-                    </div> */}
                 </div>
 
                 <div className="offcanvas__nav__option">
@@ -41,11 +33,6 @@ const OffcanvasMenu = ({ isOpen, closeMenu }) => {
                     </Link>
                     <div className="price">$0.00</div>
                 </div>
-
-                {/* Mobile Menu Placeholder */}
-                {/* <div id="mobile-menu-wrap">
-                   
-                </div> */}
 
                 <div className="offcanvas__text">
                     <p>Free shipping, 30-day return or refund guarantee.</p>

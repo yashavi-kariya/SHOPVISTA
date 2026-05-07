@@ -369,7 +369,10 @@ const Orders = () => {
                                             {status.label}
                                         </span>
                                         <span style={{ fontWeight: "700", fontSize: "16px", color: "#1a1a1a" }}>
-                                            Rs.{order.totalPrice?.toFixed(2)}
+                                            {/* Rs.{(order.totalAmount - (order.discount || 0) + (order.shippingCharge || 0) > 0
+                                                ? order.totalAmount
+                                                : order.totalAmount)?.toFixed(2)} */}
+                                            Rs.{Number(order.totalAmount)?.toFixed(2)}
                                         </span>
                                         <span className={`accordion-arrow ${isExpanded ? "open" : ""}`}>▼</span>
                                     </div>
@@ -396,6 +399,11 @@ const Orders = () => {
                                                             <div style={{ fontSize: "13px", color: "#888" }}>
                                                                 Qty: {item.quantity} × Rs.{(item.price || 0).toFixed(2)}
                                                             </div>
+                                                            {(item.color || item.size) && (
+                                                                <div style={{ fontSize: "12px", color: "#aaa", marginTop: "2px" }}>
+                                                                    {item.color && `🎨 ${item.color}`}{item.color && item.size && " · "}{item.size && `📐 ${item.size}`}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div style={{ fontWeight: "600", color: "#1a1a1a", fontSize: "14px", flexShrink: 0 }}>

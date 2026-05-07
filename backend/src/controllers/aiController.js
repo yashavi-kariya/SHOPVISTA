@@ -1,5 +1,4 @@
 import { getAISuggestion } from "../utils/aiHelper.js";
-
 export const customerSuggest = async (req, res) => {
     try {
         const { topic } = req.body;
@@ -15,7 +14,6 @@ Keep suggestions under 80 words. Be professional but friendly. Return only the m
         res.status(500).json({ error: e.message });
     }
 };
-
 export const adminSuggest = async (req, res) => {
     try {
         const { customerName, customerMessage } = req.body;

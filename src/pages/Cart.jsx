@@ -726,7 +726,15 @@ const Cart = () => {
                             )}
                         </div>
 
-                        <Link to="/checkout" className="btn btn-dark w-100 mt-4 py-2">
+                        <Link
+                            to="/checkout"
+                            className="btn btn-dark w-100 mt-4 py-2"
+                            onClick={() => {
+                                console.log("Navigating to checkout");
+                                console.log("localStorage discount:", localStorage.getItem("discount"));
+                                console.log("localStorage coupon:", localStorage.getItem("coupon"));
+                            }}
+                        >
                             Proceed to Checkout
                         </Link>
                     </div>

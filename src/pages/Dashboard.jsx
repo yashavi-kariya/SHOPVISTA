@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 const statusColors = {
     delivered: { bg: "#d1fae5", text: "#065f46" },
     processing: { bg: "#fef3c7", text: "#92400e" },
+    confirmed: { bg: "#dbeafe", text: "#1e40af" },
     shipped: { bg: "#dbeafe", text: "#1e40af" },
     cancelled: { bg: "#fee2e2", text: "#991b1b" },
     pending: { bg: "#ede9fe", text: "#5b21b6" },
@@ -12,6 +13,7 @@ const statusColors = {
 const statusIcons = {
     delivered: "✓",
     processing: "⏳",
+    confirmed: "✅",
     shipped: "🚚",
     cancelled: "✕",
     pending: "◷",
@@ -100,7 +102,18 @@ const Dashboard = () => {
                 fetchMessages(userData.email);
                 return api.get("/api/orders/my", { headers });
             })
-            .then((res) => { if (res) setOrders(res.data); })
+            // .then((res) => { if (res) setOrders(res.data); })
+            .then((res) => {
+                if (res) {
+                    console.log("Orders from API:", res.data.map(o => ({
+                        id: o._id?.slice(-6),
+                        totalAmount: o.totalAmount,
+                        discount: o.discount,
+                        subtotal: o.subtotal
+                    })));
+                    setOrders(res.data);
+                }
+            })
             .catch(() => setError("Something went wrong. Please try again."))
             .finally(() => setLoading(false));
     }, [navigate]);
@@ -128,7 +141,7 @@ const Dashboard = () => {
     };
 
     const totalSpent = orders.reduce((s, o) => s + (o.totalAmount || 0), 0);
-    const deliveredCount = orders.filter((o) => o.status === "delivered").length;
+    const deliveredCount = orders.filter((o) => o.status?.toLowerCase() === "delivered").length;
 
     if (loading) {
         return (
@@ -227,10 +240,15 @@ const Dashboard = () => {
                                                     <div className="db2-items">
                                                         {order.items.map((item, idx) => (
                                                             <div key={idx} className="db2-item">
-                                                                {item.image && <img src={item.image} alt={item.name} className="db2-item__img" />}
+                                                                {(item.img || item.image) && <img src={item.img || item.image} alt={item.name} className="db2-item__img" />}
                                                                 <div>
                                                                     <p className="db2-item__name">{item.name}</p>
                                                                     <p className="db2-item__meta">Qty: {item.quantity} · ₹{item.price?.toLocaleString("en-IN")} each</p>
+                                                                    {(item.color || item.size) && (
+                                                                        <p className="db2-item__meta" style={{ marginTop: "2px" }}>
+                                                                            {item.color && `🎨 ${item.color}`}{item.color && item.size && " · "}{item.size && `📐 ${item.size}`}
+                                                                        </p>
+                                                                    )}
                                                                 </div>
                                                                 <p className="db2-item__total">₹{(item.quantity * item.price)?.toLocaleString("en-IN")}</p>
                                                             </div>
