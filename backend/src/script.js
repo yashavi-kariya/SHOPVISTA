@@ -20,6 +20,7 @@ import blogRoutes from "./routes/blogRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
 
 const app = express();
 dbconnect();
@@ -66,6 +67,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/settings", settingsRoutes);
 
 const PORT = process.env.PORT || 3001;
 

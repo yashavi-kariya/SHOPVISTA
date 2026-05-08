@@ -862,11 +862,13 @@ const ProductCard = ({
         >
             <div className="sv-product-card__pic" onClick={goToProduct}>
                 <img
-                    src={
-                        product.img && product.img.trim() !== ""
-                            ? product.img.replace("/public", "")
-                            : "/placeholder.png"
-                    }
+                    src={(() => {
+                        const src = product.images?.[0] || product.img
+                            || product.variants?.find(v => v.images?.[0])?.images?.[0]
+                            || null;
+                        if (!src || src.trim() === "") return "/placeholder.png";
+                        return src.replace("/public", "");
+                    })()}
                     alt={product.name}
                     loading="lazy"
                 />

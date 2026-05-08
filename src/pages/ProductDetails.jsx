@@ -227,7 +227,7 @@ const ProductDetails = () => {
                 const data = res.data.product || res.data;
                 setProduct(data);
                 const firstColor = data.variants?.[0]?.attributes?.color || data.colors?.[0] || "";
-                const firstSize = data.variants?.[0]?.attributes?.size || data.sizes?.[0] || "";
+                const firstSize = data.variants?.find(v => v.attributes?.size)?.attributes?.size || "";
                 setSelectedColor(firstColor);
                 setSelectedSize(firstSize);
             } catch (error) { console.log(error); }
@@ -267,10 +267,11 @@ const ProductDetails = () => {
     // Find exact (color + size) variant → gives per-size stock & price
     useEffect(() => {
         if (product?.variants?.length > 0) {
-            const variant = product.variants.find(v =>
-                v.attributes.color === selectedColor &&
-                (!selectedSize || v.attributes.size === selectedSize || !v.attributes.size)
-            );
+            const variant = product.variants.find(v => {
+                const colorMatch = v.attributes?.color === selectedColor;
+                const sizeMatch = !v.attributes?.size || !selectedSize || v.attributes.size === selectedSize;
+                return colorMatch && sizeMatch;
+            });
             setCurrentVariant(variant || null);
         }
     }, [product, selectedSize, selectedColor]);
@@ -368,9 +369,8 @@ const ProductDetails = () => {
                                 </div>
                             );
                         })()}
-
                         {/* Size — each variant is now exactly one size, so stock check is direct */}
-                        {product.variants?.length > 0 && (
+                        {product.variants?.some(v => v.attributes?.size) && (
                             <div className="mb-3">
                                 <strong>Size:</strong>
                                 <div className="d-flex gap-2 mt-2 flex-wrap">

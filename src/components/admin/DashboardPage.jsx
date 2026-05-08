@@ -1,59 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// // import api from "api";
-// import api from "../../api";
-// import PageHeader from "./PageHeader";
-
-// const DashboardPage = ({ toggleSidebar, sidebarOpen }) => {
-//     const [stats, setStats] = useState({
-//         totalProducts: 0,
-//         totalOrders: 0,
-//         totalUsers: 0,
-//         revenue: 0
-//     });
-
-//     useEffect(() => {
-//         const fetchStats = async () => {
-//             try {
-//                 const token = localStorage.getItem("token");
-
-//                 const res = await api.get(
-//                     "/api/admin/dashboard",
-//                     {
-//                         headers: {
-//                             Authorization: `Bearer ${token}`
-//                         }
-//                     }
-//                 );
-
-//                 setStats(res.data);
-//             } catch (error) {
-//                 console.error(error);
-//             }
-//         };
-
-//         fetchStats();
-//     }, []);
-
-//     return (
-//         <div className="page">
-//             <PageHeader
-//                 title="Admin Dashboard"
-//                 subtitle="Overview of your store performance"
-//                 toggleSidebar={toggleSidebar}
-//                 sidebarOpen={sidebarOpen}
-//             />
-
-//             <div className="stats-grid">
-//                 <div className="stat-card">Total Products: {stats.totalProducts}</div>
-//                 <div className="stat-card">Total Orders: {stats.totalOrders}</div>
-//                 <div className="stat-card">Total Users: {stats.totalUsers}</div>
-//                 <div className="stat-card">Revenue: ₹{stats.revenue}</div>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default DashboardPage;
 import React, { useEffect, useState } from "react";
 import api from "../../api";
 import PageHeader from "./PageHeader";
@@ -150,6 +94,8 @@ const DashboardPage = ({ toggleSidebar, sidebarOpen }) => {
     const [users, setUsers] = useState([]);
     const token = localStorage.getItem("token");
     const h = { headers: { Authorization: `Bearer ${token}` } };
+    const [lowStockItems, setLowStockItems] = useState([]);
+    const [threshold, setThreshold] = useState(5);
 
     useEffect(() => {
         api.get("/api/admin/dashboard", h)
@@ -162,6 +108,33 @@ const DashboardPage = ({ toggleSidebar, sidebarOpen }) => {
 
         api.get("/api/users/admin/users", h)
             .then(res => setUsers(Array.isArray(res.data) ? res.data : []))
+            .catch(() => { });
+
+        api.get("/api/settings")
+            .then(res => {
+                const t = res.data.lowStockThreshold ?? 5;
+                setThreshold(t);
+                return api.get("/api/products");
+            })
+            .then(res => {
+                const products = Array.isArray(res.data) ? res.data : [];
+                const low = [];
+                products.forEach(p => {
+                    p.variants?.forEach((v, idx) => {
+                        if (v.stock <= threshold) {
+                            low.push({
+                                productId: p._id,
+                                productName: p.name,
+                                color: v.attributes?.color || "—",
+                                size: v.attributes?.size || "—",
+                                stock: v.stock,
+                                variantIndex: idx,
+                            });
+                        }
+                    });
+                });
+                setLowStockItems(low.sort((a, b) => a.stock - b.stock));
+            })
             .catch(() => { });
     }, []);
 
@@ -303,6 +276,35 @@ const DashboardPage = ({ toggleSidebar, sidebarOpen }) => {
                         })
                     }
                 </div>
+
+                {lowStockItems.length > 0 && (
+                    <div className="dv2-panel" style={{ marginTop: 14, animationDelay: "280ms" }}>
+                        <p className="dv2-panel-title" style={{ color: "#ef4444" }}>
+                            ⚠ Low Stock Alert ({lowStockItems.length} variants)
+                        </p>
+                        {lowStockItems.map((item, i) => (
+                            <div className="dv2-order-row" key={i}>
+                                <div className="dv2-avatar" style={{ background: "#fee2e2", color: "#dc2626" }}>
+                                    📦
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <p style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>{item.productName}</p>
+                                    <p style={{ margin: 0, fontSize: 11, color: "#bbb" }}>
+                                        {item.color} / {item.size}
+                                    </p>
+                                </div>
+                                <span style={{
+                                    fontSize: 12, fontWeight: 700,
+                                    color: item.stock === 0 ? "#dc2626" : "#f59e0b",
+                                    background: item.stock === 0 ? "#fee2e2" : "#fef3c7",
+                                    padding: "3px 10px", borderRadius: 20
+                                }}>
+                                    {item.stock === 0 ? "Out of stock" : `${item.stock} left`}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 <div className="dv2-panel" style={{ animationDelay: "240ms" }}>
                     <p className="dv2-panel-title">Recent Users</p>

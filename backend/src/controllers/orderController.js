@@ -29,43 +29,46 @@ export const createOrder = async (req, res) => {
             if (!productId) {
                 return res.status(400).json({ message: "Product ID missing" });
             }
-            const product = await Product.findOneAndUpdate(
-                { _id: productId, stock: { $gte: item.quantity } },
-                { $inc: { stock: -item.quantity, sold: item.quantity } },
-                { new: true, session }
-            );
 
+            const product = await Product.findById(productId).session(session);
             if (!product) {
-                const exists = await Product.findById(productId).session(session);
-                const msg = !exists
-                    ? "Product not found"
-                    : `${exists.name} has insufficient stock`;
-                return res.status(400).json({ message: msg });
+                return res.status(400).json({ message: "Product not found" });
             }
-            // ✅ Use price sent from frontend (variant price), fallback to product.price
+
+            // Find matching variant by color + size
+            const variantIndex = product.variants.findIndex(v =>
+                v.attributes?.color === (item.color || null) &&
+                (v.attributes?.size === (item.size || "") || (!v.attributes?.size && !item.size))
+            )
+
+            if (variantIndex === -1) {
+                return res.status(400).json({ message: `Variant not found for ${product.name}` });
+            }
+
+            const variant = product.variants[variantIndex];
+            if (variant.stock < item.quantity) {
+                return res.status(400).json({ message: `Insufficient stock for ${product.name} (${item.color} / ${item.size})` });
+            }
+
+            // Deduct variant stock
+            product.variants[variantIndex].stock -= item.quantity;
+            product.sold = (product.sold || 0) + item.quantity;
+
+            // Recalculate top-level stock
+            product.stock = product.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+
+            await product.save({ session });
+
             mappedItems.push({
                 product: productId,
                 name: product.name,
                 img: item.img || product.img || "",
-                price: Number(item.price) > 0
-                    ? Number(item.price)
-                    : (() => {
-                        // Try to find matching variant price
-                        if (product.variants?.length > 0 && (item.color || item.size)) {
-                            const variant = product.variants.find(v =>
-                                v.attributes.color === item.color &&
-                                v.attributes.size === item.size
-                            );
-                            return variant?.price || product.price;
-                        }
-                        return product.price;
-                    })(),
+                price: Number(item.price) > 0 ? Number(item.price) : (variant?.price || product.price),
                 quantity: item.quantity,
                 color: item.color || null,
                 size: item.size || null,
             });
         }
-
         const order = new Order({
             user: userId,
             items: mappedItems,

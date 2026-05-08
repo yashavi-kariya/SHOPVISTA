@@ -147,11 +147,14 @@ const Product = () => {
                                                 onClick={() => goToProduct(product)}
                                             >
                                                 <img
-                                                    src={getImgUrl(product.image || product.img)}
+                                                    src={getImgUrl(
+                                                        product.images?.[0] || product.img
+                                                        || product.variants?.find(v => v.images?.[0])?.images?.[0]
+                                                        || null
+                                                    )}
                                                     alt={product.name}
                                                     loading="lazy"
                                                 />
-
                                                 {/* Badge */}
                                                 {product.discount > 0 && (
                                                     <span style={{
@@ -295,8 +298,7 @@ const Product = () => {
                         <span className="compare-bar__label">Compare ({compare.length}/3):</span>
                         {compare.map((p) => (
                             <div key={p.id} className="compare-bar__chip">
-                                <img src={getImgUrl(p.image || p.img)} alt={p.name} />
-                                <span>{p.name}</span>
+                                <img src={getImgUrl(p.images?.[0] || p.img || p.variants?.find(v => v.images?.[0])?.images?.[0] || null)} alt={p.name} />                               <span>{p.name}</span>
                                 <button onClick={() => toggleCompare(p)} title="Remove">×</button>
                             </div>
                         ))}

@@ -8,20 +8,14 @@ import {
 } from "../controllers/productController.js";
 
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
-
+import { restockVariant } from "../controllers/productController.js";
 const router = express.Router();
 
-// GET all
 router.get("/", getProducts);
 router.get("/:id", getSingleProduct);
-
-// CREATE
 router.post("/", protect, adminOnly, addProduct);
-
-// UPDATE 
 router.put("/:id", protect, adminOnly, updateProduct);
-
-// DELETE
 router.delete("/:id", protect, adminOnly, deleteProduct);
+router.patch("/:id/restock", protect, adminOnly, restockVariant);
 
 export default router;
