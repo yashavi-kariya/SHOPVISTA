@@ -109,14 +109,14 @@ export const CartProvider = ({ children }) => {
     // -----------------------------
     // REMOVE ITEM
     // -----------------------------
-    const removeItem = async (productId) => {
+    const removeItem = async (productId, variantId = null) => {
         const config = getAuthConfig();
 
         if (config) {
             try {
                 await api.delete(`${API_BASE}/remove/${productId}`, config);
                 setCartItems(prev =>
-                    prev.filter(item => item.product?._id !== productId)
+                    prev.filter(item => !(item.product?._id === productId && (!variantId || item.variantId === variantId))).filter(item => item.product?._id !== productId)
                 );
             } catch (err) {
                 console.error("Remove item failed:", err);
@@ -152,8 +152,7 @@ export const CartProvider = ({ children }) => {
     // -----------------------------
     const subtotal = useMemo(() => {
         return cartItems.reduce((total, item) => {
-            const price = Number(item.product?.price || 0);
-            const qty = Number(item.quantity || 0);
+            const price = Number(item.price || item.product?.price || 0); const qty = Number(item.quantity || 0);
             return total + price * qty;
         }, 0);
     }, [cartItems]);
