@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api";
 import { CartContext } from "../context/CartContext";
@@ -240,30 +240,32 @@ const ProductDetails = () => {
         if (path.startsWith("http") || path.startsWith("/")) return path;
         return `${import.meta.env.VITE_API_URL || ""}/${path}`;
     };
-
+    const galleryImagesRef = useRef([]);
     // Gallery images — driven by selected color
     const galleryImages = (() => {
         if (!product) return [];
 
-        // All variants for this color (one per size, but images are shared)
         const colorVariants = (product.variants || []).filter(v =>
             (v.attributes?.color || "").trim().toLowerCase() === (selectedColor || "").trim().toLowerCase()
         );
 
-        // Deduplicated images from matching variants
         const variantImgs = [];
         for (const v of colorVariants) {
             const imgs = v.images?.length ? v.images : (v.image ? [v.image] : []);
             imgs.forEach(img => { if (img && !variantImgs.includes(img)) variantImgs.push(img); });
         }
 
-        if (variantImgs.length > 0) return variantImgs.map(getImgUrl).filter(Boolean);
+        let result;
+        if (variantImgs.length > 0) {
+            result = variantImgs.map(getImgUrl).filter(Boolean);
+        } else {
+            const productImgs = product.images?.length > 0 ? product.images : (product.img ? [product.img] : []);
+            result = productImgs.map(getImgUrl).filter(Boolean);
+        }
 
-        // Fallback to product-level images
-        const productImgs = product.images?.length > 0 ? product.images : (product.img ? [product.img] : []);
-        return productImgs.map(getImgUrl).filter(Boolean);
+        galleryImagesRef.current = result; // 👈 always keep ref in sync
+        return result;
     })();
-
     // Find exact (color + size) variant → gives per-size stock & price
     useEffect(() => {
         if (product?.variants?.length > 0) {
@@ -318,7 +320,6 @@ const ProductDetails = () => {
             }
         });
     };
-
     return (
         <section className="product-details py-5">
             <div className="container">
@@ -408,7 +409,6 @@ const ProductDetails = () => {
                                 </div>
                             </div>
                         )}
-
                         {/* Stock — now shows exact stock for selected color+size */}
                         <div className="mb-3">
                             <p>
@@ -445,17 +445,29 @@ const ProductDetails = () => {
                                 }
                             </button>
                             <button className="btn btn-success flex-grow-1" onClick={handleBuyNow}>Buy Now</button>
-                            <button className="btn btn-outline-danger" onClick={() =>
+                            <button className="btn btn-outline-danger" onClick={() => {
+                                const imgToSave = galleryImagesRef.current?.[0] ||
+                                    currentVariant?.image ||
+                                    currentVariant?.images?.[0] ||
+                                    product.variants?.[0]?.image ||
+                                    product.img || "";
+
+                                console.log("Saving to wishlist img:", imgToSave); // 👈 add this
+
                                 toggleWishlist({
-                                    ...product,
+                                    _id: product._id,
+                                    name: product.name,
+                                    price: currentVariant?.price || product.price,
+                                    originalPrice: product.originalPrice || null,
+                                    rating: product.rating || null,
+                                    brand: product.brand || "",
+                                    colors: [...new Set((product.variants || []).map(v => v.attributes?.color).filter(Boolean))],
                                     variantId: currentVariant?._id || null,
                                     color: selectedColor,
                                     size: selectedSize,
-                                    img: galleryImages?.length > 0
-                                        ? galleryImages[0]
-                                        : (product.img || product.images?.[0])
-                                })
-                            }>
+                                    img: imgToSave,
+                                });
+                            }}>
                                 <img src={heartIcon} width="20" alt=""
                                     style={{
                                         filter: isInWishlist(product._id, currentVariant?._id)

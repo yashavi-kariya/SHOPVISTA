@@ -78,10 +78,7 @@ const Wishlist = () => {
                     const id = `${product._id}-${product.variantId || "default"}`;
                     const isRemoving = removingIds[id];
                     const inCart = isInCart(product._id, product.variantId);
-
-                    // Show product-level image (wishlist has no color selection yet)
                     const imgSrc = resolveImage(product.img || product.images?.[0] || "");
-
                     return (
                         <div
                             key={`${product._id}-${product.variantId || "default"}`}
@@ -96,7 +93,6 @@ const Wishlist = () => {
                                     className="wl-card__img"
                                     onError={e => { e.target.src = "/no-image.png"; }}
                                 />
-
                                 {/* Remove heart button */}
                                 <button
                                     className="wl-card__remove-fab"
@@ -116,7 +112,6 @@ const Wishlist = () => {
                                     </button>
                                 </div>
                             </div>
-
                             <div className="wl-card__body">
                                 <h3 className="wl-card__name">{product.name}</h3>
 

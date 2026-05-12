@@ -380,7 +380,30 @@ const ProductCard = ({
         const alreadyWished = isInWishlist(product._id);
         setWished(true);
         setTimeout(() => setWished(false), 400);
-        toggleWishlist(product);
+
+        // ✅ resolve image same way the card does
+        const resolvedImg = (() => {
+            const src = product.images?.[0] ||
+                product.img ||
+                product.variants?.find(v => v.image)?.image ||      // 👈 your key is "image"
+                product.variants?.find(v => v.images?.[0])?.images?.[0] ||
+                "";
+            if (!src || src.trim() === "") return "";
+            return src.replace("/public", "");
+        })();
+
+
+        toggleWishlist({
+            _id: product._id,
+            name: product.name,
+            price: product.price,
+            originalPrice: product.originalPrice || null,
+            rating: product.rating || null,
+            brand: product.brand || "",
+            colors: [...new Set((product.variants || []).map(v => v.attributes?.color).filter(Boolean))],
+            variantId: null,
+            img: resolvedImg,
+        });
 
         toast({
             type: alreadyWished ? "info" : "success",
@@ -390,7 +413,6 @@ const ProductCard = ({
                 : `${product.name} added to your wishlist!`,
         });
     };
-
     const goToProduct = () => {
         if (!isLoggedIn) {
             toast({
