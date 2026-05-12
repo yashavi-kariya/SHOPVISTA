@@ -6,13 +6,11 @@ import api from "../api";
 const Cart = () => {
     const { cartItems, updateQty, removeItem, subtotal } = useCart();
     const navigate = useNavigate();
-
     // ── Shipping settings from DB ──────────────────────────────────────────
     const [shippingSettings, setShippingSettings] = useState({
         shippingCharge: 79,
         freeShippingThreshold: 999,
     });
-
     useEffect(() => {
         api.get("/api/settings")
             .then(res => {
@@ -24,26 +22,18 @@ const Cart = () => {
                 }
             })
             .catch(() => {
-                // fallback to defaults if settings fetch fails
             });
     }, []);
-
     const { shippingCharge: baseShippingCharge, freeShippingThreshold: freeLimit } = shippingSettings;
-
-    // ── Coupon / discount state ────────────────────────────────────────────
     const [coupon, setCoupon] = useState("");
     const [discount, setDiscount] = useState(0);
     const [message, setMessage] = useState("");
     const [dynamicCoupon, setDynamicCoupon] = useState(null);
     const [couponInput, setCouponInput] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState(null);
-
-    // ── Pricing (discount first, then shipping on discounted total) ────────
     const finalTotal = subtotal - discount;
     const shippingCharge = finalTotal >= freeLimit ? 0 : baseShippingCharge;
     const grandTotal = finalTotal + shippingCharge;
-
-    // Free-shipping progress bar
     const remaining = freeLimit - subtotal;
     const progress = Math.min((subtotal / freeLimit) * 100, 100);
 

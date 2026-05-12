@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-// import api from "api";
 import api from "../api";
 import breadcrumbBg from "../assets/img/breadcrumb-bg.jpg";
 import calendarIcon from "../assets/img/icon/calendar.png";
@@ -72,5 +71,4 @@ const BlogDetail = () => {
         </>
     );
 };
-
 export default BlogDetail;

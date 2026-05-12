@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
-// import api from "api";
+import { toast, ToastProvider } from "../components/Toast";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 const Register = () => {
@@ -10,25 +10,32 @@ const Register = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
-
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
             const res = await api.post(
                 "/api/auth/register",
-                { name, email, password }  // 👈 role removed
+                { name, email, password }
             );
-            alert(res.data.message);
+            toast({
+                type: "success",
+                title: "Registration Successful",
+                message: res.data.message,
+                duration: 3000,
+            });
             navigate("/login");
         } catch (error) {
-            alert(error.response?.data?.message || "Registration failed");
+            toast({
+                type: "error",
+                title: "Registration Failed",
+                message: error.response?.data?.message || "Something went wrong. Please try again.",
+                duration: 4000,
+            });
         } finally {
             setLoading(false);
         }
     };
-
     return (
         <div className="login-page-wrapper">
 

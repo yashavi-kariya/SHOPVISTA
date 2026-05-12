@@ -1,9 +1,4 @@
-// import api from "api";
 import api from "../api";
-
-// const API_URL = "/api/products";
-
-
 export const getProducts = async () => {
     try {
         const response = await api.get("/api/products");

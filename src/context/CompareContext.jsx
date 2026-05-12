@@ -7,11 +7,9 @@ export const CompareProvider = ({ children }) => {
         const saved = localStorage.getItem("compare");
         return saved ? JSON.parse(saved) : [];
     });
-
     useEffect(() => {
         localStorage.setItem("compare", JSON.stringify(compare));
     }, [compare]);
-
     const toggleCompare = (product) => {
         setCompare((prev) => {
             const exists = prev.find((p) => p.id === product.id);
@@ -23,7 +21,6 @@ export const CompareProvider = ({ children }) => {
             }
         });
     };
-
     const isInCompare = (id) => compare.some((p) => p.id === id);
     const clearCompare = () => setCompare([]);
     return (

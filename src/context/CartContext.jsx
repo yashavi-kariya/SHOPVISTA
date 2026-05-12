@@ -111,7 +111,6 @@ export const CartProvider = ({ children }) => {
     // -----------------------------
     const removeItem = async (productId, variantId = null) => {
         const config = getAuthConfig();
-
         if (config) {
             try {
                 await api.delete(`${API_BASE}/remove/${productId}`, config);
@@ -156,7 +155,6 @@ export const CartProvider = ({ children }) => {
             return total + price * qty;
         }, 0);
     }, [cartItems]);
-
     const cartCount = useMemo(() => {
         return cartItems.reduce((total, item) => total + item.quantity, 0);
     }, [cartItems]);

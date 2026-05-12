@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-// import api from "api";
 import api from "../api";
 
 const CollectionProducts = () => {
-    const { type } = useParams(); // "summer" or "winter"
+    const { type } = useParams();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const getImage = (p) => {
+        // 👇 changed .img to .image
+        const variantImg = p.variants?.find(v => v.image && v.image.trim() !== "")?.image;
+
+        const img = variantImg || p.img || "";
+
+        if (!img || img.trim() === "") return "/placeholder.png";
+        if (img.startsWith("http")) return img;
+        return `http://localhost:3001${img}`;
+    };
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -14,6 +24,11 @@ const CollectionProducts = () => {
                 const res = await api.get(
                     `/api/products?collection=${type}`
                 );
+                // res.data.forEach(p => {
+                //     console.log("name:", p.name);
+                //     console.log("p.img:", p.img);
+                //     console.log("p.variants:", p.variants);
+                // });
                 setProducts(res.data);
             } catch (err) {
                 console.error(err);
@@ -23,14 +38,11 @@ const CollectionProducts = () => {
         };
         fetchProducts();
     }, [type]);
-
     const config = {
         summer: { emoji: "☀️", title: "Summer Collection", color: "#e67e22", bg: "#fff8f0" },
         winter: { emoji: "❄️", title: "Winter Collection", color: "#2980b9", bg: "#f0f7ff" }
     };
-
     const { emoji, title, color, bg } = config[type] || config.summer;
-
     return (
         <section style={{ minHeight: "100vh", background: bg }}>
             {/* Banner */}
@@ -57,14 +69,13 @@ const CollectionProducts = () => {
                         </Link>
                     </div>
                 )}
-
                 <div className="row g-4">
                     {products.map(p => (
                         <div key={p._id} className="col-6 col-md-4 col-lg-3">
                             <Link to={`/product/${p._id}`} style={{ textDecoration: "none", color: "inherit" }}>
                                 <div className="card border-0 shadow-sm rounded-4 h-100">
                                     <img
-                                        src={p.img || "/placeholder.png"}
+                                        src={getImage(p)}
                                         alt={p.name}
                                         className="card-img-top rounded-top-4"
                                         style={{ height: "220px", objectFit: "cover" }}

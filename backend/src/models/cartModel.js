@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const cartItemSchema = new mongoose.Schema({
     product: {
         type: mongoose.Schema.Types.ObjectId,
@@ -38,7 +37,6 @@ const cartItemSchema = new mongoose.Schema({
         default: 1
     }
 });
-
 const cartSchema = new mongoose.Schema(
     {
         user: {

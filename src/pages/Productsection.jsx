@@ -178,7 +178,6 @@ const Product = () => {
                                                         New
                                                     </span>
                                                 )}
-
                                                 {/* Action buttons (wishlist + compare) */}
                                                 <div className="sv-product-card__actions">
                                                     {/* Wishlist */}
@@ -191,7 +190,6 @@ const Product = () => {
                                                             ♥
                                                         </span>
                                                     </button>
-
                                                     {/* Compare */}
                                                     <button
                                                         className="sv-wish-btn"
@@ -242,7 +240,6 @@ const Product = () => {
                                                     </button>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
                                 );
@@ -253,7 +250,6 @@ const Product = () => {
                     </div>
                 </div>
             </section>
-
             {/* ── Compare Bar ── */}
             {compare.length > 0 && (
                 <div className="compare-bar">
