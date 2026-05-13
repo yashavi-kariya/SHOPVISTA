@@ -289,17 +289,19 @@ const ProductDetails = () => {
 
     const handleAddToCart = () => {
         if (!isLoggedIn) { alert("Please login first!"); navigate("/login"); return; }
-        // Use the selected color's first image so cart/wishlist show the right variant photo
-        const variantImg = galleryImages[0] || product.img || "";
+
+        const variantImg = galleryImages[0]
+            || currentVariant?.image
+            || currentVariant?.images?.[0]
+            || product.img
+            || "";
+
         addToCart({
             _id: product._id,
-            ...product,
-            quantity,
-            selectedColor,
-            selectedSize,
-            variantId: currentVariant?._id || null,
+            name: product.name,
             price: currentVariant?.price || product.price,
-            // These three fields go into the cart item record
+            quantity,
+            variantId: currentVariant?._id || null,
             img: variantImg,
             color: selectedColor,
             size: selectedSize,

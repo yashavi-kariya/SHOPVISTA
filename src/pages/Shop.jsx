@@ -87,24 +87,47 @@ const Shop = () => {
         return true;
     };
 
-    // ── Fix 1: Optimistic update — instant button response ──
     const handleAddToCart = async (product) => {
         if (!requireLogin()) return;
 
-        // If already in cart, go to cart immediately
         if (addedProducts[product._id]) {
             navigate("/cart");
             return;
         }
 
-        // Optimistic update — show "Go to Cart" instantly without waiting for API
         setAddedProducts(prev => ({ ...prev, [product._id]: true }));
 
         try {
-            await addToCart(product);
+            // ✅ Resolve the best image from the product
+            const resolvedImg = (() => {
+                const src = product.images?.[0]
+                    || product.img
+                    || product.variants?.find(v => v.image)?.image
+                    || product.variants?.find(v => v.images?.[0])?.images?.[0]
+                    || "";
+                if (!src || src.trim() === "") return "";
+                return src.replace("/public", "");
+            })();
+
+            // ✅ Resolve default color and size from first available variant
+            const firstVariant = product.variants?.find(v => v.stock > 0) || product.variants?.[0];
+            const defaultColor = firstVariant?.attributes?.color || "";
+            const defaultSize = firstVariant?.attributes?.size || "";
+            const defaultPrice = firstVariant?.price || product.price;
+            const variantId = firstVariant?._id || null;
+
+            await addToCart({
+                _id: product._id,
+                name: product.name,
+                price: defaultPrice,
+                quantity: 1,
+                variantId,
+                img: resolvedImg,   // ✅ correct image
+                color: defaultColor,  // ✅ variant color
+                size: defaultSize,   // ✅ variant size
+            });
         } catch (err) {
             console.error("Cart error:", err);
-            // Revert on failure
             setAddedProducts(prev => ({ ...prev, [product._id]: false }));
             toast({
                 type: "error",
@@ -113,7 +136,6 @@ const Shop = () => {
             });
         }
     };
-
     const handleBuyNow = (productId) => {
         if (!requireLogin()) return;
         navigate(`/checkout/${productId}`);

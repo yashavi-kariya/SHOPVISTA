@@ -26,7 +26,35 @@ const Product = () => {
             });
             return;
         }
-        await addToCart(product);
+
+        // ✅ Resolve best image
+        const resolvedImg = (() => {
+            const src = product.images?.[0]
+                || product.img
+                || product.variants?.find(v => v.image)?.image
+                || product.variants?.find(v => v.images?.[0])?.images?.[0]
+                || "";
+            if (!src || src.trim() === "") return "";
+            return src.replace("/public", "");
+        })();
+
+        // ✅ Resolve first available variant details
+        const firstVariant = product.variants?.find(v => v.stock > 0) || product.variants?.[0];
+        const defaultColor = firstVariant?.attributes?.color || "";
+        const defaultSize = firstVariant?.attributes?.size || "";
+        const defaultPrice = firstVariant?.price || product.price;
+        const variantId = firstVariant?._id || null;
+
+        await addToCart({
+            _id: product._id,
+            name: product.name,
+            price: defaultPrice,
+            quantity: 1,
+            variantId,
+            img: resolvedImg,
+            color: defaultColor,
+            size: defaultSize,
+        });
     };
 
     const isInCart = (id) => cartItems?.some(item =>
