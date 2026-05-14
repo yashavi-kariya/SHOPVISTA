@@ -272,7 +272,6 @@ const ProductModal = ({ editId, form, setForm, handleChange, handleVariantChange
     };
 
     const [colorEntries, setColorEntries] = useState(buildInitialEntries);
-
     const usedColors = colorEntries.map(e => e.color);
     const availableColors = ALL_COLORS.filter(c => !usedColors.includes(c));
 
@@ -412,6 +411,20 @@ const ProductModal = ({ editId, form, setForm, handleChange, handleVariantChange
                                         <div className="pf-field">
                                             <label>Discount %</label>
                                             <input name="discount" type="number" placeholder="0" value={form.discount} onChange={handleChange} />
+                                        </div>
+                                        <div className="pf-field">
+                                            <label>Return Window (days)</label>
+                                            <input
+                                                name="returnWindowDays"
+                                                type="number"
+                                                min="0"
+                                                placeholder="Global default"
+                                                value={form.returnWindowDays ?? ""}
+                                                onChange={(e) => setForm(prev => ({
+                                                    ...prev,
+                                                    returnWindowDays: e.target.value ? Number(e.target.value) : null
+                                                }))}
+                                            />
                                         </div>
                                     </div>
                                 </div>

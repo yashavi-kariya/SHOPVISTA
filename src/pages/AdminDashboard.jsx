@@ -12,7 +12,7 @@ import BlogPage from "../components/admin/BlogPage";
 import AdminMessages from "../components/admin/AdminMessages";
 import CouponsPage from "../components/admin/CouponsPage";
 import SettingsPage from "../components/admin/SettingsPage";
-
+import ReturnsPage from "../components/admin/ReturnsPage";
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
@@ -58,6 +58,7 @@ const AdminDashboard = () => {
             case "messages": return <AdminMessages token={token} {...sharedProps} />;
             case "coupons": return <CouponsPage token={token} {...sharedProps} />;
             case "settings": return <SettingsPage token={token} {...sharedProps} />;
+            case "returns": return <ReturnsPage token={token} {...sharedProps} />;
             default: return <DashboardPage {...sharedProps} />;
         }
     };

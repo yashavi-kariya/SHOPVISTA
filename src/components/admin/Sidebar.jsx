@@ -11,8 +11,8 @@ const NAV_ITEMS = [
     { key: "messages", icon: "✉️", label: "Messages" },
     { key: "coupons", icon: "🎟️", label: "Coupons" },
     { key: "settings", icon: "⚙️", label: "Settings" },
+    { key: "returns", icon: "↩", label: "Returns" },  // ← was "id", now "key"
 ];
-
 const Sidebar = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen, handleLogout, unreadCount }) => {
     const navigate = useNavigate();
 
@@ -39,7 +39,6 @@ const Sidebar = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen, handleL
                     ✕
                 </button>
             </div>
-
             <ul className="sidebar__menu">
                 {NAV_ITEMS.map((item) => (
                     <li

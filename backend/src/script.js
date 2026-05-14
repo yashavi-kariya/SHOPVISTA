@@ -2,12 +2,9 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import path from "path";
-// import dotenv from "dotenv";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { upload } from "./config/cloudinary.js";
-// dotenv.config();
-
 import dbconnect from "./config/dbConnect.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
@@ -21,6 +18,8 @@ import messageRoutes from "./routes/messageRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
+import returnRoutes from "./routes/returnRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 const app = express();
 dbconnect();
@@ -68,7 +67,8 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/settings", settingsRoutes);
-
+app.use("/api/returns", returnRoutes);
+app.use("/api/notifications", notificationRoutes);
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, "0.0.0.0", () => {

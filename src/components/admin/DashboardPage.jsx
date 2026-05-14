@@ -146,7 +146,8 @@ const DashboardPage = ({ toggleSidebar, sidebarOpen }) => {
         const val = orders
             .filter(o => {
                 const d = new Date(o.createdAt);
-                return d.getMonth() === m && d.getFullYear() === yr && o.status?.toLowerCase() !== "cancelled";
+                return d.getMonth() === m && d.getFullYear() === yr
+                    && !["Cancelled", "Refunded", "Returned"].includes(o.status);
             })
             .reduce((s, o) => s + (o.totalAmount || o.amount || 0), 0);
         return { label: MONTHS[m], value: val };
@@ -181,7 +182,8 @@ const DashboardPage = ({ toggleSidebar, sidebarOpen }) => {
     ).length;
 
     const todayRevenue = orders
-        .filter(o => new Date(o.createdAt).toDateString() === now.toDateString() && o.status?.toLowerCase() !== "cancelled")
+        .filter(o => new Date(o.createdAt).toDateString() === now.toDateString()
+            && !["Cancelled", "Refunded", "Returned"].includes(o.status))
         .reduce((s, o) => s + (o.totalAmount || o.amount || 0), 0);
 
     return (
@@ -193,7 +195,6 @@ const DashboardPage = ({ toggleSidebar, sidebarOpen }) => {
                 toggleSidebar={toggleSidebar}
                 sidebarOpen={sidebarOpen}
             />
-
             {/* existing stat cards — untouched */}
             <div className="stats-grid">
                 <div className="stat-card">Total Products: {stats.totalProducts}</div>
@@ -201,7 +202,6 @@ const DashboardPage = ({ toggleSidebar, sidebarOpen }) => {
                 <div className="stat-card">Total Users: {stats.totalUsers}</div>
                 <div className="stat-card">Revenue: ₹{stats.revenue}</div>
             </div>
-
             {/* ── Today snapshot ── */}
             <div className="dv2-row3">
                 {[

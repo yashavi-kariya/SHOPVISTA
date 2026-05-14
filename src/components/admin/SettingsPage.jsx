@@ -11,6 +11,7 @@ const SettingsPage = ({ token, toggleSidebar, sidebarOpen }) => {
     const [lowStockThreshold, setLowStockThreshold] = useState(5);
     const [shippingCharge, setShippingCharge] = useState(79);
     const [freeShippingThreshold, setFreeShippingThreshold] = useState(999);
+    const [defaultReturnWindowDays, setDefaultReturnWindowDays] = useState(7);
     const [tiers, setTiers] = useState([
         { minCartValue: 3000, discountValue: 10, prefix: "SAVE10-" },
         { minCartValue: 5000, discountValue: 20, prefix: "SAVE20-" },
@@ -25,6 +26,7 @@ const SettingsPage = ({ token, toggleSidebar, sidebarOpen }) => {
                     setShippingCharge(res.data.shippingCharge ?? 79);
                     setFreeShippingThreshold(res.data.freeShippingThreshold ?? 999);
                     setLowStockThreshold(res.data.lowStockThreshold ?? 5);
+                    setDefaultReturnWindowDays(res.data.defaultReturnWindowDays ?? 7);
                     if (res.data.couponTiers?.length) setTiers(res.data.couponTiers);
                 }
             })
@@ -40,6 +42,7 @@ const SettingsPage = ({ token, toggleSidebar, sidebarOpen }) => {
                 shippingCharge: Number(shippingCharge),
                 freeShippingThreshold: Number(freeShippingThreshold),
                 lowStockThreshold: Number(lowStockThreshold),
+                defaultReturnWindowDays: Number(defaultReturnWindowDays),
                 couponTiers: tiers.map(t => ({
                     minCartValue: Number(t.minCartValue),
                     discountValue: Number(t.discountValue),
@@ -137,6 +140,14 @@ const SettingsPage = ({ token, toggleSidebar, sidebarOpen }) => {
                                 />
                                 <p className="sp-field-hint">Alert when variant stock falls below this number</p>
                             </div>
+                            <div className="sp-field">
+                                <label>Default Return Window (days)</label>
+                                <input
+                                    type="number"
+                                    value={defaultReturnWindowDays}
+                                    onChange={(e) => setDefaultReturnWindowDays(Number(e.target.value))}
+                                />
+                            </div>
                         </div>
 
                         {/* Live Preview */}
@@ -153,65 +164,6 @@ const SettingsPage = ({ token, toggleSidebar, sidebarOpen }) => {
                         </div>
                     </div>
 
-                    {/* ── Coupon Tier Settings ── */}
-                    {/* <div className="sp-section">
-                        <p className="sp-section-title">Auto Coupon Tiers</p>
-                        <p className="sp-section-sub">
-                            When a customer's cart reaches these amounts, a coupon is auto-generated.
-                            Tiers are applied in ascending order — the highest qualifying tier is used.
-                        </p>
-
-                        <div className="sp-tier-header">
-                            <span>Min Cart (₹)</span>
-                            <span>Discount (%)</span>
-                            <span>Code Prefix</span>
-                            <span></span>
-                        </div>
-
-                        {tiers.map((t, i) => (
-                            <div className="sp-tier-row" key={i}>
-                                <input
-                                    className="sp-tier-input"
-                                    type="number" min="0"
-                                    value={t.minCartValue}
-                                    onChange={e => updateTier(i, "minCartValue", e.target.value)}
-                                    placeholder="e.g. 3000"
-                                />
-                                <input
-                                    className="sp-tier-input"
-                                    type="number" min="0" max="100"
-                                    value={t.discountValue}
-                                    onChange={e => updateTier(i, "discountValue", e.target.value)}
-                                    placeholder="e.g. 10"
-                                />
-                                <input
-                                    className="sp-tier-input"
-                                    type="text"
-                                    value={t.prefix}
-                                    onChange={e => updateTier(i, "prefix", e.target.value.toUpperCase())}
-                                    placeholder="e.g. SAVE10-"
-                                />
-                                <button className="sp-del-btn" onClick={() => removeTier(i)}>✕</button>
-                            </div>
-                        ))} */}
-
-                    {/* <button className="sp-add-btn" onClick={addTier}>+ Add Tier</button> */}
-
-                    {/* Tier Preview */}
-                    {/* {tiers.length > 0 && (
-                            <div className="sp-preview" style={{ marginTop: 16 }}>
-                                <p className="sp-preview-title">Tier Preview (sorted)</p>
-                                {sortedTiers.map((t, i) => (
-                                    <div className="sp-preview-row" key={i}>
-                                        <span>Cart ≥ ₹{Number(t.minCartValue || 0).toLocaleString("en-IN")}</span>
-                                        <span style={{ fontWeight: 600 }}>
-                                            {t.prefix || "COUPON-"} → {t.discountValue}% OFF
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        )} */}
-                    {/* </div> */}
 
                     {/* ── Save Button ── */}
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>

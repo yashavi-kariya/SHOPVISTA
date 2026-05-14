@@ -66,7 +66,8 @@ const ProductsPage = ({ products, fetchProducts, token, toggleSidebar, sidebarOp
     const emptyForm = {
         name: "", description: "", category: "", subCategory: "", brand: "",
         img: "", images: [], discount: "", collection: "none",
-        variants: []
+        variants: [],
+        returnWindowDays: null,
     };
 
     const [form, setForm] = useState(emptyForm);
@@ -134,8 +135,7 @@ const ProductsPage = ({ products, fetchProducts, token, toggleSidebar, sidebarOp
             images: p.images?.length > 0 ? p.images : (p.img ? [p.img] : []),
             discount: p.discount || "",
             collection: p.collection || "none",
-            // Keep flat variant shape — color/size/stock/price/images
-            // ProductModal.buildInitialEntries will group these by color into sizeStocks
+            returnWindowDays: p.returnWindowDays ?? null,
             variants: p.variants?.length > 0
                 ? p.variants.map(v => ({
                     color: v.attributes?.color || "",
