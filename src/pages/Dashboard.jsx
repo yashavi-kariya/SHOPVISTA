@@ -18,12 +18,8 @@ const statusIcons = {
     shipped: "🚚", cancelled: "✕", pending: "◷",
     refunded: "↩", returned: "↩", packed: "📦",
 };
-
 const RETURN_REASONS = ["Damaged", "Wrong Item", "Not as Described", "Size Issue", "Other"];
-
-// Statuses where Cancel is allowed
 const CANCELLABLE_STATUSES = ["Processing", "Packed", "Shipped"];
-// Status where Return is allowed
 const RETURNABLE_STATUS = "Delivered";
 
 const STYLES = `
@@ -36,7 +32,6 @@ const STYLES = `
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
 .db2-page { min-height: 100vh; background: #f7f7f7; padding: 32px 16px; font-family: 'Segoe UI', sans-serif; }
 .db2-wrap { max-width: 760px; margin: 0 auto; }
 .db2-greeting { animation: db-fadeUp .4s ease both; margin-bottom: 24px; }
@@ -147,7 +142,6 @@ const STYLES = `
     .db2-profile__grid { grid-template-columns: 1fr; }
 }
 `;
-
 // ─── Cancel Confirm Modal ─────────────────────────────────────────────────────
 const CancelModal = ({ order, onClose, onConfirm }) => {
     const [loading, setLoading] = useState(false);
@@ -313,16 +307,26 @@ const Dashboard = () => {
             setCancelModal(null);
         }
     };
-
     // After return submitted — update order returnStatus locally
     const handleReturnSuccess = (orderId) => {
         setOrders(prev => prev.map(o =>
             o._id === orderId ? { ...o, returnStatus: "Pending" } : o
         ));
     };
-
+    const markNotificationsRead = async () => {
+        if (unreadNotifications === 0) return;
+        try {
+            await api.put("/api/notifications/read-all"); // ← correct URL
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        } catch (err) {
+            console.error("Failed to mark notifications read:", err);
+        }
+    };
     const unreadNotifications = notifications.filter(n => !n.read).length;
-    const totalSpent = orders.reduce((s, o) => s + (o.totalAmount || 0), 0);
+    const EXCLUDED = ["Cancelled", "Refunded", "Returned"];
+    const totalSpent = orders
+        .filter(o => !EXCLUDED.includes(o.status))
+        .reduce((s, o) => s + (o.totalAmount || 0), 0);
     const deliveredCount = orders.filter(o => o.status?.toLowerCase() === "delivered").length;
 
     if (loading) {
@@ -367,9 +371,16 @@ const Dashboard = () => {
                             { id: "profile", label: "Profile" },
                         ].map(t => (
                             <button key={t.id} className={`db2-tab ${activeTab === t.id ? "active" : ""}`}
-                                onClick={() => { setActiveTab(t.id); if (t.id === "messages") fetchMessages(); }}>
+                                onClick={() => {
+                                    setActiveTab(t.id);
+                                    if (t.id === "messages") {
+                                        fetchMessages();
+                                        // Mark all notifications as read
+                                        markNotificationsRead();
+                                    }
+                                }}>
                                 {t.label}
-                                {t.id === "orders" && unreadNotifications > 0 && (
+                                {t.id === "messages" && unreadNotifications > 0 && (
                                     <span style={{ marginLeft: 4, background: "#e53935", color: "#fff", borderRadius: 10, fontSize: 10, padding: "1px 5px", fontWeight: 700 }}>
                                         {unreadNotifications}
                                     </span>
@@ -378,7 +389,6 @@ const Dashboard = () => {
                         ))}
                         <button className="db2-tab" style={{ marginLeft: "auto", color: "#e53935" }} onClick={logout}>Logout</button>
                     </div>
-
                     {/* ── Orders Tab ── */}
                     {activeTab === "orders" && (
                         <section>
@@ -411,7 +421,6 @@ const Dashboard = () => {
                                                     <span className={`db2-order__arrow ${isOpen ? "open" : ""}`}>›</span>
                                                 </div>
                                             </div>
-
                                             <div className={`db2-order__body ${isOpen ? "open" : ""}`}>
                                                 {/* Items */}
                                                 {order.items?.length > 0 ? (
@@ -437,7 +446,6 @@ const Dashboard = () => {
                                                 ) : (
                                                     <div className="db2-items"><p style={{ color: "#aaa", fontSize: 13 }}>No item details available.</p></div>
                                                 )}
-
                                                 {/* Footer */}
                                                 <div className="db2-order__footer">
                                                     <div className="db2-footer-left">

@@ -9,7 +9,6 @@ const protect = async (req, res, next) => {
         if (!token) {
             return res.status(401).json({ message: "No token provided" });
         }
-
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findById(decoded.id).select("-password");
 
@@ -22,7 +21,6 @@ const protect = async (req, res, next) => {
             email: user.email || "",
             role: user.role
         };
-
         next();
     } catch (error) {
         console.error("Auth Middleware Error:", error);
@@ -30,20 +28,10 @@ const protect = async (req, res, next) => {
     }
 };
 
-// const adminOnly = (req, res, next) => {
-//     if (req.user && req.user.role === "admin") {
-//         next();
-//     } else {
-//         return res.status(403).json({
-//             message: "Admin access only"
-//         });
-//     }
-// };
 const adminOnly = (req, res, next) => {
     if (req.user.role !== "admin") {
         return res.status(403).json({ message: "Access denied" });
     }
     next();
 };
-
 export { protect, adminOnly };
