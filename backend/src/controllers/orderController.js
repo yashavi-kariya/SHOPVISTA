@@ -193,7 +193,7 @@ export const cancelOrder = async (req, res) => {
 
         if (order.user.toString() !== req.user.id.toString())
             return res.status(403).json({ message: "Not authorized" });
-        const cancellableStatuses = ["Processing", "Packed", "Shipped"];
+        const cancellableStatuses = ["Processing", "Confirmed", "Packed", "Shipped"];
         if (!cancellableStatuses.includes(order.status)) {
             if (order.status === "Delivered")
                 return res.status(400).json({ message: "Delivered orders cannot be cancelled. Please use the Return option instead." });

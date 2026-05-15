@@ -310,21 +310,9 @@ const ReturnDetailModal = ({ order, token, onClose, onResolved }) => {
                 )}
 
                 {/* Action buttons — only for Pending */}
-                {order.returnStatus === "Pending" && !success && (
-                    <div className="rp-modal-btns">
-                        <button className="rp-modal-btn cancel" onClick={onClose}>Cancel</button>
-                        {!showRejectBox ? (
-                            <button className="rp-modal-btn reject" onClick={() => setShowRejectBox(true)}>
-                                ✕ Reject
-                            </button>
-                        ) : (
-                            <button className="rp-modal-btn reject" disabled={loading} onClick={() => handle("Rejected")}>
-                                {loading ? "Rejecting…" : "Confirm Reject"}
-                            </button>
-                        )}
-                        <button className="rp-modal-btn approve" disabled={loading} onClick={() => handle("Approved")}>
-                            {loading ? "Processing…" : "✓ Approve"}
-                        </button>
+                {order.returnStatus === "Pending" && (
+                    <div style={{ background: "#fef9c3", color: "#854d0e", padding: "10px 12px", borderRadius: 8, fontSize: 13, marginTop: 16 }}>
+                        ⚠ To approve or reject this return, go to the <strong>Orders page</strong> and click "↩ Review Return".
                     </div>
                 )}
             </div>
@@ -510,18 +498,8 @@ const ReturnsPage = ({ token, toggleSidebar, sidebarOpen }) => {
                                             {/* Actions */}
                                             <td className="rp-td-actions">
                                                 <button className="rp-action-btn view" onClick={() => setSelected(o)}>
-                                                    View
+                                                    View Details
                                                 </button>
-                                                {o.returnStatus === "Pending" && (
-                                                    <>
-                                                        <button className="rp-action-btn approve" onClick={() => setSelected(o)}>
-                                                            Approve
-                                                        </button>
-                                                        <button className="rp-action-btn reject" onClick={() => setSelected(o)}>
-                                                            Reject
-                                                        </button>
-                                                    </>
-                                                )}
                                             </td>
                                         </tr>
                                     );
@@ -531,7 +509,6 @@ const ReturnsPage = ({ token, toggleSidebar, sidebarOpen }) => {
                     </div>
                 )}
             </div>
-
             {selected && (
                 <ReturnDetailModal
                     order={selected}

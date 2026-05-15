@@ -19,7 +19,7 @@ const statusIcons = {
     refunded: "↩", returned: "↩", packed: "📦",
 };
 const RETURN_REASONS = ["Damaged", "Wrong Item", "Not as Described", "Size Issue", "Other"];
-const CANCELLABLE_STATUSES = ["Processing", "Packed", "Shipped"];
+const CANCELLABLE_STATUSES = ["Processing", "Confirmed", "Packed", "Shipped"];
 const RETURNABLE_STATUS = "Delivered";
 
 const STYLES = `
@@ -282,7 +282,6 @@ const Dashboard = () => {
             .then(res => setNotifications(res.data))
             .catch(() => { });
     }, []);
-
     const fetchMessages = async (emailOverride) => {
         const email = emailOverride || user.email;
         if (!email) return;
@@ -293,9 +292,7 @@ const Dashboard = () => {
         } catch (e) { }
         setMessagesLoading(false);
     };
-
     const logout = () => { localStorage.removeItem("token"); navigate("/login"); };
-
     // Cancel an order
     const handleCancel = async (orderId) => {
         try {
@@ -307,7 +304,6 @@ const Dashboard = () => {
             setCancelModal(null);
         }
     };
-    // After return submitted — update order returnStatus locally
     const handleReturnSuccess = (orderId) => {
         setOrders(prev => prev.map(o =>
             o._id === orderId ? { ...o, returnStatus: "Pending" } : o
