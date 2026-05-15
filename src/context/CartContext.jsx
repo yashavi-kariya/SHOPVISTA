@@ -25,8 +25,15 @@ const CartProvider = ({ children }) => {
                 const items = res.data?.items || [];
                 setCartItems(Array.isArray(items) ? items : []);
             } catch (err) {
-                console.error("Fetch cart error:", err);
-                setCartItems([]);
+                if (err.response?.status === 401) {
+                    // Token expired or invalid — clear it and fall back to guest cart
+                    localStorage.removeItem("token");
+                    const guestCart = JSON.parse(localStorage.getItem("cart")) || [];
+                    setCartItems(guestCart);
+                } else {
+                    console.error("Fetch cart error:", err);
+                    setCartItems([]);
+                }
             }
         } else {
             // Guest — read from localStorage
@@ -38,7 +45,6 @@ const CartProvider = ({ children }) => {
             }
         }
     }, []);
-
     useEffect(() => {
         fetchCart();
     }, [fetchCart]);
@@ -66,8 +72,13 @@ const CartProvider = ({ children }) => {
                 );
                 await fetchCart();
             } catch (err) {
-                console.error("Add to cart failed:", err);
-                throw err; // re-throw so caller can catch & revert optimistic update
+                if (err.response?.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/login"; // force re-login
+                } else {
+                    console.error("Add to cart failed:", err);
+                    throw err;
+                }
             }
         } else {
             // ── Guest cart ──────────────────────────────────────────────
@@ -93,7 +104,7 @@ const CartProvider = ({ children }) => {
                         img: product.img || "",
                         color: product.color || "",
                         size: product.size || "",
-                        product,   // keep full product ref for Cart.jsx rendering
+                        product,
                     },
                 ];
             }
@@ -101,7 +112,6 @@ const CartProvider = ({ children }) => {
             localStorage.setItem("cart", JSON.stringify(updatedCart));
         }
     };
-
     // ─────────────────────────────────────────
     // UPDATE QUANTITY
     // ─────────────────────────────────────────
@@ -126,8 +136,13 @@ const CartProvider = ({ children }) => {
                     )
                 );
             } catch (err) {
-                console.error("Update quantity failed:", err);
-                fetchCart(); // re-sync on failure
+                if (err.response?.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/login"; // force re-login
+                } else {
+                    console.error("Update quantity failed:", err);
+                    fetchCart(); // re-sync on failure
+                }
             }
         } else {
             const updatedCart = cartItems.map(item =>
@@ -137,7 +152,6 @@ const CartProvider = ({ children }) => {
             localStorage.setItem("cart", JSON.stringify(updatedCart));
         }
     };
-
     // ─────────────────────────────────────────
     // REMOVE ITEM  (pass itemId = cart subdoc _id for precision)
     // ─────────────────────────────────────────
@@ -153,7 +167,6 @@ const CartProvider = ({ children }) => {
                     `${API_BASE}/remove/${productId}?${params.toString()}`,
                     config
                 );
-
                 setCartItems(prev =>
                     prev.filter(ci => {
                         if (itemId) return ci._id?.toString() !== itemId;
@@ -163,8 +176,13 @@ const CartProvider = ({ children }) => {
                     })
                 );
             } catch (err) {
-                console.error("Remove item failed:", err);
-                fetchCart();
+                if (err.response?.status === 401) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/login"; // force re-login
+                } else {
+                    console.error("Remove item failed:", err);
+                    fetchCart();
+                }
             }
         } else {
             const updated = cartItems.filter(ci => ci.productId !== productId);
@@ -172,7 +190,6 @@ const CartProvider = ({ children }) => {
             localStorage.setItem("cart", JSON.stringify(updated));
         }
     };
-
     // ─────────────────────────────────────────
     // CLEAR CART
     // ─────────────────────────────────────────
@@ -188,7 +205,6 @@ const CartProvider = ({ children }) => {
         setCartItems([]);
         localStorage.removeItem("cart");
     };
-
     // ─────────────────────────────────────────
     // MERGE GUEST CART AFTER LOGIN
     // ─────────────────────────────────────────
@@ -204,7 +220,6 @@ const CartProvider = ({ children }) => {
             console.error("Merge guest cart failed:", err);
         }
     };
-
     // ─────────────────────────────────────────
     // COMPUTED VALUES
     // item shape from backend: { _id, product: {...}, name, price, img, color, size, quantity }
@@ -243,175 +258,3 @@ const CartProvider = ({ children }) => {
 const useCart = () => useContext(CartContext);
 
 export { CartContext, CartProvider, useCart };
-// import { createContext, useContext, useState, useMemo, useEffect, useCallback } from "react";
-// import api from "../api";
-// export const CartContext = createContext();
-// export const CartProvider = ({ children }) => {
-//     const [cartItems, setCartItems] = useState([]);
-//     const API_BASE = "/api/cart";
-//     const getAuthConfig = () => {
-//         const token = localStorage.getItem("token");
-//         if (!token) return null;
-
-//         return {
-//             headers: {
-//                 Authorization: `Bearer ${token}`
-//             }
-//         };
-//     };
-//     // -----------------------------
-//     // FETCH CART
-//     // -----------------------------
-//     const fetchCart = useCallback(async () => {
-//         const config = getAuthConfig();
-//         if (config) {
-//             try {
-//                 const res = await api.get("/api/cart", config);
-//                 // Handle both shapes: { items: [] } or direct array or { cart: { items: [] } }
-//                 const items = res.data?.items || res.data?.cart?.items || res.data || [];
-//                 setCartItems(Array.isArray(items) ? items : []);
-//             } catch (err) {
-//                 console.error("Fetch cart error:", err);
-//             }
-//         } else {
-//             const guestCart = JSON.parse(localStorage.getItem("cart")) || [];
-//             setCartItems(guestCart);
-//         }
-//     }, []);
-//     // -----------------------------
-//     // ADD TO CART
-//     // -----------------------------
-//     const addToCart = async (product) => {
-//         const config = getAuthConfig();
-//         if (config) {
-//             try {
-//                 await api.post(`${API_BASE}/add`, { productId: product._id, quantity: product.quantity || 1, variantId: product.variantId }, config);
-//                 await fetchCart();
-//             } catch (err) {
-//                 console.error("Add to cart failed:", err);
-//             }
-//         } else {
-//             const existing = cartItems.find(i =>
-//                 i.productId === product._id &&
-//                 i.variantId === product.variantId
-//             );
-//             let updatedCart;
-//             if (existing) {
-//                 updatedCart = cartItems.map(i =>
-//                     i.productId === product._id ? { ...i, quantity: i.quantity + 1 } : i
-//                 );
-//             } else {
-//                 updatedCart = [
-//                     ...cartItems,
-//                     {
-//                         productId: product._id,
-//                         quantity: 1,
-//                         product,
-//                         variantId: product.variantId,
-//                         color: product.color,
-//                         size: product.size,
-//                         price: product.price,
-//                         img: product.img,
-//                     }
-//                 ];
-//             }
-//             setCartItems(updatedCart);
-//             localStorage.setItem("cart", JSON.stringify(updatedCart));
-//         }
-//     };
-//     const updateQty = async (productId, newQty, variantId = null) => {
-//         const config = getAuthConfig();
-//         const validatedQty = Math.max(1, parseInt(newQty) || 1);
-//         if (config) {
-//             try {
-//                 await api.put(`${API_BASE}/update`, { productId, quantity: validatedQty, variantId }, config);
-//                 setCartItems(prev =>
-//                     prev.map(item =>
-//                         item.product?._id === productId &&
-//                             (!variantId || item.variantId === variantId)
-//                             ? { ...item, quantity: validatedQty }
-//                             : item
-//                     )
-//                 );
-//             } catch (err) {
-//                 console.error("Update quantity failed:", err);
-//             }
-//         } else {
-//             const updatedCart = cartItems.map(item =>
-//                 item.productId === productId ? { ...item, quantity: validatedQty } : item
-//             );
-//             setCartItems(updatedCart);
-//             localStorage.setItem("cart", JSON.stringify(updatedCart));
-//         }
-//     };
-//     // -----------------------------
-//     // REMOVE ITEM
-//     // -----------------------------
-//     const removeItem = async (productId, variantId = null) => {
-//         const config = getAuthConfig();
-//         if (config) {
-//             try {
-//                 await api.delete(`${API_BASE}/remove/${productId}`, config);
-//                 setCartItems(prev =>
-//                     prev.filter(item => !(item.product?._id === productId && (!variantId || item.variantId === variantId))).filter(item => item.product?._id !== productId)
-//                 );
-//             } catch (err) {
-//                 console.error("Remove item failed:", err);
-//             }
-//         } else {
-//             const updatedCart = cartItems.filter(item => item.productId !== productId);
-//             setCartItems(updatedCart);
-//             localStorage.setItem("cart", JSON.stringify(updatedCart));
-//         }
-//     };
-//     const clearCart = () => {
-//         setCartItems([]);
-//         localStorage.removeItem("cart"); // remove guest cart too
-//     };
-//     // -----------------------------
-//     // MERGE GUEST CART AFTER LOGIN
-//     // -----------------------------
-//     const mergeGuestCart = async () => {
-//         const guestCart = JSON.parse(localStorage.getItem("cart")) || [];
-//         const config = getAuthConfig();
-//         if (!config || guestCart.length === 0) return;
-
-//         try {
-//             await api.post(`${API_BASE}/merge`, { items: guestCart }, config);
-//             localStorage.removeItem("cart");
-//             fetchCart();
-//         } catch (err) {
-//             console.error("Merge guest cart failed:", err);
-//         }
-//     };
-//     // -----------------------------
-//     // SUBTOTAL & COUNT
-//     // -----------------------------
-//     const subtotal = useMemo(() => {
-//         return cartItems.reduce((total, item) => {
-//             const price = Number(item.price || item.product?.price || 0); const qty = Number(item.quantity || 0);
-//             return total + price * qty;
-//         }, 0);
-//     }, [cartItems]);
-//     const cartCount = useMemo(() => {
-//         return cartItems.reduce((total, item) => total + item.quantity, 0);
-//     }, [cartItems]);
-//     return (
-//         <CartContext.Provider
-//             value={{
-//                 cartItems,
-//                 addToCart,
-//                 updateQty,
-//                 removeItem,
-//                 clearCart,
-//                 subtotal,
-//                 cartCount,
-//                 fetchCart,
-//                 mergeGuestCart
-//             }}
-//         >
-//             {children}
-//         </CartContext.Provider>
-//     );
-// };
-// export const useCart = () => useContext(CartContext);

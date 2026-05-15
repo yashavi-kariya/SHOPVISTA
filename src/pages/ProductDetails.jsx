@@ -322,7 +322,11 @@ const ProductDetails = () => {
                 setSelectedColor(firstColor);
                 setSelectedSize(firstSize);
             } catch (error) {
-                console.error("Failed to fetch product:", error);
+                if (error.response?.status === 404) {
+                    navigate("/shop"); // product deleted — redirect to shop
+                } else {
+                    console.error("Failed to fetch product:", error);
+                }
             }
         };
         fetchProduct();
