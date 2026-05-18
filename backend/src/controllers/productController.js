@@ -104,7 +104,6 @@ export const updateProduct = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-// Add this new function:
 export const restockVariant = async (req, res) => {
     try {
         const { variantIndex, quantity } = req.body;

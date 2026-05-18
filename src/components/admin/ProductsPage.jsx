@@ -86,12 +86,13 @@ const ProductsPage = ({ products, fetchProducts, token, toggleSidebar, sidebarOp
 
     // flatVariants passed directly from ProductModal — avoids stale closure bug
     const handleSubmit = async (flatVariants) => {
+        // FIX — flatVariants already have attributes shape from ProductModal
         const variants = flatVariants
-            .filter(v => v.color)
+            .filter(v => v.attributes?.color)  // ← check attributes.color
             .map(v => ({
                 attributes: {
-                    color: v.color,
-                    size: v.size || ""
+                    color: v.attributes.color,   // ← read from attributes
+                    size: v.attributes.size || ""
                 },
                 price: Number(v.price),
                 stock: Number(v.stock),
@@ -103,7 +104,7 @@ const ProductsPage = ({ products, fetchProducts, token, toggleSidebar, sidebarOp
 
         const payload = {
             ...form,
-            img: form.images?.[0] || form.img || "",
+            img: variants[0]?.images?.[0] || form.images?.[0] || form.img || "",
             images: form.images || [],
             variants
         };

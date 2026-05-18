@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useContext, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api";
 import { CartContext } from "../context/CartContext";
@@ -62,7 +62,6 @@ const GALLERY_STYLES = `
   .gal-thumb.active { border-color:#6b2737; opacity:1; box-shadow:0 0 0 1px rgba(107,39,55,.2); }
   .gal-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
   .gal-count { font-size:11px; color:#aaa; text-align:center; }
-
   .lb-overlay {
     position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.92);
     display:flex; align-items:center; justify-content:center;
@@ -97,18 +96,11 @@ const GALLERY_STYLES = `
   }
   .lb-dot.active { background:#fff; }
 `;
-
 const COLORS_MAP = {
     Black: "#1a1a1a", White: "#f0f0f0", Red: "#e74c3c", Blue: "#5bb0e9",
     Green: "#27ae60", Yellow: "#f1c40f", Pink: "#e91e8c", Beige: "#c9a96e",
     Brown: "#795548", Navy: "#1a237e", Grey: "#9e9e9e", Orange: "#d75323"
 };
-
-// ─────────────────────────────────────────────
-// VARIANT NORMALIZER
-// Safely normalizes ANY variant shape — present, future, or partially broken.
-// Add new fields here as your schema grows; old products won't crash.
-// ─────────────────────────────────────────────
 const normalizeVariant = (variant) => {
     // If variant is null / undefined / not an object — return a safe empty shell
     if (!variant || typeof variant !== "object") {
@@ -119,9 +111,8 @@ const normalizeVariant = (variant) => {
             price: null,
             images: [],
             image: null,
-            // ── new fields (safe defaults) ──────────────────
-            returnDays: null,           // e.g. 7, 14, 30
-            returnPolicy: null,         // e.g. "No questions asked"
+            returnDays: null,
+            returnPolicy: null,
             sku: null,
             weight: null,
             dimensions: null,
@@ -129,7 +120,6 @@ const normalizeVariant = (variant) => {
             isActive: true,
         };
     }
-
     return {
         // Core identity
         _id: variant._id ?? null,
@@ -143,15 +133,12 @@ const normalizeVariant = (variant) => {
                 Object.entries(variant.attributes || {}).map(([k, v]) => [k, v ?? ""])
             ),
         },
-
         // Inventory
         stock: typeof variant.stock === "number" ? variant.stock : 0,
         price: variant.price ?? null,
-
         // Images
         images: Array.isArray(variant.images) ? variant.images.filter(Boolean) : [],
         image: variant.image ?? null,
-
         // ── NEW FIELDS — safe defaults so old products never crash ──────────
         returnDays: variant.returnDays ?? null,   // number | null
         returnPolicy: variant.returnPolicy ?? null,   // string | null
@@ -160,9 +147,6 @@ const normalizeVariant = (variant) => {
         dimensions: variant.dimensions ?? null,
         discount: variant.discount ?? null,
         isActive: variant.isActive ?? true,
-
-        // Forward-compat catch-all: keep any unknown future keys as-is
-        // so new fields never get silently dropped
         ...Object.fromEntries(
             Object.entries(variant).filter(([key]) =>
                 !["_id", "attributes", "stock", "price", "images", "image",
@@ -197,11 +181,16 @@ const normalizeProduct = (raw) => {
 // ─────────────────────────────────────────────
 // IMAGE GALLERY COMPONENT
 // ─────────────────────────────────────────────
-const ImageGallery = ({ images = [], productName = "", colorLabel = "" }) => {
+const ImageGallery = ({ images = [], productName = "", colorLabel = "", onIndexChange }) => {
     const [activeIdx, setActiveIdx] = useState(0);
     const [lightboxOpen, setLightboxOpen] = useState(false);
 
-    useEffect(() => { setActiveIdx(0); }, [images]);
+    useEffect(() => {
+        setActiveIdx(0);
+    }, [images]);
+    useEffect(() => {
+        onIndexChange?.(activeIdx);
+    }, [activeIdx]);
 
     const safeImages = images.filter(Boolean);
     if (safeImages.length === 0) return null;
@@ -307,6 +296,7 @@ const ProductDetails = () => {
     const [selectedSize, setSelectedSize] = useState("");
     const [currentVariant, setCurrentVariant] = useState(null);
     const [quantity, setQuantity] = useState(1);
+    const [activeGalleryIdx, setActiveGalleryIdx] = useState(0);
 
     const isLoggedIn = !!localStorage.getItem("token");
 
@@ -340,7 +330,7 @@ const ProductDetails = () => {
 
     const galleryImagesRef = useRef([]);
 
-    const galleryImages = (() => {
+    const galleryImages = useMemo(() => {
         if (!product) return [];
 
         const colorVariants = product.variants.filter(v =>
@@ -363,9 +353,8 @@ const ProductDetails = () => {
 
         galleryImagesRef.current = result;
         return result;
-    })();
+    }, [product, selectedColor]);
 
-    // ✅ Variant matching — all safe because normalizeVariant guarantees attributes exists
     useEffect(() => {
         if (product?.variants?.length > 0) {
             const variant = product.variants.find(v => {
@@ -392,9 +381,18 @@ const ProductDetails = () => {
     const returnDays = currentVariant?.returnDays ?? product.returnDays ?? null;
     const returnPolicy = currentVariant?.returnPolicy ?? product.returnPolicy ?? null;
 
+
     const handleAddToCart = () => {
         if (!isLoggedIn) { alert("Please login first!"); navigate("/login"); return; }
-        const variantImg = galleryImages[0] || currentVariant?.image || currentVariant?.images?.[0] || product.img || "";
+
+        // Use the currently viewed image, not always [0]
+        const variantImg = galleryImagesRef.current?.[activeGalleryIdx]
+            || galleryImagesRef.current?.[0]
+            || currentVariant?.images?.[0]
+            || currentVariant?.image
+            || product.img
+            || "";
+
         addToCart({
             _id: product._id,
             name: product.name,
@@ -429,7 +427,7 @@ const ProductDetails = () => {
 
                     {/* LEFT — Color-aware Image Gallery */}
                     <div className="col-lg-6">
-                        <ImageGallery images={galleryImages} productName={product.name} colorLabel={selectedColor} />
+                        <ImageGallery images={galleryImages} productName={product.name} colorLabel={selectedColor} onIndexChange={setActiveGalleryIdx} />
                     </div>
 
                     {/* RIGHT — Product Info */}
@@ -469,6 +467,7 @@ const ProductDetails = () => {
                                             return (
                                                 <button key={color} onClick={() => {
                                                     setSelectedColor(color);
+                                                    setActiveGalleryIdx(0);
                                                     const firstVariant = product.variants.find(v => v.attributes.color === color && v.stock > 0);
                                                     if (firstVariant?.attributes?.size) setSelectedSize(firstVariant.attributes.size);
                                                 }} title={color} style={{

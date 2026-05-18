@@ -259,18 +259,28 @@ const ProductModal = ({ editId, form, setForm, handleChange, handleVariantChange
     const buildInitialEntries = () => {
         const map = {};
         (form.variants || []).forEach(v => {
-            if (!v.color) return;
-            if (!map[v.color]) {
-                map[v.color] = { color: v.color, price: v.price || "", images: v.images || [], sizeStocks: {} };
+            const color = v.attributes?.color || v.color || "";
+            const size = v.attributes?.size || v.size || "";
+            if (!color) return;
+            if (!map[color]) {
+                map[color] = {
+                    color,
+                    price: v.price || "",
+                    images: v.images || [],
+                    sizeStocks: {},
+                    noSizeStock: "",  // ← initialize
+                };
             }
-            if (v.size) {
-                map[v.color].sizeStocks[v.size] = v.stock !== undefined ? String(v.stock) : "";
+            if (size) {
+                map[color].sizeStocks[size] = v.stock !== undefined ? String(v.stock) : "";
+            } else {
+                // ← FIX: size-free variant — store stock in noSizeStock
+                map[color].noSizeStock = v.stock !== undefined ? String(v.stock) : "";
             }
-            if (!map[v.color].images.length && v.images?.length) map[v.color].images = v.images;
+            if (!map[color].images.length && v.images?.length) map[color].images = v.images;
         });
         return Object.values(map);
     };
-
     const [colorEntries, setColorEntries] = useState(buildInitialEntries);
     const usedColors = colorEntries.map(e => e.color);
     const availableColors = ALL_COLORS.filter(c => !usedColors.includes(c));
@@ -278,11 +288,9 @@ const ProductModal = ({ editId, form, setForm, handleChange, handleVariantChange
     const addColor = (color) => {
         setColorEntries(prev => [...prev, { color, sizeStocks: {}, price: "", images: [] }]);
     };
-
     const updateEntry = (idx, updated) => {
         setColorEntries(prev => prev.map((e, i) => i === idx ? updated : e));
     };
-
     const removeEntry = (idx) => {
         setColorEntries(prev => prev.filter((_, i) => i !== idx));
     };
@@ -296,20 +304,20 @@ const ProductModal = ({ editId, form, setForm, handleChange, handleVariantChange
             if (sizes.length === 0) {
                 // size-free variant
                 flatVariants.push({
-                    color: entry.color,
-                    size: "",
-                    price: entry.price,
+                    attributes: { color: entry.color, size: "" },
+                    price: Number(entry.price) || 0,
                     stock: Number(entry.noSizeStock) || 0,
                     images: entry.images,
+                    image: entry.images?.[0] || "",
                 });
             } else {
                 sizes.forEach(size => {
                     flatVariants.push({
-                        color: entry.color,
-                        size,
-                        price: entry.price,
+                        attributes: { color: entry.color, size },
+                        price: Number(entry.price) || 0,
                         stock: Number(entry.sizeStocks[size]) || 0,
-                        images: entry.images,   // same images for every size of this color
+                        images: entry.images,
+                        image: entry.images?.[0] || "",
                     });
                 });
             }
@@ -429,7 +437,7 @@ const ProductModal = ({ editId, form, setForm, handleChange, handleVariantChange
                                     </div>
                                 </div>
 
-                                <div style={{ marginBottom: 18 }}>
+                                {/* <div style={{ marginBottom: 18 }}>
                                     <div className="pf-sec-label">Main Product Images</div>
                                     <div className="pf-img-note" style={{ marginBottom: 10 }}>
                                         These are <strong>fallback / catalogue images</strong>. For color-specific images, go to Step 2 → Variants.
@@ -462,7 +470,7 @@ const ProductModal = ({ editId, form, setForm, handleChange, handleVariantChange
                                                 }} />
                                         </div>
                                     </details>
-                                </div>
+                                </div> */}
 
                                 <div style={{ marginBottom: 18 }}>
                                     <div className="pf-sec-label">Category</div>
