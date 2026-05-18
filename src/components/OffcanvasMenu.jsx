@@ -12,7 +12,6 @@ const OffcanvasMenu = ({ isOpen, closeMenu }) => {
                 onClick={closeMenu}
                 style={{ display: isOpen ? "block" : "none" }}
             ></div>
-
             <div className={`offcanvas-menu-wrapper ${isOpen ? "active" : ""}`}>
                 <div className="offcanvas__option">
                     <div className="offcanvas__links">
@@ -20,7 +19,6 @@ const OffcanvasMenu = ({ isOpen, closeMenu }) => {
                         <Link onClick={closeMenu} to="/faqs">FAQs</Link>
                     </div>
                 </div>
-
                 <div className="offcanvas__nav__option">
                     <Link to="#" className="search-switch">
                         <img src={searchIcon} alt="search" />

@@ -1,4 +1,4 @@
-console.log("API KEY loaded:", !!process.env.ANTHROPIC_API_KEY);
+console.log("API KEY loaded:", !!process.env.GROQ_API_KEY);
 export async function getAISuggestion(prompt, systemPrompt) {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
