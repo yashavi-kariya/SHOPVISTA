@@ -12,7 +12,6 @@ export const getMyNotifications = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
-
 // GET /api/notifications/admin — admin: all admin-facing notifications
 export const getAdminNotifications = async (req, res) => {
     try {
@@ -24,7 +23,6 @@ export const getAdminNotifications = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
-
 // PUT /api/notifications/:id/read — mark one as read
 export const markNotificationRead = async (req, res) => {
     try {
@@ -34,7 +32,6 @@ export const markNotificationRead = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
-
 // PUT /api/notifications/read-all — mark all as read (customer)
 export const markAllRead = async (req, res) => {
     try {

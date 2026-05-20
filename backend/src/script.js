@@ -48,13 +48,12 @@ app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 app.use("/products", express.static(path.join(__dirname, "..", "..", "public", "products")));
 
-// ── Upload Route ────────────────────────────────────────────────
+// ── Upload Route 
 app.post("/api/upload", upload.single("image"), (req, res) => {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
     res.json({ url: req.file.path });
 });
-
-// ── Routes ──────────────────────────────────────────────────────
+// Routes 
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/users", userRoutes);

@@ -1,34 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api";
-
 const CollectionProducts = () => {
     const { type } = useParams();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const getImage = (p) => {
-        // 👇 changed .img to .image
         const variantImg = p.variants?.find(v => v.image && v.image.trim() !== "")?.image;
-
         const img = variantImg || p.img || "";
-
         if (!img || img.trim() === "") return "/placeholder.png";
         if (img.startsWith("http")) return img;
         return `http://localhost:3001${img}`;
     };
-
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 const res = await api.get(
                     `/api/products?collection=${type}`
                 );
-                // res.data.forEach(p => {
-                //     console.log("name:", p.name);
-                //     console.log("p.img:", p.img);
-                //     console.log("p.variants:", p.variants);
-                // });
                 setProducts(res.data);
             } catch (err) {
                 console.error(err);

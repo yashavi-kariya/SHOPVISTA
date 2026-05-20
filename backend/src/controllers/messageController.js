@@ -5,7 +5,6 @@ export const sendMessage = async (req, res) => {
         const { name, email, message } = req.body;
         if (!name || !email || !message)
             return res.status(400).json({ error: "All fields required" });
-
         const msg = new Message({ name, email, message });
         await msg.save();
         res.status(201).json({ success: true, id: msg._id });
