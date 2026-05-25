@@ -68,12 +68,26 @@ const Product = () => {
         e.preventDefault();
         e.stopPropagation();
         if (!isLoggedIn) { navigate("/login"); return; }
+
+        const resolvedImg = (() => {
+            const src = product.images?.[0] ||
+                product.img ||
+                product.variants?.find(v => v.image)?.image ||
+                product.variants?.find(v => v.images?.[0])?.images?.[0] || "";
+            if (!src || src.trim() === "") return "";
+            return src.replace("/public", "");
+        })();
+
         toggleWishlist({
-            ...product,
+            _id: product._id,
+            name: product.name,
+            price: product.price,
+            originalPrice: product.originalPrice || null,
+            rating: product.rating || null,
+            brand: product.brand || "",
+            colors: [...new Set((product.variants || []).map(v => v.attributes?.color).filter(Boolean))],
             variantId: null,
-            color: null,
-            size: null,
-            img: product.images?.[0] || product.img
+            img: resolvedImg,   // ✅ fixed
         });
     };
 
@@ -162,7 +176,7 @@ const Product = () => {
                             ))
                         ) : products.length > 0 ? (
                             products.map((product) => {
-                                const wishlisted = isInWishlist(product._id, null)
+                                const wishlisted = isInWishlist(product._id)
                                 const inCart = isInCart(product._id);
 
                                 return (
@@ -212,9 +226,9 @@ const Product = () => {
                                                     <button
                                                         className="sv-wish-btn"
                                                         onClick={(e) => handleWishlist(e, product)}
-                                                        title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                                                        title={isInWishlist(product._id) ? "Remove from wishlist" : "Add to wishlist"}
                                                     >
-                                                        <span className={wishlisted ? "sv-wish-icon sv-wish-icon--active" : "sv-wish-icon"}>
+                                                        <span className={isInWishlist(product._id) ? "sv-wish-icon sv-wish-icon--active" : "sv-wish-icon"}>
                                                             ♥
                                                         </span>
                                                     </button>

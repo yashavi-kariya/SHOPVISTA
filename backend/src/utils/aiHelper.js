@@ -7,7 +7,7 @@ export async function getAISuggestion(prompt, systemPrompt) {
             "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
         },
         body: JSON.stringify({
-            model: "llama-3.1-8b-instant", // free model
+            model: "llama-3.1-8b-instant",
             max_tokens: 300,
             messages: [
                 { role: "system", content: systemPrompt },
@@ -15,12 +15,10 @@ export async function getAISuggestion(prompt, systemPrompt) {
             ],
         }),
     });
-
     if (!response.ok) {
         const err = await response.json();
         throw new Error(err.error?.message || `API error ${response.status}`);
     }
-
     const data = await response.json();
     return data.choices?.[0]?.message?.content || "";
 }

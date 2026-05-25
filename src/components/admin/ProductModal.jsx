@@ -8,7 +8,23 @@ const COLORS_MAP = {
     Brown: "#795548", Navy: "#1a237e", Grey: "#9e9e9e", Orange: "#d75323"
 };
 const ALL_COLORS = Object.keys(COLORS_MAP);
-const ALL_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "28", "30", "32", "34", "36", "38", "40", "1yr to 15yr"];
+const SIZES_BY_CATEGORY = {
+    clothing: ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
+    bottoms: ["28", "30", "32", "34", "36", "38", "40", "42"],
+    kids: ["1yr", "2yr", "3yr", "4yr", "5yr", "6yr", "7yr", "8yr", "9yr", "10yr", "11yr", "12yr", "13yr", "14yr", "15yr"],
+    shoes: ["3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+    onesize: ["Free Size"],
+};
+
+const CATEGORY_TO_SIZE_TYPE = {
+    men: ["clothing", "bottoms"],
+    women: ["clothing", "bottoms"],
+    kids: ["kids"],
+    bags: ["onesize"],
+    Footware: ["shoes"],
+    accessories: ["onesize"],
+    Electronics: ["onesize"],
+};
 
 /* ─────────────────────────────────────────────────────────
    VARIANT MULTI-IMAGE PICKER
@@ -91,27 +107,29 @@ const VariantMultiImagePicker = ({ images = [], onChange, token, color }) => {
      sizeStocks: { S: "10", M: "5", ... }   ← per-size stock
    }
 ───────────────────────────────────────────────────────── */
-const ColorCard = ({ entry, onChange, onRemove, token }) => {
+const ColorCard = ({ entry, onChange, onRemove, token, category }) => {
     const [noSizeStock, setNoSizeStock] = useState(entry.noSizeStock || "");
+
+    // Get available sizes based on category
+    const getSizesForCategory = () => {
+        const types = CATEGORY_TO_SIZE_TYPE[category] || ["clothing"];
+        return types.flatMap(type => SIZES_BY_CATEGORY[type] || []);
+    };
+    const availableSizes = getSizesForCategory();
     const toggleSize = (size) => {
         const current = entry.sizeStocks || {};
         if (size in current) {
-            // remove this size
             const { [size]: _, ...rest } = current;
             onChange({ ...entry, sizeStocks: rest });
         } else {
-            // add this size with empty stock
             onChange({ ...entry, sizeStocks: { ...current, [size]: "" } });
         }
     };
-
     const setStock = (size, value) => {
         onChange({ ...entry, sizeStocks: { ...entry.sizeStocks, [size]: value } });
     };
-
     const selectedSizes = Object.keys(entry.sizeStocks || {});
     const dot = COLORS_MAP[entry.color];
-
     return (
         <div style={{
             border: "1.5px solid #f0f0f0", borderRadius: 12, overflow: "hidden",
@@ -146,7 +164,6 @@ const ColorCard = ({ entry, onChange, onRemove, token }) => {
                     Remove
                 </button>
             </div>
-
             {/* Card body */}
             <div style={{ padding: "12px 14px" }}>
 
@@ -155,21 +172,56 @@ const ColorCard = ({ entry, onChange, onRemove, token }) => {
                     <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em", color: "#bbb", marginBottom: 7 }}>
                         Sizes <span style={{ color: "#aaa", fontWeight: 400 }}>(click to add, then set stock per size)</span>
                     </div>
+                    {/* Size type tabs — only show if multiple size types exist */}
+                    {(() => {
+                        const types = CATEGORY_TO_SIZE_TYPE[category] || ["clothing"];
+                        return types.length > 1 ? (
+                            <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+                                {types.map(type => (
+                                    <button
+                                        key={type}
+                                        type="button"
+                                        onClick={() => onChange({ ...entry, sizeStocks: {}, _sizeType: type })}
+                                        style={{
+                                            padding: "4px 12px", borderRadius: 20, fontSize: 11,
+                                            fontWeight: 600, cursor: "pointer", border: "1.5px solid",
+                                            borderColor: (entry._sizeType || types[0]) === type ? "#6b2737" : "#e8e8e8",
+                                            background: (entry._sizeType || types[0]) === type ? "#6b2737" : "#fff",
+                                            color: (entry._sizeType || types[0]) === type ? "#fff" : "#888",
+                                        }}
+                                    >
+                                        {type === "clothing" ? "Clothing (XS–XXL)"
+                                            : type === "bottoms" ? "Bottoms (28–42)"
+                                                : type === "shoes" ? "Shoes (3–12)"
+                                                    : type === "kids" ? "Kids (1yr–15yr)"
+                                                        : "Free Size"}
+                                    </button>
+                                ))}
+                            </div>
+                        ) : null;
+                    })()}
+
+                    {/* Size pills */}
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                        {ALL_SIZES.map(size => {
-                            const on = size in (entry.sizeStocks || {});
-                            return (
-                                <div key={size} onClick={() => toggleSize(size)} style={{
-                                    padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 500,
-                                    cursor: "pointer", userSelect: "none", transition: "all .14s",
-                                    border: on ? "1.5px solid #6b2737" : "1.5px solid #e8e8e8",
-                                    background: on ? "#6b2737" : "#fff",
-                                    color: on ? "#fff" : "#666",
-                                }}>
-                                    {size}
-                                </div>
-                            );
-                        })}
+                        {(() => {
+                            const types = CATEGORY_TO_SIZE_TYPE[category] || ["clothing"];
+                            const activeType = entry._sizeType || types[0];
+                            const sizes = SIZES_BY_CATEGORY[activeType] || availableSizes;
+                            return sizes.map(size => {
+                                const on = size in (entry.sizeStocks || {});
+                                return (
+                                    <div key={size} onClick={() => toggleSize(size)} style={{
+                                        padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 500,
+                                        cursor: "pointer", userSelect: "none", transition: "all .14s",
+                                        border: on ? "1.5px solid #6b2737" : "1.5px solid #e8e8e8",
+                                        background: on ? "#6b2737" : "#fff",
+                                        color: on ? "#fff" : "#666",
+                                    }}>
+                                        {size}
+                                    </div>
+                                );
+                            });
+                        })()}
                     </div>
 
                     {selectedSizes.length === 0 && (
@@ -556,6 +608,7 @@ const ProductModal = ({ editId, form, setForm, handleChange, handleVariantChange
                                         key={entry.color}
                                         entry={entry}
                                         token={token}
+                                        category={form.category}
                                         onChange={updated => updateEntry(idx, updated)}
                                         onRemove={() => removeEntry(idx)}
                                     />

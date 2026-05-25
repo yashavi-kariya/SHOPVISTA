@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-// import api from "api";
 import api from "../../api";
 import PageHeader from "./PageHeader";
 
@@ -9,7 +8,6 @@ const UsersPage = ({ token, toggleSidebar, sidebarOpen }) => {
     const [error, setError] = useState(null);
     const [search, setSearch] = useState("");
     const [roleFilter, setRoleFilter] = useState("all");
-
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -26,20 +24,17 @@ const UsersPage = ({ token, toggleSidebar, sidebarOpen }) => {
         };
         fetchUsers();
     }, []);
-
     const filtered = users
         .filter(u => roleFilter === "all" || u.role?.toLowerCase() === roleFilter)
         .filter(u => {
             const q = search.toLowerCase();
             return !q || u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q);
         });
-
     const stats = [
         ["Total", users.length, "registered"],
         ["Admins", users.filter(u => u.role?.toLowerCase() === "admin").length, "privileged"],
         ["Users", users.filter(u => u.role?.toLowerCase() === "user").length, "standard"],
     ];
-
     const initials = (name = "") =>
         name.split(" ").map(w => w[0] || "").join("").slice(0, 2).toUpperCase();
 
@@ -52,9 +47,7 @@ const UsersPage = ({ token, toggleSidebar, sidebarOpen }) => {
             </span>
         );
     };
-
     const ROLES = ["all", "admin", "user"];
-
     return (
         <div className="page">
             <style>{`
@@ -63,7 +56,6 @@ const UsersPage = ({ token, toggleSidebar, sidebarOpen }) => {
                 .up-stat-label{font-size:11px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
                 .up-stat-val{font-size:22px;font-weight:600}
                 .up-stat-sub{font-size:11px;color:#bbb;margin-top:2px}
-
                 .up-toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;animation:up-sd .42s .04s ease both}
                 .up-search-wrap{flex:1;min-width:150px;position:relative}
                 .up-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#bbb;pointer-events:none}
@@ -73,14 +65,12 @@ const UsersPage = ({ token, toggleSidebar, sidebarOpen }) => {
                 .up-fbtn{padding:8px 14px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:12px;font-family:inherit;color:#777;cursor:pointer;transition:all .15s}
                 .up-fbtn.active,.up-fbtn:hover{background:#eef2ff;color:#4338ca;border-color:transparent}
                 .up-fbtn.fadmin.active,.up-fbtn.fadmin:hover{background:#fdf2f8;color:#be185d;border-color:transparent}
-
                 .up-desktop{background:#fff;border:1px solid #e8e8e8;border-radius:12px;overflow:hidden;animation:up-fu .45s .08s ease both}
                 .up-th{display:grid;grid-template-columns:2fr 2.5fr 1.2fr;padding:10px 16px;background:#f9f9f9;border-bottom:1px solid #f0f0f0;font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:.06em}
                 .up-tr{display:grid;grid-template-columns:2fr 2.5fr 1.2fr;padding:13px 16px;border-bottom:1px solid #f7f7f7;align-items:center;opacity:0;transform:translateY(5px);animation:up-ri .35s forwards}
                 .up-tr:last-child{border-bottom:none}
                 .up-tr:hover{background:#fafbff}
                 .up-tr:nth-child(1){animation-delay:.12s}.up-tr:nth-child(2){animation-delay:.17s}.up-tr:nth-child(3){animation-delay:.22s}.up-tr:nth-child(4){animation-delay:.27s}.up-tr:nth-child(5){animation-delay:.32s}.up-tr:nth-child(6){animation-delay:.37s}.up-tr:nth-child(7){animation-delay:.42s}.up-tr:nth-child(8){animation-delay:.47s}
-
                 .u-cell{display:flex;align-items:center;gap:9px;min-width:0}
                 .u-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
                 .up-av-admin{background:#fdf2f8;color:#be185d}
@@ -112,14 +102,12 @@ const UsersPage = ({ token, toggleSidebar, sidebarOpen }) => {
                 @keyframes up-ri{to{opacity:1;transform:none}}
                 @keyframes up-sh{0%,100%{background-position:200% 0}50%{background-position:-200% 0}}
             `}</style>
-
             <PageHeader
                 title="Users"
                 subtitle="Manage registered users and roles"
                 toggleSidebar={toggleSidebar}
                 sidebarOpen={sidebarOpen}
             />
-
             {/* Stats */}
             <div className="up-stats">
                 {stats.map(([label, val, sub]) => (
@@ -191,7 +179,6 @@ const UsersPage = ({ token, toggleSidebar, sidebarOpen }) => {
                     ))
                 )}
             </div>
-
             {/* Mobile Cards */}
             {!loading && (
                 <div className="up-mobile">

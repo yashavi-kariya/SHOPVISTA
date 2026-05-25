@@ -102,7 +102,6 @@ const COLORS_MAP = {
     Brown: "#795548", Navy: "#1a237e", Grey: "#9e9e9e", Orange: "#d75323"
 };
 const normalizeVariant = (variant) => {
-    // If variant is null / undefined / not an object — return a safe empty shell
     if (!variant || typeof variant !== "object") {
         return {
             _id: null,
@@ -380,8 +379,6 @@ const ProductDetails = () => {
     const displayStock = currentVariant ? currentVariant.stock : product.stock;
     const returnDays = currentVariant?.returnDays ?? product.returnDays ?? null;
     const returnPolicy = currentVariant?.returnPolicy ?? product.returnPolicy ?? null;
-
-
     const handleAddToCart = () => {
         if (!isLoggedIn) { alert("Please login first!"); navigate("/login"); return; }
 
@@ -495,12 +492,10 @@ const ProductDetails = () => {
                                             .filter(v => v.attributes.size)
                                             .map(v => v.attributes.size)
                                     )].map((size) => {
-                                        // ✅ Safe — normalizeVariant guarantees .attributes always exists
                                         const exactVariant = product.variants.find(v =>
                                             v.attributes.color === selectedColor && v.attributes.size === size
                                         );
                                         const isAvailable = exactVariant ? exactVariant.stock > 0 : false;
-
                                         return (
                                             <button key={size} onClick={() => {
                                                 if (!isAvailable) return;
@@ -528,7 +523,6 @@ const ProductDetails = () => {
                                 </div>
                             </div>
                         )}
-
                         {/* Stock */}
                         <div className="mb-3">
                             <p>
@@ -536,7 +530,6 @@ const ProductDetails = () => {
                                 {displayStock > 0 ? displayStock : "Out of stock"}
                             </p>
                         </div>
-
                         {/* Quantity */}
                         <div className="d-flex align-items-center mb-4">
                             <button className="btn btn-outline-secondary" onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
@@ -563,32 +556,45 @@ const ProductDetails = () => {
                                 }
                             </button>
                             <button className="btn btn-success flex-grow-1" onClick={handleBuyNow}>Buy Now</button>
-                            <button className="btn btn-outline-danger" onClick={() => {
-                                const imgToSave = galleryImagesRef.current?.[0] ||
-                                    currentVariant?.image ||
-                                    currentVariant?.images?.[0] ||
-                                    product.variants?.[0]?.image ||
-                                    product.img || "";
-                                toggleWishlist({
-                                    _id: product._id,
-                                    name: product.name,
-                                    price: displayPrice,
-                                    originalPrice: product.originalPrice || null,
-                                    rating: product.rating || null,
-                                    brand: product.brand,
-                                    colors: [...new Set(product.variants.map(v => v.attributes.color).filter(Boolean))],
-                                    variantId: currentVariant?._id || null,
-                                    color: selectedColor,
-                                    size: selectedSize,
-                                    img: imgToSave,
-                                });
-                            }}>
-                                <img src={heartIcon} width="20" alt=""
+                            <button
+                                className="btn btn-outline-danger"
+                                onClick={() => {
+                                    const imgToSave = galleryImagesRef.current?.[0] ||
+                                        currentVariant?.image ||
+                                        currentVariant?.images?.[0] ||
+                                        product.variants?.[0]?.image ||
+                                        product.img || "";
+                                    toggleWishlist({
+                                        _id: product._id,
+                                        name: product.name,
+                                        price: displayPrice,
+                                        originalPrice: product.originalPrice || null,
+                                        rating: product.rating || null,
+                                        brand: product.brand,
+                                        colors: [...new Set(product.variants.map(v => v.attributes.color).filter(Boolean))],
+                                        variantId: currentVariant?._id || null,
+                                        color: selectedColor,
+                                        size: selectedSize,
+                                        img: imgToSave,
+                                    });
+                                }}
+                                style={{
+                                    backgroundColor: isInWishlist(product._id) ? "#e74c3c" : "transparent",
+                                    borderColor: "#e74c3c",
+                                    transition: "background 0.2s"
+                                }}
+                            >
+                                <img
+                                    src={heartIcon}
+                                    width="20"
+                                    alt=""
                                     style={{
-                                        filter: isInWishlist(product._id, currentVariant?._id)
-                                            ? "invert(24%) sepia(98%) saturate(7420%) hue-rotate(345deg)"
-                                            : "none"
-                                    }} />
+                                        filter: isInWishlist(product._id)
+                                            ? "brightness(0) invert(1)"   // white heart on red bg
+                                            : "invert(24%) sepia(98%) saturate(7420%) hue-rotate(345deg)", // red heart
+                                        transition: "filter 0.2s"
+                                    }}
+                                />
                             </button>
                         </div>
 

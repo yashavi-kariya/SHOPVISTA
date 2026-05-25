@@ -383,12 +383,11 @@ const ProductCard = ({
     isLoggedIn, isInWishlist, toggleWishlist,
     addedProducts, handleAddToCart, handleBuyNow, navigate
 }) => {
-    const [wished, setWished] = useState(false);
+    // const [wished, setWished] = useState(false);
 
     // ── Fix 2: Wishlist requires login + shows toast ──
     const handleWish = (e) => {
         e.stopPropagation();
-
         if (!isLoggedIn) {
             toast({
                 type: "warn",
@@ -400,20 +399,15 @@ const ProductCard = ({
         }
 
         const alreadyWished = isInWishlist(product._id);
-        setWished(true);
-        setTimeout(() => setWished(false), 400);
 
-        // ✅ resolve image same way the card does
         const resolvedImg = (() => {
             const src = product.images?.[0] ||
                 product.img ||
-                product.variants?.find(v => v.image)?.image ||      // 👈 your key is "image"
-                product.variants?.find(v => v.images?.[0])?.images?.[0] ||
-                "";
+                product.variants?.find(v => v.image)?.image ||
+                product.variants?.find(v => v.images?.[0])?.images?.[0] || "";
             if (!src || src.trim() === "") return "";
             return src.replace("/public", "");
         })();
-
 
         toggleWishlist({
             _id: product._id,
@@ -431,8 +425,8 @@ const ProductCard = ({
             type: alreadyWished ? "info" : "success",
             title: alreadyWished ? "Removed from wishlist" : "Added to wishlist ♥",
             message: alreadyWished
-                ? `${product.name} removed from your wishlist.`
-                : `${product.name} added to your wishlist!`,
+                ? `${product.name} removed.`
+                : `${product.name} added to wishlist!`,
         });
     };
     const goToProduct = () => {
@@ -467,7 +461,7 @@ const ProductCard = ({
                 />
                 <div className="sv-product-card__actions">
                     <button
-                        className={`sv-wish-btn${wished ? " sv-wish-btn--pulse" : ""}`}
+                        className="sv-wish-btn"
                         onClick={handleWish}
                         title={isInWishlist(product._id) ? "Remove from wishlist" : "Add to wishlist"}
                     >
