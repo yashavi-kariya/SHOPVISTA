@@ -15,7 +15,6 @@ const Product = () => {
     const [loading, setLoading] = useState(false);
     const isLoggedIn = !!localStorage.getItem("token");
     const navigate = useNavigate();
-
     const handleAddToCart = async (product) => {
         if (!isLoggedIn) {
             toast({
@@ -26,8 +25,6 @@ const Product = () => {
             });
             return;
         }
-
-        // ✅ Resolve best image
         const resolvedImg = (() => {
             const src = product.images?.[0]
                 || product.img
@@ -37,14 +34,11 @@ const Product = () => {
             if (!src || src.trim() === "") return "";
             return src.replace("/public", "");
         })();
-
-        // ✅ Resolve first available variant details
         const firstVariant = product.variants?.find(v => v.stock > 0) || product.variants?.[0];
         const defaultColor = firstVariant?.attributes?.color || "";
         const defaultSize = firstVariant?.attributes?.size || "";
         const defaultPrice = firstVariant?.price || product.price;
         const variantId = firstVariant?._id || null;
-
         await addToCart({
             _id: product._id,
             name: product.name,
@@ -56,14 +50,12 @@ const Product = () => {
             size: defaultSize,
         });
     };
-
     const isInCart = (id) => cartItems?.some(item =>
         item.product?._id === id ||
         item.productId === id ||
         item._id === id ||
         item.id === id
     );
-
     const handleWishlist = (e, product) => {
         e.preventDefault();
         e.stopPropagation();
@@ -77,7 +69,6 @@ const Product = () => {
             if (!src || src.trim() === "") return "";
             return src.replace("/public", "");
         })();
-
         toggleWishlist({
             _id: product._id,
             name: product.name,
@@ -87,10 +78,9 @@ const Product = () => {
             brand: product.brand || "",
             colors: [...new Set((product.variants || []).map(v => v.attributes?.color).filter(Boolean))],
             variantId: null,
-            img: resolvedImg,   // ✅ fixed
+            img: resolvedImg,
         });
     };
-
     const handleCompare = (e, product) => {
         e.preventDefault();
         const normalized = { ...product, id: product._id };
@@ -100,7 +90,6 @@ const Product = () => {
         }
         toggleCompare(normalized);
     };
-
     useEffect(() => {
         const fetchProducts = async () => {
             setLoading(true);
@@ -116,13 +105,11 @@ const Product = () => {
         };
         fetchProducts();
     }, [activeFilter]);
-
     const getImgUrl = (path) => {
         if (!path) return "/no-image.png";
         if (path.startsWith("http") || path.startsWith("/")) return path;
         return `${import.meta.env.VITE_API_URL || ""}/${path}`;
     };
-
     const goToProduct = (product) => {
         if (!isLoggedIn) {
             toast({
@@ -139,7 +126,6 @@ const Product = () => {
         <>
             <section className="product spad" style={{ paddingBottom: "0" }}>
                 <div className="container">
-
                     {/* ── Filter Tabs ── */}
                     <div className="row">
                         <div className="col-lg-12">
@@ -160,7 +146,6 @@ const Product = () => {
                             </ul>
                         </div>
                     </div>
-
                     {/* ── Product Grid ── */}
                     <div className="row product__filter">
                         {loading ? (
@@ -178,11 +163,9 @@ const Product = () => {
                             products.map((product) => {
                                 const wishlisted = isInWishlist(product._id)
                                 const inCart = isInCart(product._id);
-
                                 return (
                                     <div key={product._id} className="col-lg-3 col-md-6 col-sm-6 mb-4">
                                         <div className="sv-product-card sv-product-card--visible">
-
                                             {/* ── Image ── */}
                                             <div
                                                 className="sv-product-card__pic"
@@ -249,7 +232,6 @@ const Product = () => {
                                                     </button>
                                                 </div>
                                             </div>
-
                                             {/* ── Info ── */}
                                             <div className="sv-product-card__info">
                                                 <p className="sv-product-card__category">{product.category}</p>
@@ -350,5 +332,4 @@ const Product = () => {
         </>
     );
 };
-
 export default Product;

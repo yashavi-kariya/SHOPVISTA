@@ -45,6 +45,18 @@ app.use(cors({
 }));
 app.use(express.json());
 
+const healthCheck = (req, res) => {
+    res.status(200).json({
+        status: "ok",
+        service: "shopvista-backend",
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
+    });
+};
+
+app.get("/healthz", healthCheck);
+app.get("/api/health", healthCheck);
+
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 app.use("/products", express.static(path.join(__dirname, "..", "..", "public", "products")));
 
